@@ -467,6 +467,127 @@ figure {
   text-transform: uppercase;
 }
 
+.action-row,
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.action-row .primary-button,
+.card-actions .shortlist-button {
+  flex: 1 1 180px;
+}
+
+.undo-button {
+  min-height: 40px;
+  border: 1px solid rgba(21, 17, 13, 0.28);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--rust);
+  padding: 0 14px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.undo-button:hover {
+  border-color: var(--rust);
+  background: #fff;
+}
+
+.undo-button[hidden] {
+  display: none;
+}
+
+.card-actions .undo-button {
+  min-height: 36px;
+}
+
+.site-footer {
+  display: grid;
+  min-height: 520px;
+  place-items: center;
+  gap: 18px;
+  padding: clamp(70px, 10vw, 130px) clamp(18px, 5vw, 64px);
+  text-align: center;
+  color: rgba(255, 248, 232, 0.82);
+  background:
+    linear-gradient(180deg, rgba(243, 230, 210, 0.85) 0%, rgba(21, 17, 13, 0.8) 36%, #05070e 100%),
+    url("assets/comic-night.png") center / cover no-repeat;
+}
+
+.footer-mark {
+  display: inline-grid;
+  grid-template-columns: 76px auto 76px;
+  align-items: center;
+  gap: 18px;
+  color: var(--gold);
+}
+
+.footer-mark span {
+  height: 1px;
+  background: rgba(255, 248, 232, 0.24);
+}
+
+.footer-mark b {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.site-footer h2 {
+  margin: 0;
+  color: #fff;
+  font-family: "Bangers", "Space Grotesk", sans-serif;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.site-footer p {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(255, 248, 232, 0.66);
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.footer-links a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 248, 232, 0.22);
+  padding: 0 14px;
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.footer-links a:hover {
+  border-color: var(--gold);
+  background: rgba(243, 185, 76, 0.1);
+}
+
+.site-footer small {
+  margin-top: 18px;
+  color: rgba(255, 248, 232, 0.42);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .system-card ul {
   grid-column: 2;
   display: grid;

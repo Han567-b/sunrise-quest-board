@@ -186,6 +186,7 @@ const playerTitle = document.querySelector("#playerTitle");
 const readinessNote = document.querySelector("#readinessNote");
 const publishQuest = document.querySelector("#publishQuest");
 const publishStatus = document.querySelector("#publishStatus");
+const undoPublish = document.querySelector("#undoPublish");
 const saveApplication = document.querySelector("#saveApplication");
 const applicationStatus = document.querySelector("#applicationStatus");
 const levelButtons = document.querySelectorAll("[data-level]");
@@ -321,7 +322,10 @@ function renderApplicants() {
       </div>
       <div class="tag-row">${person.signals.map((signal) => `<span>${signal}</span>`).join("")}</div>
       <p>${person.note}</p>
-      <button type="button" class="shortlist-button">Invite to quest</button>
+      <div class="card-actions">
+        <button type="button" class="shortlist-button">Invite to quest</button>
+        <button type="button" class="undo-button undo-invite" hidden>Undo</button>
+      </div>
     </article>
   `).join("");
 }
@@ -382,16 +386,42 @@ if (publishQuest) {
   publishQuest.addEventListener("click", () => {
     publishQuest.textContent = "Draft published";
     publishQuest.disabled = true;
+    if (undoPublish) undoPublish.hidden = false;
     if (publishStatus) {
       publishStatus.textContent = "This quest is now visible in the applicant queue for Power Runners.";
     }
   });
 }
 
+if (undoPublish) {
+  undoPublish.addEventListener("click", () => {
+    publishQuest.textContent = "Save this quest";
+    publishQuest.disabled = false;
+    undoPublish.hidden = true;
+    if (publishStatus) {
+      publishStatus.textContent = "Quest save was undone. It is back in draft mode.";
+    }
+  });
+}
+
 document.addEventListener("click", (event) => {
-  if (!event.target.classList.contains("shortlist-button")) return;
-  event.target.textContent = "Invite saved";
-  event.target.disabled = true;
+  if (event.target.classList.contains("shortlist-button")) {
+    const actions = event.target.closest(".card-actions");
+    const undoButton = actions?.querySelector(".undo-invite");
+    event.target.textContent = "Invite saved";
+    event.target.disabled = true;
+    if (undoButton) undoButton.hidden = false;
+  }
+
+  if (event.target.classList.contains("undo-invite")) {
+    const actions = event.target.closest(".card-actions");
+    const inviteButton = actions?.querySelector(".shortlist-button");
+    if (inviteButton) {
+      inviteButton.textContent = "Invite to quest";
+      inviteButton.disabled = false;
+    }
+    event.target.hidden = true;
+  }
 });
 
 if (saveApplication) {

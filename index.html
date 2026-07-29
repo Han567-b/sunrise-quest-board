@@ -161,7 +161,10 @@
               <div><dt>Shift</dt><dd>Setup · live power check · breakdown</dd></div>
               <div><dt>Reward</dt><dd>Credits + badge + stipend review</dd></div>
             </dl>
-            <button class="primary-button" type="button" id="publishQuest">Save this quest</button>
+            <div class="action-row">
+              <button class="primary-button" type="button" id="publishQuest">Save this quest</button>
+              <button class="undo-button" type="button" id="undoPublish" hidden>Undo</button>
+            </div>
             <p class="action-status" id="publishStatus" aria-live="polite"></p>
           </article>
           <div class="applicant-panel">
@@ -271,6 +274,22 @@
           </div>
         </aside>
       </section>
+
+      <footer class="site-footer" aria-label="Sunrise Quest Board footer">
+        <div class="footer-mark" aria-hidden="true">
+          <span></span>
+          <b>☀</b>
+          <span></span>
+        </div>
+        <h2>Sunrise Operational</h2>
+        <p>Solar-powered community work, matched into clear quests for September 26.</p>
+        <div class="footer-links">
+          <a href="#roles">Roles</a>
+          <a href="#board">Find a Quest</a>
+          <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Full Comic</a>
+        </div>
+        <small>Presented for the Sunrise Fair Greenworker Quest Board</small>
+      </footer>
 
     </main>
 
