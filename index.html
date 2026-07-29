@@ -26,7 +26,6 @@
         <a href="#board">Board</a>
         <a href="#journey">Timeline</a>
         <a href="#research">MVP Use</a>
-        <a href="#assets">Field Kit</a>
         <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Full Comic</a>
       </nav>
       <div class="top-actions">
@@ -70,7 +69,7 @@
             <span class="system-number">02</span>
             <div>
               <h3>Hire & Assign Teams</h3>
-              <p>Organizers compare applicants, review verified history, shortlist contributors, and assign a Quest Party with clear milestones.</p>
+              <p>Event leads compare applicants, review verified history, shortlist contributors, and assign a Quest Party with clear milestones.</p>
             </div>
             <ul>
               <li>Applicant comparison by reliability, proof, notes, and role fit</li>
@@ -114,17 +113,35 @@
       <section class="hire-desk" id="hire" aria-labelledby="hire-title">
         <div class="section-copy">
           <p class="eyebrow">Hire Desk</p>
-          <h2 id="hire-title">Organizer view for choosing the right crew.</h2>
+          <h2 id="hire-title">Crew lead view for choosing the right support team.</h2>
           <p>This is the part that makes the page feel like an actual hiring tool: open role details, applicant comparison, shortlisting, and assignment readiness.</p>
+        </div>
+        <div class="crew-leads" aria-label="Sunrise crew leads">
+          <article>
+            <span>Event Director</span>
+            <strong>Maya Chen</strong>
+            <p>Reviews operations support, volunteer flow, and event-day coordination roles.</p>
+          </article>
+          <article>
+            <span>Solar Tech Lead</span>
+            <strong>Marcus Johnson</strong>
+            <p>Reviews solar micro-grid support, battery monitoring, cable safety, and power-down roles.</p>
+          </article>
+          <article>
+            <span>Refreshments Coordinator</span>
+            <strong>Rosa Delgado</strong>
+            <p>Reviews refreshments station support, vendor care, food safety, and guest service roles.</p>
+          </article>
         </div>
         <div class="hire-layout">
           <article class="post-panel">
             <p class="eyebrow">Quest post</p>
-            <h3>Power Runner Crew Lead</h3>
+            <h3>Solar Micro-Grid Support</h3>
             <dl>
               <div><dt>Event</dt><dd>September 26 Sunrise Fair</dd></div>
-              <div><dt>Shift</dt><dd>7:00 AM setup · 12:00 PM system watch · 10:30 PM breakdown</dd></div>
-              <div><dt>Reward</dt><dd>Quest credits + technical badge + stipend eligible</dd></div>
+              <div><dt>Reports to</dt><dd>Marcus Johnson · Solar Tech Lead</dd></div>
+              <div><dt>Shift</dt><dd>6:00 AM micro-grid unload · 9:00 AM power-up · 10:30 PM breakdown</dd></div>
+              <div><dt>Reward</dt><dd>Quest credits + solar operations badge + stipend eligible</dd></div>
               <div><dt>Proof</dt><dd>Battery log, safety photos, final energy notes</dd></div>
             </dl>
             <button class="primary-button" type="button">Publish draft quest</button>
@@ -164,6 +181,7 @@
             <input id="experience" name="experience" type="range" min="1" max="4" value="2">
             <div class="range-labels" aria-hidden="true">
               <span>New</span>
+              <strong id="experienceValue">Level 2</strong>
               <span>Lead</span>
             </div>
 
@@ -201,18 +219,18 @@
             <div class="avatar">AP</div>
             <div>
               <p class="eyebrow">Player card</p>
-              <h2>Aspiring Power Runner</h2>
-              <p>Level 2 contributor · 18 credits · 3 badges</p>
+              <h2 id="playerTitle">Solar Support Candidate</h2>
+              <p id="playerMeta">Level 2 contributor · 18 credits · 3 badges</p>
             </div>
           </div>
 
           <div class="progress-wrap">
             <div class="progress-title">
               <span>Level 3 readiness</span>
-              <strong>68%</strong>
+              <strong id="levelPercent">68%</strong>
             </div>
             <div class="progress-bar" aria-label="Level 3 readiness">
-              <span style="width: 68%"></span>
+              <span id="levelBar" style="width: 68%"></span>
             </div>
           </div>
 
@@ -248,27 +266,6 @@
         <div class="research-grid" id="researchGrid"></div>
       </section>
 
-      <section class="field-kit" id="assets" aria-labelledby="assets-title">
-        <div class="section-copy">
-          <p class="eyebrow">Field Kit</p>
-          <h2 id="assets-title">Use real event documents as quest context.</h2>
-          <p>Quest pages can attach maps, call sheets, journey maps, and proof templates so contributors know what to do before they arrive.</p>
-        </div>
-        <div class="asset-strip">
-          <figure>
-            <a href="assets/site-map.png" target="_blank" rel="noopener" aria-label="Open full Site Map">
-              <img src="assets/site-map.png" alt="Sunrise event site map">
-            </a>
-            <figcaption>Site Map <span>Open full view</span></figcaption>
-          </figure>
-          <figure>
-            <a href="assets/green-build-team.png" target="_blank" rel="noopener" aria-label="Open full Team Roles">
-              <img src="assets/green-build-team.png" alt="Green build team roles">
-            </a>
-            <figcaption>Team Roles <span>Open full view</span></figcaption>
-          </figure>
-        </div>
-      </section>
     </main>
 
       <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
@@ -280,10 +277,10 @@
         <input id="name" type="text" placeholder="Your name">
         <label for="role">Role target</label>
         <select id="role">
-          <option>Power Runner</option>
-          <option>Green Worker</option>
-          <option>Cloud Support</option>
-          <option>Story Capture</option>
+          <option>Solar Micro-Grid Support</option>
+          <option>Event Operations Support</option>
+          <option>Refreshments Station Support</option>
+          <option>Breakdown Crew</option>
         </select>
         <label for="interests">Skills and interests</label>
         <textarea id="interests" rows="5" placeholder="Energy, media, logistics, community support..."></textarea>

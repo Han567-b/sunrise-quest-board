@@ -372,6 +372,42 @@ figure {
   margin-top: 24px;
 }
 
+.crew-leads {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(190px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.crew-leads article {
+  border: 1px solid var(--line);
+  background: rgba(255, 248, 232, 0.86);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.crew-leads span {
+  display: block;
+  color: var(--rust);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.crew-leads strong {
+  display: block;
+  margin: 6px 0 8px;
+  font-family: "Space Grotesk", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.28rem;
+}
+
+.crew-leads p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .post-panel,
 .applicant-panel {
   padding: 22px;
@@ -844,6 +880,7 @@ figcaption span {
   .research-grid,
   .system-grid,
   .flow-grid,
+  .crew-leads,
   .hire-layout {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
@@ -868,6 +905,7 @@ figcaption span {
   .workspace,
   .system-grid,
   .flow-grid,
+  .crew-leads,
   .hire-layout,
   .applicant-grid {
     grid-template-columns: 1fr;

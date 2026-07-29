@@ -8,6 +8,12 @@ The site turns marketplace research into a two-sided Quest Board prototype for S
 - Hire & Assign Teams: quest posting, applicant comparison, shortlisting, assignment readiness, and milestone tracking.
 - Verify Work: proof collection, completion review, badges, credits, and visible contribution history.
 
+Role language is aligned to the Sunrise Operational comic crew structure:
+
+- Maya Chen: Event Director
+- Marcus Johnson: Solar Tech Lead
+- Rosa Delgado: Refreshments Coordinator
+
 ## Open locally
 
 Open `index.html` in a browser.

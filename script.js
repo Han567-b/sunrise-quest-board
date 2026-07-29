@@ -1,45 +1,45 @@
 const quests = [
   {
-    title: "Power Runner",
+    title: "Solar Micro-Grid Support",
     skill: "energy",
     level: 2,
     rewards: ["credits", "badge"],
     duration: "Event day",
     score: 96,
-    summary: "Monitor batteries, solar microgrid connections, cable safety, and stage power during the event.",
+    summary: "Support Marcus Johnson with solar panel unloading, micro-grid setup, battery checks, cable safety, and power-down.",
     proof: ["Battery status photos", "Energy notes in Captain's Log", "Post-event carbon offset summary"],
     source: "Fast role matching plus milestone tracking"
   },
   {
-    title: "Cloud Support Guide",
+    title: "Event Operations Support",
     skill: "community",
     level: 1,
     rewards: ["credits", "badge"],
-    duration: "Remote",
+    duration: "Event day",
     score: 88,
-    summary: "Help vendors and participants navigate the event map, schedule, and support questions from off-site.",
-    proof: ["Support log", "Resolved request count", "Escalation notes"],
+    summary: "Support Maya Chen with setup coordination, volunteer check-ins, schedule updates, and crew handoffs.",
+    proof: ["Check-in log", "Resolved request count", "Handoff notes"],
     source: "Guided recommendations adapted for community navigation"
   },
   {
-    title: "Green Build Crew",
+    title: "Refreshments Station Support",
     skill: "logistics",
     level: 2,
     rewards: ["credits", "stipend", "badge"],
-    duration: "Prep + event",
+    duration: "Event day",
     score: 91,
-    summary: "Set up garden build materials, confirm tools, and coordinate role handoffs across the build party.",
-    proof: ["Setup checklist", "Team handoff notes", "Completion photos"],
+    summary: "Support Rosa Delgado with local vendor setup, refreshments flow, food safety reminders, and guest care.",
+    proof: ["Station checklist", "Vendor handoff notes", "Service photos"],
     source: "Skill packaging transformed into clear quest scopes"
   },
   {
-    title: "Story Capture Lead",
+    title: "Story & Proof Capture",
     skill: "media",
     level: 3,
     rewards: ["credits", "badge"],
     duration: "Event + post",
     score: 83,
-    summary: "Collect photos, short interviews, and proof of completed work for the event recap and player cards.",
+    summary: "Capture photos, short quotes, proof of completed work, and story moments for the event recap and Player Cards.",
     proof: ["Media folder", "Contributor quotes", "Tagged quest evidence"],
     source: "Portfolio-style proof redesigned as visible contribution history"
   },
@@ -55,14 +55,14 @@ const quests = [
     source: "Simple categories plus guided recommendations"
   },
   {
-    title: "Site Safety Scout",
+    title: "Breakdown Crew",
     skill: "logistics",
     level: 2,
     rewards: ["credits", "badge"],
-    duration: "Event day",
+    duration: "Late night",
     score: 86,
-    summary: "Walk the site map, check trip hazards, flag equipment issues, and document safety fixes.",
-    proof: ["Safety checklist", "Before and after photos", "Issue resolution notes"],
+    summary: "Join the full crew after the last audience leaves: pack equipment, coil cables, clear the field, and support final inspection.",
+    proof: ["Breakdown checklist", "Before and after photos", "Final sweep notes"],
     source: "Marketplace trust signals applied to event operations"
   }
 ];
@@ -76,8 +76,8 @@ const research = [
   },
   {
     name: "Role Clarity",
-    focus: "Power, operations, cloud",
-    lesson: "The MVP depends on three clear character roles with different responsibilities.",
+    focus: "Director, solar, refreshments",
+    lesson: "The MVP depends on clear support roles connected to the actual crew structure.",
     quest: "Show each role's duties, required skills, event window, deliverables, and support contacts."
   },
   {
@@ -96,28 +96,28 @@ const research = [
 
 const applicants = [
   {
-    name: "Ari P.",
-    role: "Power Runner",
+    name: "Jordan K.",
+    role: "Solar Micro-Grid Support",
     fit: 94,
     rate: "Stipend eligible",
     signals: ["Solar 101", "Site Safety", "2 event shifts"],
-    note: "Has microgrid training and can cover setup plus late breakdown."
+    note: "Best match for supporting Marcus Johnson during solar unload, power-up, and final cable breakdown."
   },
   {
-    name: "Maya C.",
-    role: "Cloud Support",
+    name: "Nia R.",
+    role: "Event Operations Support",
     fit: 89,
     rate: "Quest credits",
-    signals: ["Vendor support", "Map guide", "Remote ready"],
-    note: "Strong fit for digital routing, vendor questions, and schedule updates."
+    signals: ["Crew check-in", "Schedule notes", "Guest support"],
+    note: "Strong fit for supporting Maya Chen with volunteer flow, standup notes, and on-site coordination."
   },
   {
-    name: "JT R.",
-    role: "Green Worker",
+    name: "Eli M.",
+    role: "Refreshments Station Support",
     fit: 86,
     rate: "Credits + badge",
-    signals: ["Tool handling", "Build crew", "Morning shift"],
-    note: "Good operations applicant for tent setup, materials, and handoffs."
+    signals: ["Food safety", "Vendor support", "Guest care"],
+    note: "Good match for helping Rosa Delgado with refreshments setup, local vendor care, and service flow."
   },
   {
     name: "Sam L.",
@@ -143,6 +143,11 @@ const matcher = document.querySelector("#matcher");
 const researchGrid = document.querySelector("#researchGrid");
 const timelineEl = document.querySelector("#timeline");
 const applicantGrid = document.querySelector("#applicantGrid");
+const experienceValue = document.querySelector("#experienceValue");
+const levelPercent = document.querySelector("#levelPercent");
+const levelBar = document.querySelector("#levelBar");
+const playerMeta = document.querySelector("#playerMeta");
+const playerTitle = document.querySelector("#playerTitle");
 let currentView = "recommended";
 
 function selectedRewards() {
@@ -161,7 +166,24 @@ function filteredQuests() {
     .sort((a, b) => b.score - a.score);
 }
 
+function updatePlayerProgress() {
+  const level = Number(matcher.experience.value);
+  const readinessByLevel = {
+    1: { percent: 42, title: "New Event Contributor", meta: "Level 1 contributor · 6 credits · 1 badge" },
+    2: { percent: 68, title: "Solar Support Candidate", meta: "Level 2 contributor · 18 credits · 3 badges" },
+    3: { percent: 84, title: "Reliable Crew Support", meta: "Level 3 contributor · 31 credits · 5 badges" },
+    4: { percent: 96, title: "Quest Party Lead", meta: "Level 4 contributor · 52 credits · 8 badges" }
+  };
+  const state = readinessByLevel[level];
+  if (experienceValue) experienceValue.textContent = `Level ${level}`;
+  if (levelPercent) levelPercent.textContent = `${state.percent}%`;
+  if (levelBar) levelBar.style.width = `${state.percent}%`;
+  if (playerMeta) playerMeta.textContent = state.meta;
+  if (playerTitle) playerTitle.textContent = state.title;
+}
+
 function renderQuests() {
+  updatePlayerProgress();
   const list = filteredQuests();
   questGrid.innerHTML = "";
 
@@ -274,6 +296,7 @@ document.querySelectorAll("[data-close-panel]").forEach((button) => {
 });
 
 matcher.addEventListener("input", renderQuests);
+updatePlayerProgress();
 renderQuests();
 renderResearch();
 renderTimeline();
