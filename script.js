@@ -69,28 +69,28 @@ const quests = [
 
 const research = [
   {
-    name: "Fast Intake",
-    focus: "Start quickly",
-    lesson: "People should not need a long explanation before they can find a useful role.",
-    quest: "Use short categories, plain-language quest cards, and a clear next step."
+    name: "Readiness Check",
+    focus: "Before September 20",
+    lesson: "Every recruited Greenworker needs to understand the quest before event week.",
+    quest: "Use the page to confirm who has reviewed the comic/manual, chosen a role, and knows the next step."
   },
   {
-    name: "Guided Choice",
-    focus: "Reduce uncertainty",
-    lesson: "A good system helps users compare options before committing.",
-    quest: "Show fit, time, reward, proof, and responsibility before someone joins a quest."
+    name: "Role Clarity",
+    focus: "Power, operations, cloud",
+    lesson: "The MVP depends on three clear character roles with different responsibilities.",
+    quest: "Show each role's duties, required skills, event window, deliverables, and support contacts."
   },
   {
-    name: "Contributor Identity",
-    focus: "Make work visible",
-    lesson: "People need a trusted way to show what they can do and what they have already done.",
-    quest: "Player Cards collect skill tags, badges, event proof, and contribution history."
+    name: "Live Coordination",
+    focus: "During the event",
+    lesson: "On-site teams and remote support need the same map, timeline, and status language.",
+    quest: "Use quest cards, checklists, and status updates to reduce confusion during setup, operation, and breakdown."
   },
   {
-    name: "Project Structure",
-    focus: "Track progress",
-    lesson: "Larger community work needs milestones, handoffs, and completion review.",
-    quest: "Quest Parties use shared timelines, captain logs, proof uploads, and completion states."
+    name: "Proof & Feedback",
+    focus: "After September 26",
+    lesson: "The test is only useful if expectation and reality can be compared after the fair.",
+    quest: "Collect photos, notes, completion evidence, and feedback so Player Cards and future quests improve."
   }
 ];
 
