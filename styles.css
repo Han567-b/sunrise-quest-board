@@ -496,12 +496,71 @@ figure {
   background: #fff;
 }
 
+.danger-button {
+  min-height: 40px;
+  border: 1px solid rgba(166, 72, 37, 0.5);
+  background: rgba(166, 72, 37, 0.08);
+  color: var(--rust);
+  padding: 0 14px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.danger-button:hover {
+  background: var(--rust);
+  color: #fff;
+}
+
 .undo-button[hidden] {
   display: none;
 }
 
 .card-actions .undo-button {
   min-height: 36px;
+}
+
+.saved-card {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.saved-card[hidden] {
+  display: none;
+}
+
+.saved-card h3 {
+  margin-bottom: 14px;
+  font-size: 1.5rem;
+}
+
+.saved-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.saved-card div:not(.action-row) {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.saved-card dt {
+  color: var(--rust);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.saved-card dd {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .site-footer {
@@ -638,6 +697,8 @@ figure {
 .profile-panel {
   border-left: 1px solid var(--line);
   background: rgba(243, 185, 76, 0.18);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .matcher {
@@ -834,6 +895,20 @@ fieldset label {
   gap: 14px;
   align-items: center;
   margin-bottom: 14px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.player-card > div:not(.avatar) {
+  min-width: 0;
+}
+
+.player-card h2 {
+  max-width: 100%;
+  font-size: clamp(1.7rem, 2.3vw, 2.6rem);
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .avatar {
@@ -1516,4 +1591,89 @@ button:disabled {
   .workspace {
     min-height: auto;
   }
+}
+
+/* Final footer override: keep it visually close to the main comic site's ending. */
+.site-footer {
+  display: flex;
+  min-height: 640px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  border-top: 1px solid rgba(255, 248, 232, 0.12);
+  padding: clamp(90px, 13vw, 170px) clamp(18px, 5vw, 64px);
+  text-align: center;
+  color: rgba(255, 248, 232, 0.82);
+  background:
+    linear-gradient(180deg, rgba(243, 230, 210, 0.14) 0%, rgba(10, 15, 27, 0.88) 26%, #03050b 100%),
+    url("assets/comic-night.png") center / cover no-repeat;
+}
+
+.site-footer .footer-mark {
+  display: inline-grid;
+  grid-template-columns: 80px auto 80px;
+  align-items: center;
+  gap: 18px;
+  color: var(--gold);
+}
+
+.site-footer .footer-mark span {
+  height: 1px;
+  background: rgba(255, 248, 232, 0.24);
+}
+
+.site-footer .footer-mark b {
+  color: var(--gold);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.site-footer h2 {
+  margin: 0;
+  color: #fff;
+  font-family: "Bangers", "Space Grotesk", sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5.3rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.site-footer p {
+  max-width: 650px;
+  margin: 0;
+  color: rgba(255, 248, 232, 0.68);
+  font-size: clamp(1rem, 1.7vw, 1.32rem);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.site-footer .footer-links a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 248, 232, 0.22);
+  padding: 0 14px;
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.site-footer small {
+  margin-top: 20px;
+  color: rgba(255, 248, 232, 0.42);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }

@@ -163,7 +163,7 @@
             </dl>
             <div class="action-row">
               <button class="primary-button" type="button" id="publishQuest">Save this quest</button>
-              <button class="undo-button" type="button" id="undoPublish" hidden>Undo</button>
+              <button class="undo-button" type="button" id="undoPublish" hidden>Cancel save</button>
             </div>
             <p class="action-status" id="publishStatus" aria-live="polite"></p>
           </article>
@@ -282,7 +282,7 @@
           <span></span>
         </div>
         <h2>Sunrise Operational</h2>
-        <p>Solar-powered community work, matched into clear quests for September 26.</p>
+        <p>Join the September 26 Sunrise Fair crew.</p>
         <div class="footer-links">
           <a href="#roles">Roles</a>
           <a href="#board">Find a Quest</a>
@@ -350,6 +350,20 @@
         <button type="button" class="primary-button" id="saveApplication">Save draft card</button>
         <p class="action-status" id="applicationStatus" aria-live="polite"></p>
       </form>
+      <article class="saved-card" id="savedApplicationCard" hidden aria-live="polite">
+        <p class="eyebrow">Saved Player Card</p>
+        <h3 id="savedCardName">Draft contributor</h3>
+        <dl>
+          <div><dt>Role</dt><dd id="savedCardRole"></dd></div>
+          <div><dt>Availability</dt><dd id="savedCardAvailability"></dd></div>
+          <div><dt>Skills</dt><dd id="savedCardSkills"></dd></div>
+          <div><dt>Proof</dt><dd id="savedCardProof"></dd></div>
+        </dl>
+        <div class="action-row">
+          <button class="undo-button" type="button" id="editApplication">Edit again</button>
+          <button class="danger-button" type="button" id="deleteApplication">Delete draft</button>
+        </div>
+      </article>
     </section>
 
     <div class="scrim" data-close-panel></div>

@@ -189,6 +189,9 @@ const publishStatus = document.querySelector("#publishStatus");
 const undoPublish = document.querySelector("#undoPublish");
 const saveApplication = document.querySelector("#saveApplication");
 const applicationStatus = document.querySelector("#applicationStatus");
+const savedApplicationCard = document.querySelector("#savedApplicationCard");
+const editApplication = document.querySelector("#editApplication");
+const deleteApplication = document.querySelector("#deleteApplication");
 const levelButtons = document.querySelectorAll("[data-level]");
 let currentView = "recommended";
 
@@ -324,7 +327,7 @@ function renderApplicants() {
       <p>${person.note}</p>
       <div class="card-actions">
         <button type="button" class="shortlist-button">Invite to quest</button>
-        <button type="button" class="undo-button undo-invite" hidden>Undo</button>
+        <button type="button" class="undo-button undo-invite" hidden>Cancel invite</button>
       </div>
     </article>
   `).join("");
@@ -426,10 +429,38 @@ document.addEventListener("click", (event) => {
 
 if (saveApplication) {
   saveApplication.addEventListener("click", () => {
+    const name = document.querySelector("#name")?.value.trim() || "Draft contributor";
     const role = document.querySelector("#role")?.value || "selected role";
     const availability = document.querySelector("#availability")?.value || "selected availability";
+    const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
+    const proof = document.querySelector("#proof")?.value.trim() || "No proof added yet";
+    document.querySelector("#savedCardName").textContent = name;
+    document.querySelector("#savedCardRole").textContent = role;
+    document.querySelector("#savedCardAvailability").textContent = availability;
+    document.querySelector("#savedCardSkills").textContent = skills;
+    document.querySelector("#savedCardProof").textContent = proof;
+    if (savedApplicationCard) savedApplicationCard.hidden = false;
     if (applicationStatus) {
-      applicationStatus.textContent = `Draft Player Card saved for ${role}. Availability: ${availability}. Next step: lead review and quest match.`;
+      applicationStatus.textContent = "Draft saved below. You can edit it or delete it before submitting.";
+    }
+  });
+}
+
+if (editApplication) {
+  editApplication.addEventListener("click", () => {
+    document.querySelector("#name")?.focus();
+    if (applicationStatus) {
+      applicationStatus.textContent = "Editing mode: update the fields, then save the draft again.";
+    }
+  });
+}
+
+if (deleteApplication) {
+  deleteApplication.addEventListener("click", () => {
+    document.querySelector(".apply-form")?.reset();
+    if (savedApplicationCard) savedApplicationCard.hidden = true;
+    if (applicationStatus) {
+      applicationStatus.textContent = "Draft deleted. You can start a new Player Card.";
     }
   });
 }
