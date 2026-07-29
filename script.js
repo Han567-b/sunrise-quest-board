@@ -8,7 +8,7 @@ const quests = [
     score: 96,
     summary: "Monitor batteries, solar microgrid connections, cable safety, and stage power during the event.",
     proof: ["Battery status photos", "Energy notes in Captain's Log", "Post-event carbon offset summary"],
-    source: "TaskRabbit speed plus Upwork milestone tracking"
+    source: "Fast role matching plus milestone tracking"
   },
   {
     title: "Cloud Support Guide",
@@ -19,7 +19,7 @@ const quests = [
     score: 88,
     summary: "Help vendors and participants navigate the event map, schedule, and support questions from off-site.",
     proof: ["Support log", "Resolved request count", "Escalation notes"],
-    source: "Thumbtack decision support adapted for community navigation"
+    source: "Guided recommendations adapted for community navigation"
   },
   {
     title: "Green Build Crew",
@@ -30,7 +30,7 @@ const quests = [
     score: 91,
     summary: "Set up garden build materials, confirm tools, and coordinate role handoffs across the build party.",
     proof: ["Setup checklist", "Team handoff notes", "Completion photos"],
-    source: "Fiverr service packaging transformed into quest scopes"
+    source: "Skill packaging transformed into clear quest scopes"
   },
   {
     title: "Story Capture Lead",
@@ -41,7 +41,7 @@ const quests = [
     score: 83,
     summary: "Collect photos, short interviews, and proof of completed work for the event recap and player cards.",
     proof: ["Media folder", "Contributor quotes", "Tagged quest evidence"],
-    source: "Upwork portfolio logic redesigned as visible contribution history"
+    source: "Portfolio-style proof redesigned as visible contribution history"
   },
   {
     title: "Onboarding Host",
@@ -52,7 +52,7 @@ const quests = [
     score: 79,
     summary: "Welcome new contributors, explain quest rules, and help them choose a beginner-friendly role.",
     proof: ["Attendance list", "Matched player cards", "Orientation feedback"],
-    source: "TaskRabbit category simplicity plus Thumbtack recommendations"
+    source: "Simple categories plus guided recommendations"
   },
   {
     title: "Site Safety Scout",
@@ -69,28 +69,28 @@ const quests = [
 
 const research = [
   {
-    name: "TaskRabbit",
-    focus: "Fast local matching",
-    lesson: "Use clear categories, simple intake, nearby availability, and quick booking.",
-    quest: "Beginner quests should be easy to understand and accept without a long application."
+    name: "Fast Intake",
+    focus: "Start quickly",
+    lesson: "People should not need a long explanation before they can find a useful role.",
+    quest: "Use short categories, plain-language quest cards, and a clear next step."
   },
   {
-    name: "Thumbtack",
-    focus: "Comparison and trust",
-    lesson: "Help people compare options with reviews, profiles, recommendations, and quotes.",
-    quest: "The board should recommend roles while still letting participants explore."
+    name: "Guided Choice",
+    focus: "Reduce uncertainty",
+    lesson: "A good system helps users compare options before committing.",
+    quest: "Show fit, time, reward, proof, and responsibility before someone joins a quest."
   },
   {
-    name: "Fiverr",
-    focus: "Worker identity",
-    lesson: "Profiles, portfolios, tags, and packaged services make skills discoverable.",
-    quest: "Player Cards should grow through badges, proof, and completed quests."
+    name: "Contributor Identity",
+    focus: "Make work visible",
+    lesson: "People need a trusted way to show what they can do and what they have already done.",
+    quest: "Player Cards collect skill tags, badges, event proof, and contribution history."
   },
   {
-    name: "Upwork",
-    focus: "Structured project work",
-    lesson: "Job posts, proposals, milestones, messages, and work history support larger projects.",
-    quest: "Quest Parties need shared milestones, role assignments, and visible contribution history."
+    name: "Project Structure",
+    focus: "Track progress",
+    lesson: "Larger community work needs milestones, handoffs, and completion review.",
+    quest: "Quest Parties use shared timelines, captain logs, proof uploads, and completion states."
   }
 ];
 

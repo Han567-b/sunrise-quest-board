@@ -2,12 +2,10 @@
 
 A static Quest Board prototype for Key Tech Labs / Circular Economy Co-op.
 
-The site turns the four-platform research into a usable marketplace-style experience:
+The site turns marketplace research into two core product capabilities:
 
-- TaskRabbit: fast categories and simple local task matching
-- Thumbtack: recommendations, comparison, reviews, and decision support
-- Fiverr: worker identity, packaged skills, tags, and visibility
-- Upwork: project structure, milestones, proposals, and work history
+- Smart Quest Matching: short intake, recommended roles, filters, rewards, and clear responsibility previews.
+- Trusted Player Cards: skill tags, contribution proof, badges, credits, milestones, and visible work history.
 
 ## Open locally
 

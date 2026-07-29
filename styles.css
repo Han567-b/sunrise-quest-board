@@ -1,17 +1,15 @@
 :root {
   color-scheme: light;
-  --ink: #0e0a07;
+  --ink: #15110d;
   --paper: #f3e6d2;
-  --paper-light: #fff8e8;
+  --paper-soft: #fff8e8;
   --gold: #f3b94c;
-  --amber: #eb881f;
+  --amber: #df7f22;
   --rust: #a64825;
-  --green: #40633f;
-  --mint: #a7c978;
-  --cream: #fff4cf;
-  --white: #ffffff;
-  --shadow: 6px 6px 0 rgba(14, 10, 7, 0.86);
-  --soft-shadow: 3px 3px 0 rgba(14, 10, 7, 0.86);
+  --green: #3e6540;
+  --muted: #6f675d;
+  --line: rgba(21, 17, 13, 0.16);
+  --shadow: 0 18px 46px rgba(21, 17, 13, 0.14);
 }
 
 * {
@@ -28,12 +26,10 @@ body {
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0;
   background:
-    radial-gradient(circle at 20% 15%, rgba(243, 185, 76, 0.22), transparent 28rem),
-    radial-gradient(circle at 78% 12%, rgba(64, 99, 63, 0.18), transparent 24rem),
-    linear-gradient(90deg, rgba(14, 10, 7, 0.035) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(14, 10, 7, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 17, 13, 0.025) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(21, 17, 13, 0.025) 1px, transparent 1px),
     var(--paper);
-  background-size: auto, auto, 22px 22px, 22px 22px, auto;
+  background-size: 24px 24px, 24px 24px, auto;
 }
 
 button,
@@ -61,8 +57,8 @@ a {
   align-items: center;
   gap: 22px;
   padding: 14px clamp(16px, 4vw, 34px);
-  border-bottom: 3px solid var(--ink);
-  background: rgba(14, 10, 7, 0.78);
+  border-bottom: 1px solid rgba(255, 244, 207, 0.18);
+  background: rgba(21, 17, 13, 0.9);
   color: #fff;
   backdrop-filter: blur(10px);
 }
@@ -76,27 +72,27 @@ a {
 
 .brand-mark {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border: 2px solid var(--gold);
+  border: 1px solid var(--gold);
   color: var(--gold);
-  font-size: 1rem;
-  transform: skew(-9deg);
+  font-size: 0.9rem;
+}
+
+.brand strong,
+.brand small {
+  display: block;
 }
 
 .brand strong {
-  display: block;
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 1.38rem;
-  letter-spacing: 0.03em;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
 .brand small {
-  display: block;
-  color: rgba(255, 244, 207, 0.78);
-  font-size: 0.78rem;
+  color: rgba(255, 244, 207, 0.72);
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -110,25 +106,24 @@ nav,
 
 nav a,
 .ghost-button,
-.main-site-button,
-.segmented button,
 .primary-button,
-.scroll-cue {
-  min-height: 40px;
-  border: 2px solid transparent;
-  padding: 0 14px;
+.scroll-cue,
+.segmented button {
   display: inline-flex;
+  min-height: 40px;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
-  text-transform: uppercase;
-  font-family: "Comic Neue", "Comic Sans MS", cursive;
+  border: 1px solid transparent;
+  padding: 0 14px;
+  color: inherit;
+  font-size: 0.82rem;
   font-weight: 900;
-  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 nav a {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 nav a:hover {
@@ -136,70 +131,60 @@ nav a:hover {
 }
 
 .ghost-button {
-  background: transparent;
-  border-color: rgba(255, 244, 207, 0.52);
+  border-color: rgba(255, 244, 207, 0.38);
+  background: rgba(255, 255, 255, 0.04);
   color: #fff;
 }
 
-.main-site-button,
 .primary-button,
 .scroll-cue {
-  border-color: var(--gold);
+  border-color: var(--amber);
   background: var(--amber);
   color: #fff;
-  box-shadow: var(--soft-shadow);
-}
-
-.main-site-button:hover,
-.primary-button:hover,
-.scroll-cue:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 rgba(14, 10, 7, 0.9);
+  box-shadow: 0 12px 28px rgba(21, 17, 13, 0.22);
 }
 
 .comic-hero {
   position: relative;
-  min-height: calc(100vh - 70px);
   display: grid;
+  min-height: min(720px, calc(100vh - 69px));
   place-items: center;
   overflow: hidden;
-  border-bottom: 4px solid var(--ink);
-  background: #000 url("assets/comic-hero.png") center 44% / cover no-repeat;
+  border-bottom: 1px solid var(--line);
+  background: #000 url("assets/comic-hero.png") center 42% / cover no-repeat;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.72)),
-    radial-gradient(circle at center, transparent 0 36%, rgba(0, 0, 0, 0.42) 72%);
+    linear-gradient(90deg, rgba(0, 0, 0, 0.76), rgba(0, 0, 0, 0.34)),
+    radial-gradient(circle at 72% 36%, transparent 0 26%, rgba(0, 0, 0, 0.5) 76%);
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
-  width: min(920px, calc(100% - 32px));
-  text-align: center;
+  width: min(1000px, calc(100% - 36px));
   color: #fff;
-  padding: 54px 0;
+  padding: 64px 0;
 }
 
 .kicker,
 .eyebrow {
   margin: 0 0 10px;
   color: var(--gold);
-  font-family: "Comic Neue", "Comic Sans MS", cursive;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 900;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .kicker {
   display: inline-block;
-  padding: 9px 14px;
-  border: 2px solid rgba(243, 185, 76, 0.58);
-  background: rgba(14, 10, 7, 0.78);
+  padding: 8px 12px;
+  border: 1px solid rgba(243, 185, 76, 0.54);
+  background: rgba(21, 17, 13, 0.68);
 }
 
 h1,
@@ -210,36 +195,129 @@ p {
 }
 
 h1,
-h2 {
-  font-family: Bangers, Impact, "Comic Sans MS", cursive;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
+h2,
+h3 {
+  letter-spacing: 0;
 }
 
 h1 {
-  margin: 18px 0 14px;
+  max-width: 780px;
+  margin: 18px 0 18px;
   color: var(--gold);
-  font-size: clamp(4rem, 11vw, 9.5rem);
-  line-height: 0.82;
-  text-shadow: 5px 5px 0 rgba(14, 10, 7, 0.95);
-  transform: skew(-7deg);
+  font-size: clamp(3rem, 7vw, 6.4rem);
+  font-weight: 900;
+  line-height: 0.94;
+  text-shadow: 0 12px 34px rgba(0, 0, 0, 0.58);
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: clamp(1.8rem, 3vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+h3 {
+  margin-bottom: 8px;
+  font-size: 1.08rem;
+  font-weight: 900;
 }
 
 .hero-content p:not(.kicker) {
-  max-width: 780px;
-  margin: 0 auto 26px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(1rem, 1.5vw, 1.32rem);
+  max-width: 680px;
+  margin-bottom: 28px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1rem, 1.6vw, 1.28rem);
   font-weight: 700;
-  line-height: 1.55;
-  text-shadow: 2px 2px 0 rgba(14, 10, 7, 0.9);
+  line-height: 1.58;
+}
+
+.system-strip,
+.journey-band,
+.split-band,
+.field-kit {
+  padding: clamp(38px, 6vw, 82px) clamp(16px, 5vw, 58px);
+  border-bottom: 1px solid var(--line);
+}
+
+.system-strip {
+  background: rgba(255, 248, 232, 0.8);
+}
+
+.section-copy {
+  max-width: 760px;
+}
+
+.section-copy p,
+.intro,
+.quest-card p,
+.platform-card p,
+.profile-panel p,
+.detail-box li,
+.timeline-step p,
+.system-card p,
+.system-card li {
+  color: var(--muted);
+}
+
+.section-copy p,
+.intro {
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.system-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.system-card,
+.quest-card,
+.platform-card,
+.timeline-step,
+.player-card,
+.progress-wrap,
+.detail-box,
+.rail-note,
+figure {
+  border: 1px solid var(--line);
+  background: rgba(255, 248, 232, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.system-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  padding: 22px;
+}
+
+.system-card ul {
+  grid-column: 2;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  font-weight: 700;
+}
+
+.system-number {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  background: var(--ink);
+  color: var(--gold);
+  font-weight: 900;
 }
 
 .workspace {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(360px, 1fr) minmax(280px, 340px);
   min-height: 100vh;
-  border-bottom: 4px solid var(--ink);
+  border-bottom: 1px solid var(--line);
 }
 
 .control-rail,
@@ -253,48 +331,19 @@ h1 {
   flex-direction: column;
   justify-content: space-between;
   gap: 24px;
-  border-right: 3px solid var(--ink);
-  background: rgba(255, 248, 232, 0.76);
+  border-right: 1px solid var(--line);
+  background: rgba(255, 248, 232, 0.74);
 }
 
 .board-panel {
   background:
-    linear-gradient(rgba(255, 248, 232, 0.84), rgba(255, 248, 232, 0.84)),
+    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
     url("assets/comic-field.png") center / cover no-repeat;
 }
 
 .profile-panel {
-  border-left: 3px solid var(--ink);
-  background: rgba(243, 185, 76, 0.28);
-}
-
-h2 {
-  margin-bottom: 10px;
-  font-size: clamp(2.2rem, 3.6vw, 4.5rem);
-  line-height: 0.92;
-}
-
-h3 {
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-  font-weight: 900;
-}
-
-.intro,
-.section-copy p,
-.quest-card p,
-.profile-panel p,
-.detail-box li,
-.platform-card p,
-.timeline-step p {
-  color: rgba(14, 10, 7, 0.76);
-}
-
-.intro {
-  max-width: 34rem;
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.55;
+  border-left: 1px solid var(--line);
+  background: rgba(243, 185, 76, 0.18);
 }
 
 .matcher {
@@ -306,7 +355,7 @@ h3 {
 .matcher legend,
 .apply-form label {
   color: var(--ink);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -315,11 +364,10 @@ select,
 input[type="text"],
 textarea {
   width: 100%;
-  border: 2px solid var(--ink);
-  background: var(--white);
+  border: 1px solid rgba(21, 17, 13, 0.24);
+  background: #fff;
   color: var(--ink);
   padding: 11px 12px;
-  box-shadow: var(--soft-shadow);
 }
 
 input[type="range"] {
@@ -329,7 +377,7 @@ input[type="range"] {
 .range-labels {
   display: flex;
   justify-content: space-between;
-  color: rgba(14, 10, 7, 0.68);
+  color: var(--muted);
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -340,8 +388,8 @@ fieldset {
   gap: 8px;
   margin: 10px 0 0;
   padding: 14px;
-  border: 2px solid var(--ink);
-  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.46);
 }
 
 fieldset label {
@@ -355,19 +403,6 @@ fieldset label {
 .rail-note,
 .detail-box,
 .player-card,
-.progress-wrap,
-.quest-card,
-.platform-card,
-.timeline-step,
-figure {
-  border: 3px solid var(--ink);
-  background: var(--paper-light);
-  box-shadow: var(--shadow);
-}
-
-.rail-note,
-.detail-box,
-.player-card,
 .progress-wrap {
   padding: 16px;
 }
@@ -375,7 +410,7 @@ figure {
 .rail-note span {
   display: block;
   margin-top: 6px;
-  color: rgba(14, 10, 7, 0.72);
+  color: var(--muted);
   font-weight: 700;
   line-height: 1.5;
 }
@@ -391,9 +426,8 @@ figure {
 .segmented {
   display: inline-flex;
   padding: 4px;
-  border: 3px solid var(--ink);
-  background: var(--paper);
-  box-shadow: var(--soft-shadow);
+  border: 1px solid var(--line);
+  background: rgba(255, 248, 232, 0.78);
 }
 
 .segmented button {
@@ -419,7 +453,7 @@ figure {
 .platform-card {
   display: grid;
   gap: 12px;
-  min-height: 260px;
+  min-height: 250px;
   padding: 16px;
   text-align: left;
 }
@@ -431,12 +465,13 @@ figure {
 .quest-card:hover,
 .quest-card.active {
   background: #fff;
-  transform: translate(-2px, -2px);
-  box-shadow: 9px 9px 0 rgba(14, 10, 7, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 24px 54px rgba(21, 17, 13, 0.2);
 }
 
 .quest-meta,
-.tag-row {
+.tag-row,
+.badges {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -448,11 +483,10 @@ figure {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
-  border: 2px solid var(--ink);
+  border: 1px solid rgba(21, 17, 13, 0.16);
   padding: 3px 9px;
-  background: var(--gold);
+  background: rgba(243, 185, 76, 0.68);
   color: var(--ink);
-  font-family: "Comic Neue", "Comic Sans MS", cursive;
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -470,14 +504,13 @@ figure {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  color: rgba(14, 10, 7, 0.7);
+  color: var(--muted);
   font-size: 0.86rem;
   font-weight: 900;
 }
 
 .match-score {
   color: var(--rust);
-  font-family: "Comic Neue", "Comic Sans MS", cursive;
   font-weight: 900;
 }
 
@@ -494,12 +527,9 @@ figure {
   height: 58px;
   flex: 0 0 auto;
   place-items: center;
-  border: 3px solid var(--ink);
   background: var(--rust);
   color: #fff;
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 1.45rem;
-  box-shadow: var(--soft-shadow);
+  font-weight: 900;
 }
 
 .progress-wrap,
@@ -509,22 +539,16 @@ figure {
 }
 
 .progress-bar {
-  height: 13px;
+  height: 12px;
   overflow: hidden;
-  border: 2px solid var(--ink);
-  background: var(--cream);
+  border: 1px solid rgba(21, 17, 13, 0.16);
+  background: #fff;
 }
 
 .progress-bar span {
   display: block;
   height: 100%;
-  background: repeating-linear-gradient(45deg, var(--gold) 0 8px, var(--amber) 8px 16px);
-}
-
-.badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  background: linear-gradient(90deg, var(--amber), var(--gold));
 }
 
 .detail-box ul {
@@ -534,64 +558,10 @@ figure {
   margin-bottom: 0;
 }
 
-.journey-band,
-.split-band,
-.field-kit,
-.platform-strip {
-  padding: clamp(38px, 6vw, 82px) clamp(16px, 5vw, 58px);
-  border-bottom: 4px solid var(--ink);
-}
-
-.platform-strip {
-  background:
-    linear-gradient(rgba(243, 230, 210, 0.9), rgba(243, 230, 210, 0.9)),
-    url("assets/comic-field.png") center / cover no-repeat;
-}
-
-.feature-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
-  gap: 18px;
-  margin-top: 24px;
-}
-
-.feature-row article {
-  min-height: 150px;
-  border: 3px solid var(--ink);
-  background: var(--paper-light);
-  box-shadow: var(--shadow);
-  padding: 18px;
-}
-
-.feature-row strong {
-  display: block;
-  margin-bottom: 12px;
-  color: var(--rust);
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 2rem;
-  letter-spacing: 0.04em;
-}
-
-.feature-row span {
-  color: rgba(14, 10, 7, 0.76);
-  font-weight: 900;
-  line-height: 1.45;
-}
-
 .journey-band {
   background:
-    linear-gradient(rgba(243, 230, 210, 0.88), rgba(243, 230, 210, 0.88)),
+    linear-gradient(rgba(243, 230, 210, 0.9), rgba(243, 230, 210, 0.9)),
     url("assets/comic-night.png") center / cover no-repeat;
-}
-
-.section-copy {
-  max-width: 780px;
-}
-
-.section-copy p {
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.6;
 }
 
 .timeline {
@@ -602,7 +572,7 @@ figure {
 }
 
 .timeline-step {
-  min-height: 190px;
+  min-height: 180px;
   padding: 16px;
 }
 
@@ -610,9 +580,8 @@ figure {
   display: block;
   margin-bottom: 10px;
   color: var(--rust);
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 1.45rem;
-  letter-spacing: 0.03em;
+  font-size: 1rem;
+  font-weight: 900;
 }
 
 .split-band {
@@ -627,13 +596,7 @@ figure {
 }
 
 .platform-card {
-  min-height: 320px;
-}
-
-.platform-card h3 {
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 2rem;
-  letter-spacing: 0.04em;
+  min-height: 300px;
 }
 
 .platform-card strong {
@@ -641,7 +604,7 @@ figure {
 }
 
 .field-kit {
-  background: rgba(64, 99, 63, 0.16);
+  background: rgba(64, 99, 63, 0.12);
 }
 
 .asset-strip {
@@ -662,14 +625,13 @@ figure img {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   object-position: top;
-  border-bottom: 3px solid var(--ink);
+  border-bottom: 1px solid var(--line);
 }
 
 figcaption {
   padding: 12px 14px;
-  font-family: Bangers, "Comic Sans MS", cursive;
-  font-size: 1.35rem;
-  letter-spacing: 0.04em;
+  font-size: 1rem;
+  font-weight: 900;
 }
 
 .side-panel {
@@ -680,9 +642,9 @@ figcaption {
   width: min(430px, 100vw);
   height: 100vh;
   padding: 32px;
-  border-left: 4px solid var(--ink);
-  background: var(--paper-light);
-  box-shadow: -8px 0 0 rgba(14, 10, 7, 0.86);
+  border-left: 1px solid var(--line);
+  background: var(--paper-soft);
+  box-shadow: -18px 0 46px rgba(21, 17, 13, 0.16);
   transform: translateX(105%);
   transition: transform 180ms ease;
 }
@@ -697,12 +659,11 @@ figcaption {
   right: 14px;
   min-width: 68px;
   height: 36px;
-  border: 2px solid var(--ink);
+  border: 1px solid var(--line);
   background: #fff;
   font-size: 0.82rem;
   font-weight: 900;
   text-transform: uppercase;
-  box-shadow: var(--soft-shadow);
 }
 
 .apply-form {
@@ -715,7 +676,7 @@ figcaption {
   inset: 0;
   z-index: 30;
   display: none;
-  background: rgba(14, 10, 7, 0.46);
+  background: rgba(21, 17, 13, 0.42);
 }
 
 .scrim.open {
@@ -730,15 +691,12 @@ figcaption {
   .profile-panel {
     grid-column: 1 / -1;
     border-left: 0;
-    border-top: 3px solid var(--ink);
+    border-top: 1px solid var(--line);
   }
 
   .timeline,
-  .research-grid {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
-  }
-
-  .feature-row {
+  .research-grid,
+  .system-grid {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 }
@@ -755,7 +713,8 @@ figcaption {
     padding-bottom: 4px;
   }
 
-  .workspace {
+  .workspace,
+  .system-grid {
     grid-template-columns: 1fr;
   }
 
@@ -766,11 +725,11 @@ figcaption {
   }
 
   .comic-hero {
-    min-height: 760px;
+    min-height: 680px;
   }
 
   h1 {
-    font-size: clamp(4rem, 18vw, 6.8rem);
+    font-size: clamp(3rem, 16vw, 5.8rem);
   }
 
   .panel-heading {
@@ -780,8 +739,15 @@ figcaption {
 
   .timeline,
   .research-grid,
-  .asset-strip,
-  .feature-row {
+  .asset-strip {
     grid-template-columns: 1fr;
+  }
+
+  .system-card {
+    grid-template-columns: 1fr;
+  }
+
+  .system-card ul {
+    grid-column: 1;
   }
 }
