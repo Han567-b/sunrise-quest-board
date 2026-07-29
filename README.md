@@ -2,10 +2,11 @@
 
 A static Quest Board prototype for Key Tech Labs / Circular Economy Co-op.
 
-The site turns marketplace research into two core product capabilities:
+The site turns marketplace research into a two-sided Quest Board prototype for Sunrise Fair operations:
 
-- Smart Quest Matching: short intake, recommended roles, filters, rewards, and clear responsibility previews.
-- Trusted Player Cards: skill tags, contribution proof, badges, credits, milestones, and visible work history.
+- Recruit Contributors: role listings, smart matching, contributor applications, and Player Cards.
+- Hire & Assign Teams: quest posting, applicant comparison, shortlisting, assignment readiness, and milestone tracking.
+- Verify Work: proof collection, completion review, badges, credits, and visible contribution history.
 
 ## Open locally
 

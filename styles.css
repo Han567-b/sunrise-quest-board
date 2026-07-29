@@ -86,6 +86,7 @@ a {
 }
 
 .brand strong {
+  font-family: "Space Grotesk", "DM Sans", ui-sans-serif, system-ui, sans-serif;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -137,11 +138,18 @@ nav a:hover {
 }
 
 .primary-button,
-.scroll-cue {
+.scroll-cue,
+.secondary-cue {
   border-color: var(--amber);
   background: var(--amber);
   color: #fff;
   box-shadow: 0 12px 28px rgba(21, 17, 13, 0.22);
+}
+
+.secondary-cue {
+  margin-left: 10px;
+  border-color: rgba(255, 244, 207, 0.48);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .comic-hero {
@@ -197,6 +205,7 @@ p {
 h1,
 h2,
 h3 {
+  font-family: "Space Grotesk", "DM Sans", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0;
 }
 
@@ -233,6 +242,8 @@ h3 {
 }
 
 .system-strip,
+.marketplace-band,
+.hire-desk,
 .journey-band,
 .split-band,
 .field-kit {
@@ -242,6 +253,16 @@ h3 {
 
 .system-strip {
   background: rgba(255, 248, 232, 0.8);
+}
+
+.marketplace-band {
+  background: rgba(64, 99, 63, 0.11);
+}
+
+.hire-desk {
+  background:
+    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
+    url("assets/comic-night.png") center / cover no-repeat;
 }
 
 .section-copy {
@@ -256,7 +277,11 @@ h3 {
 .detail-box li,
 .timeline-step p,
 .system-card p,
-.system-card li {
+.system-card li,
+.flow-card li,
+.flow-card p,
+.applicant-card p,
+.post-panel dd {
   color: var(--muted);
 }
 
@@ -273,7 +298,18 @@ h3 {
   margin-top: 24px;
 }
 
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
 .system-card,
+.flow-card,
+.post-panel,
+.applicant-panel,
+.applicant-card,
 .quest-card,
 .platform-card,
 .timeline-step,
@@ -292,6 +328,107 @@ figure {
   grid-template-columns: auto 1fr;
   gap: 18px;
   padding: 22px;
+}
+
+.flow-card {
+  padding: 24px;
+  background: rgba(255, 248, 232, 0.86);
+}
+
+.flow-card span,
+.queue-count,
+.fit-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  border: 1px solid rgba(21, 17, 13, 0.16);
+  padding: 3px 9px;
+  background: rgba(243, 185, 76, 0.68);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.flow-card h3 {
+  margin-top: 14px;
+  font-size: clamp(1.45rem, 2vw, 2rem);
+}
+
+.flow-card ol {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-left: 22px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.hire-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(360px, 1.2fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.post-panel,
+.applicant-panel {
+  padding: 22px;
+}
+
+.post-panel dl {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0 22px;
+}
+
+.post-panel div {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.post-panel dt {
+  color: var(--rust);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.post-panel dd {
+  margin: 4px 0 0;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.applicant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.applicant-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.applicant-card h4 {
+  margin: 10px 0 4px;
+  font-family: "Space Grotesk", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.25rem;
+}
+
+.applicant-card button {
+  min-height: 36px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--gold);
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .system-card ul {
@@ -705,8 +842,14 @@ figcaption span {
 
   .timeline,
   .research-grid,
-  .system-grid {
+  .system-grid,
+  .flow-grid,
+  .hire-layout {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .hire-layout {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -723,7 +866,10 @@ figcaption span {
   }
 
   .workspace,
-  .system-grid {
+  .system-grid,
+  .flow-grid,
+  .hire-layout,
+  .applicant-grid {
     grid-template-columns: 1fr;
   }
 

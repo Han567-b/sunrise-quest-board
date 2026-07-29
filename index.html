@@ -7,7 +7,7 @@
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=DM+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -21,6 +21,8 @@
       </a>
       <nav aria-label="Primary navigation">
         <a href="#system">System</a>
+        <a href="#marketplace">Flow</a>
+        <a href="#hire">Hire Desk</a>
         <a href="#board">Board</a>
         <a href="#journey">Timeline</a>
         <a href="#research">MVP Use</a>
@@ -38,41 +40,105 @@
         <div class="hero-content">
           <p class="kicker">Sunrise Operational Extension</p>
           <h1 id="hero-title">Sunrise Quest Board</h1>
-          <p>A clean jump-out workspace for matching people to Sunrise event roles, showing trusted contributor history, and tracking quest progress from signup to proof.</p>
-          <a href="#board" class="scroll-cue">Open the Board</a>
+          <p>A two-sided recruiting and hiring workspace for Sunrise events: organizers post quests, contributors apply with Player Cards, and teams assign work based on fit, proof, availability, and trust.</p>
+          <div class="hero-actions">
+            <a href="#hire" class="scroll-cue">Post a Quest</a>
+            <a href="#board" class="secondary-cue">Find Work</a>
+          </div>
         </div>
       </section>
 
       <section class="system-strip" id="system" aria-labelledby="system-title">
         <div class="section-copy">
           <p class="eyebrow">Core System</p>
-          <h2 id="system-title">Two tools for organizing real community work.</h2>
+          <h2 id="system-title">A recruiting board plus a hiring desk.</h2>
         </div>
         <div class="system-grid">
           <article class="system-card primary-system">
             <span class="system-number">01</span>
             <div>
-              <h3>Smart Quest Matching</h3>
-              <p>Participants answer a short intake, then the board recommends roles by skill, availability, experience level, and event need.</p>
+              <h3>Recruit Contributors</h3>
+              <p>New participants browse open quests, filter by skill, see the expected commitment, and apply with a Player Card instead of a blank form.</p>
             </div>
             <ul>
-              <li>Simple categories for fast role discovery</li>
-              <li>Recommended quests plus free browsing</li>
-              <li>Clear duration, reward, and responsibility preview</li>
+              <li>Quest categories for solar, operations, digital support, and media</li>
+              <li>Fit score based on skills, level, availability, and readiness</li>
+              <li>Role preview with reward, proof required, and support contact</li>
             </ul>
           </article>
           <article class="system-card secondary-system">
             <span class="system-number">02</span>
             <div>
-              <h3>Trusted Player Cards</h3>
-              <p>Every completed quest builds visible proof: badges, notes, photos, credits, team history, and readiness for higher-level roles.</p>
+              <h3>Hire & Assign Teams</h3>
+              <p>Organizers compare applicants, review verified history, shortlist contributors, and assign a Quest Party with clear milestones.</p>
             </div>
             <ul>
-              <li>Skill tags and verified contribution history</li>
-              <li>Milestones, proof uploads, and completion review</li>
-              <li>Progression from newcomer to trusted lead</li>
+              <li>Applicant comparison by reliability, proof, notes, and role fit</li>
+              <li>Milestone handoffs before, during, and after the event</li>
+              <li>Completion review that updates badges, credits, and reputation</li>
             </ul>
           </article>
+        </div>
+      </section>
+
+      <section class="marketplace-band" id="marketplace" aria-labelledby="marketplace-title">
+        <div class="section-copy">
+          <p class="eyebrow">Marketplace Flow</p>
+          <h2 id="marketplace-title">How recruiting and hiring work together.</h2>
+          <p>The system is designed for both sides of the event: contributors need an easy way to find meaningful work, and organizers need a structured way to choose the right people without losing context.</p>
+        </div>
+        <div class="flow-grid">
+          <article class="flow-card">
+            <span>Contributor Side</span>
+            <h3>Find a quest that fits.</h3>
+            <ol>
+              <li>Create a Player Card with skills, interests, availability, and training proof.</li>
+              <li>Browse recommended quests or search by role type, reward, and schedule.</li>
+              <li>Apply with a short note explaining why the role fits your background.</li>
+              <li>Complete milestones and build visible reputation after review.</li>
+            </ol>
+          </article>
+          <article class="flow-card">
+            <span>Organizer Side</span>
+            <h3>Post, compare, assign.</h3>
+            <ol>
+              <li>Publish a quest with scope, time window, location, reward, and proof needed.</li>
+              <li>Review applicants through Player Cards instead of scattered messages.</li>
+              <li>Shortlist by trust signals, readiness, past work, and event-day availability.</li>
+              <li>Assign the Quest Party and track completion through the Captain's Log.</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="hire-desk" id="hire" aria-labelledby="hire-title">
+        <div class="section-copy">
+          <p class="eyebrow">Hire Desk</p>
+          <h2 id="hire-title">Organizer view for choosing the right crew.</h2>
+          <p>This is the part that makes the page feel like an actual hiring tool: open role details, applicant comparison, shortlisting, and assignment readiness.</p>
+        </div>
+        <div class="hire-layout">
+          <article class="post-panel">
+            <p class="eyebrow">Quest post</p>
+            <h3>Power Runner Crew Lead</h3>
+            <dl>
+              <div><dt>Event</dt><dd>September 26 Sunrise Fair</dd></div>
+              <div><dt>Shift</dt><dd>7:00 AM setup · 12:00 PM system watch · 10:30 PM breakdown</dd></div>
+              <div><dt>Reward</dt><dd>Quest credits + technical badge + stipend eligible</dd></div>
+              <div><dt>Proof</dt><dd>Battery log, safety photos, final energy notes</dd></div>
+            </dl>
+            <button class="primary-button" type="button">Publish draft quest</button>
+          </article>
+          <div class="applicant-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Applicant queue</p>
+                <h3>Compare candidates</h3>
+              </div>
+              <span class="queue-count">4 ready</span>
+            </div>
+            <div class="applicant-grid" id="applicantGrid"></div>
+          </div>
         </div>
       </section>
 
@@ -80,8 +146,8 @@
         <aside class="control-rail" aria-label="Quest controls">
           <div>
             <p class="eyebrow">Quest Match</p>
-            <h2 id="board-title">Find the right role for the next Sunrise event.</h2>
-            <p class="intro">A lightweight role-matching flow for contributors who need quick clarity: what the quest is, why it matters, what proof is needed, and how it builds their Player Card.</p>
+            <h2 id="board-title">Find work, apply, and build your record.</h2>
+            <p class="intro">Each quest card works like a role listing: it shows the scope, schedule, reward, proof required, and why the system thinks the contributor is a strong fit.</p>
           </div>
 
           <form class="matcher" id="matcher">
@@ -205,13 +271,20 @@
       </section>
     </main>
 
-    <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
+      <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
       <button class="close-button" type="button" data-close-panel aria-label="Close quest intake">Close</button>
       <p class="eyebrow">Quest intake</p>
-      <h2>Build a player card</h2>
+      <h2>Apply with a Player Card</h2>
       <form class="apply-form">
         <label for="name">Name</label>
         <input id="name" type="text" placeholder="Your name">
+        <label for="role">Role target</label>
+        <select id="role">
+          <option>Power Runner</option>
+          <option>Green Worker</option>
+          <option>Cloud Support</option>
+          <option>Story Capture</option>
+        </select>
         <label for="interests">Skills and interests</label>
         <textarea id="interests" rows="5" placeholder="Energy, media, logistics, community support..."></textarea>
         <label for="availability">Availability</label>
@@ -221,6 +294,8 @@
           <option>Remote support</option>
           <option>Post-event reporting</option>
         </select>
+        <label for="proof">Proof you can bring</label>
+        <textarea id="proof" rows="3" placeholder="Training completed, photos, prior event work, certificates..."></textarea>
         <button type="button" class="primary-button">Save draft card</button>
       </form>
     </section>

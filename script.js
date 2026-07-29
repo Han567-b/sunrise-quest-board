@@ -94,6 +94,41 @@ const research = [
   }
 ];
 
+const applicants = [
+  {
+    name: "Ari P.",
+    role: "Power Runner",
+    fit: 94,
+    rate: "Stipend eligible",
+    signals: ["Solar 101", "Site Safety", "2 event shifts"],
+    note: "Has microgrid training and can cover setup plus late breakdown."
+  },
+  {
+    name: "Maya C.",
+    role: "Cloud Support",
+    fit: 89,
+    rate: "Quest credits",
+    signals: ["Vendor support", "Map guide", "Remote ready"],
+    note: "Strong fit for digital routing, vendor questions, and schedule updates."
+  },
+  {
+    name: "JT R.",
+    role: "Green Worker",
+    fit: 86,
+    rate: "Credits + badge",
+    signals: ["Tool handling", "Build crew", "Morning shift"],
+    note: "Good operations applicant for tent setup, materials, and handoffs."
+  },
+  {
+    name: "Sam L.",
+    role: "Story Capture",
+    fit: 82,
+    rate: "Quest credits",
+    signals: ["Photo proof", "Interview notes", "Post-event"],
+    note: "Best for collecting evidence and turning completed work into Player Card proof."
+  }
+];
+
 const timeline = [
   ["1. Intake", "Create a Player Card with skills, interests, availability, and previous contribution proof."],
   ["2. Match", "Browse open quests or receive recommended roles based on level, skill fit, and event needs."],
@@ -107,6 +142,7 @@ const questDetail = document.querySelector("#questDetail");
 const matcher = document.querySelector("#matcher");
 const researchGrid = document.querySelector("#researchGrid");
 const timelineEl = document.querySelector("#timeline");
+const applicantGrid = document.querySelector("#applicantGrid");
 let currentView = "recommended";
 
 function selectedRewards() {
@@ -172,7 +208,7 @@ function renderDetail(quest) {
     <ul>
       ${quest.proof.map((item) => `<li>${item}</li>`).join("")}
     </ul>
-    <p><strong>Research pattern:</strong> ${quest.source}.</p>
+    <p><strong>Why this match works:</strong> ${quest.source}.</p>
   `;
 }
 
@@ -185,6 +221,22 @@ function renderResearch() {
       </div>
       <p><strong>What works:</strong> ${platform.lesson}</p>
       <p><strong>Quest Board move:</strong> ${platform.quest}</p>
+    </article>
+  `).join("");
+}
+
+function renderApplicants() {
+  if (!applicantGrid) return;
+  applicantGrid.innerHTML = applicants.map((person) => `
+    <article class="applicant-card">
+      <div>
+        <span class="fit-pill">${person.fit}% fit</span>
+        <h4>${person.name}</h4>
+        <p>${person.role} · ${person.rate}</p>
+      </div>
+      <div class="tag-row">${person.signals.map((signal) => `<span>${signal}</span>`).join("")}</div>
+      <p>${person.note}</p>
+      <button type="button">Shortlist</button>
     </article>
   `).join("");
 }
@@ -225,3 +277,4 @@ matcher.addEventListener("input", renderQuests);
 renderQuests();
 renderResearch();
 renderTimeline();
+renderApplicants();
