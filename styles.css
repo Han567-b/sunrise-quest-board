@@ -609,7 +609,7 @@ fieldset label {
 
 .asset-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
   gap: 18px;
   margin-top: 24px;
 }
@@ -629,9 +629,18 @@ figure img {
 }
 
 figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 14px;
   font-size: 1rem;
   font-weight: 900;
+}
+
+figcaption span {
+  color: var(--rust);
+  font-size: 0.78rem;
+  text-transform: uppercase;
 }
 
 .side-panel {
