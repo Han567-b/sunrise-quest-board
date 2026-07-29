@@ -842,7 +842,7 @@ figcaption span {
   top: 0;
   right: 0;
   z-index: 40;
-  width: min(430px, 100vw);
+  width: min(540px, 100vw);
   height: 100vh;
   padding: 32px;
   border-left: 1px solid var(--line);
@@ -872,6 +872,68 @@ figcaption span {
 .apply-form {
   display: grid;
   gap: 12px;
+}
+
+.panel-intro {
+  margin: -6px 0 18px;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.intake-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.intake-summary article,
+.panel-note {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px;
+}
+
+.intake-summary span {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border: 1px solid rgba(21, 17, 13, 0.16);
+  padding: 2px 7px;
+  color: var(--rust);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.intake-summary strong,
+.panel-note strong,
+.panel-note span {
+  display: block;
+}
+
+.intake-summary strong {
+  margin: 10px 0 6px;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.intake-summary p,
+.panel-note span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.42;
+}
+
+.compact-fieldset {
+  margin-top: 0;
+}
+
+.panel-note {
+  display: grid;
+  gap: 5px;
 }
 
 .scrim {
@@ -964,6 +1026,14 @@ figcaption span {
   .system-card ul {
     grid-column: 1;
   }
+
+  .side-panel {
+    padding: 24px 18px;
+  }
+
+  .intake-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Current Quest Board interface */
@@ -973,7 +1043,7 @@ figcaption span {
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   background:
-    linear-gradient(90deg, rgba(21, 17, 13, 0.78), rgba(21, 17, 13, 0.38)),
+    linear-gradient(90deg, rgba(21, 17, 13, 0.5), rgba(21, 17, 13, 0.12)),
     url("assets/comic-hero.png") center 42% / cover no-repeat;
 }
 
@@ -981,8 +1051,8 @@ figcaption span {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.54)),
-    radial-gradient(circle at 76% 24%, rgba(243, 185, 76, 0.2), transparent 28%);
+    linear-gradient(180deg, rgba(255, 248, 232, 0.04), rgba(243, 230, 210, 0.34)),
+    radial-gradient(circle at 76% 24%, rgba(243, 185, 76, 0.22), transparent 28%);
 }
 
 .hero-inner {
@@ -1044,8 +1114,8 @@ figcaption span {
 }
 
 .hero-panel {
-  border: 1px solid rgba(255, 248, 232, 0.3);
-  background: rgba(21, 17, 13, 0.72);
+  border: 1px solid rgba(21, 17, 13, 0.16);
+  background: rgba(255, 248, 232, 0.9);
   box-shadow: var(--shadow);
   padding: clamp(18px, 3vw, 28px);
   backdrop-filter: blur(12px);
@@ -1054,14 +1124,14 @@ figcaption span {
 .hero-panel strong {
   display: block;
   margin-bottom: 8px;
-  color: var(--gold);
+  color: var(--ink);
   font-family: "Space Grotesk", "DM Sans", sans-serif;
   font-size: clamp(2rem, 4vw, 3.4rem);
 }
 
 .hero-panel > span {
   display: block;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
   font-weight: 700;
   line-height: 1.5;
 }
@@ -1074,7 +1144,7 @@ figcaption span {
 }
 
 .hero-metrics div {
-  border-top: 1px solid rgba(255, 248, 232, 0.22);
+  border-top: 1px solid var(--line);
   padding-top: 12px;
 }
 
@@ -1084,12 +1154,12 @@ figcaption span {
 }
 
 .hero-metrics b {
-  color: #fff;
+  color: var(--rust);
   font-size: 1.32rem;
 }
 
 .hero-metrics span {
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--muted);
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -1110,14 +1180,14 @@ figcaption span {
 
 .model-section {
   background:
-    linear-gradient(rgba(21, 17, 13, 0.88), rgba(21, 17, 13, 0.9)),
+    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
     url("assets/comic-night.png") center / cover no-repeat;
-  color: #fff7dc;
+  color: var(--ink);
 }
 
 .model-section .section-copy p,
 .model-section .pattern-grid p {
-  color: rgba(255, 248, 232, 0.74);
+  color: var(--muted);
 }
 
 .mvp-section {
@@ -1147,8 +1217,8 @@ figcaption span {
 }
 
 .model-section .pattern-grid article {
-  border-color: rgba(255, 248, 232, 0.18);
-  background: rgba(255, 248, 232, 0.08);
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .role-card span,
@@ -1165,8 +1235,8 @@ figcaption span {
 }
 
 .model-section .pattern-grid span {
-  border-color: rgba(243, 185, 76, 0.46);
-  color: var(--gold);
+  border-color: rgba(21, 17, 13, 0.16);
+  color: var(--rust);
 }
 
 .role-card h3,
@@ -1182,11 +1252,35 @@ figcaption span {
 
 .role-card p,
 .role-card li,
+.role-details dd,
 .reward-grid p,
 .pattern-grid p {
   color: var(--muted);
   font-weight: 750;
   line-height: 1.55;
+}
+
+.role-details {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+}
+
+.role-details div {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.role-details dt {
+  color: var(--rust);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.role-details dd {
+  margin: 4px 0 0;
 }
 
 .role-card ul {

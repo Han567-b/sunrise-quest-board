@@ -76,35 +76,35 @@ const quests = [
 const applicants = [
   {
     name: "Jordan K.",
-    role: "Power Runner",
+    role: "Power Runner candidate",
     fit: 94,
     reward: "Stipend eligible",
-    signals: ["Solar 101", "Site Safety", "2 setup shifts"],
-    note: "Strong candidate for solar hardware support because the proof history already matches technical setup work."
+    signals: ["Solar 101", "Battery checks", "Cable safety"],
+    note: "Good for the solar hardware shift: can help unload panels, check batteries, and keep a simple power log."
   },
   {
     name: "Nia R.",
-    role: "Green Worker",
+    role: "Green Worker candidate",
     fit: 91,
     reward: "Quest credits",
-    signals: ["Tent setup", "Material runs", "Crew standup"],
-    note: "Best for infrastructure setup and event-day logistics because availability covers the highest-pressure window."
+    signals: ["Tent setup", "Material runs", "Morning setup"],
+    note: "Good for infrastructure setup: can move supplies, build the site layout, and support quick crew handoffs."
   },
   {
     name: "Sam L.",
-    role: "Cloud Support",
+    role: "Cloud Support candidate",
     fit: 88,
     reward: "Badge progress",
     signals: ["Remote admin", "Status notes", "Proof folders"],
-    note: "Good fit for remote operations because the work is documentation-heavy and time-sensitive."
+    note: "Good for the remote desk: can organize updates, collect proof, and keep the event record clean."
   },
   {
     name: "Eli M.",
-    role: "Green Worker",
+    role: "Green Worker candidate",
     fit: 83,
     reward: "Credits + badge",
     signals: ["Breakdown", "Tools", "Final sweep"],
-    note: "Useful late-night crew member for site reset, especially if the board needs backup coverage."
+    note: "Good for late-night breakdown: can pack gear, check missing items, and help reset the site after guests leave."
   }
 ];
 
@@ -163,10 +163,10 @@ const readinessByLevel = {
     note: "Ready for higher-trust roles like battery watch, shift handoffs, and live troubleshooting."
   },
   4: {
-    percent: 96,
+    percent: 100,
     title: "Quest Party Lead",
-    meta: "Level 4 readiness · lead support · 52 credits · 8 badges",
-    note: "Ready to coordinate a small team, review proof, and help update the next playbook."
+    meta: "Level 4 readiness · lead-ready · 52 credits · 8 badges",
+    note: "Fully ready to coordinate a small Quest Party, review proof, and help update the next playbook."
   }
 };
 
@@ -211,7 +211,7 @@ function filteredQuests() {
     .filter((quest) => quest.rewards.some((reward) => rewards.includes(reward)))
     .map((quest) => ({
       ...quest,
-      liveScore: Math.max(42, Math.min(99, quest.score + (level - quest.level) * 4))
+      liveScore: Math.max(42, Math.min(100, quest.score + (level - quest.level) * 4))
     }))
     .sort((a, b) => b.liveScore - a.liveScore);
 }
@@ -321,7 +321,7 @@ function renderApplicants() {
       </div>
       <div class="tag-row">${person.signals.map((signal) => `<span>${signal}</span>`).join("")}</div>
       <p>${person.note}</p>
-      <button type="button" class="shortlist-button">Shortlist</button>
+      <button type="button" class="shortlist-button">Invite to quest</button>
     </article>
   `).join("");
 }
@@ -390,14 +390,16 @@ if (publishQuest) {
 
 document.addEventListener("click", (event) => {
   if (!event.target.classList.contains("shortlist-button")) return;
-  event.target.textContent = "Shortlisted";
+  event.target.textContent = "Invite saved";
   event.target.disabled = true;
 });
 
 if (saveApplication) {
   saveApplication.addEventListener("click", () => {
+    const role = document.querySelector("#role")?.value || "selected role";
+    const availability = document.querySelector("#availability")?.value || "selected availability";
     if (applicationStatus) {
-      applicationStatus.textContent = "Draft Player Card saved for review. It can be matched to open quests next.";
+      applicationStatus.textContent = `Draft Player Card saved for ${role}. Availability: ${availability}. Next step: lead review and quest match.`;
     }
   });
 }
