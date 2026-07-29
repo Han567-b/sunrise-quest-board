@@ -29,9 +29,9 @@ const quests = [
     role: "Cloud Support",
     level: 1,
     rewards: ["credits", "badge"],
-    duration: "Pre-event + event day remote",
+    duration: "September 26 · remote support",
     score: 89,
-    summary: "Track status updates, route questions, update digital notes, and keep remote documentation useful for on-site teams.",
+    summary: "Track September 26 status updates, route questions, update digital notes, and keep remote documentation useful for on-site teams.",
     proof: ["Support log", "Issue routing notes", "Updated onboarding records"],
     reason: "Makes remote admin visible as real work instead of invisible background help."
   },
@@ -65,7 +65,7 @@ const quests = [
     role: "Cloud Support",
     level: 2,
     rewards: ["credits", "badge"],
-    duration: "Post-event",
+    duration: "After September 26",
     score: 82,
     summary: "Collect quest proof, organize photos and logs, prepare feedback notes, and compare expected duties with what happened on site.",
     proof: ["Proof folder", "Feedback summary", "Expectation vs. reality notes"],
@@ -110,9 +110,9 @@ const applicants = [
 
 const research = [
   {
-    name: "Readiness by September 20",
-    focus: "Before event week",
-    lesson: "The board makes preparation visible: who accepted a role, who read the guide, and who still needs support.",
+    name: "Readiness before event day",
+    focus: "Before September 26",
+    lesson: "The board makes preparation visible: who accepted a role, who read the guide, and who still needs support before the fair.",
     move: "This supports Adam's 100% readiness target before the September 26 Sunrise Fair."
   },
   {
@@ -139,7 +139,7 @@ const timeline = [
   ["1. Intake", "Contributor creates a Player Card with target role, skills, proof, reward preference, and availability."],
   ["2. Match", "Quest Board recommends roles by skill focus, experience level, and reward type."],
   ["3. Shortlist", "Event leads compare applicants and choose the best-fit Quest Party for the September test."],
-  ["4. Prepare", "Assigned contributors read the comic guide/manual and confirm readiness before September 20."],
+  ["4. Prepare", "Assigned contributors read the comic guide/manual and confirm readiness before September 26."],
   ["5. Execute & Verify", "Crews complete event-day work, submit proof, earn credits or badge progress, and feed learning back into the system."]
 ];
 
