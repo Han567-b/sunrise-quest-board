@@ -556,6 +556,27 @@ input[type="range"] {
   text-transform: uppercase;
 }
 
+.level-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.level-steps button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.level-steps button.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--gold);
+}
+
 fieldset {
   display: grid;
   gap: 8px;
@@ -942,5 +963,342 @@ figcaption span {
 
   .system-card ul {
     grid-column: 1;
+  }
+}
+
+/* Current Quest Board interface */
+.hero {
+  position: relative;
+  min-height: min(760px, calc(100vh - 69px));
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, rgba(21, 17, 13, 0.78), rgba(21, 17, 13, 0.38)),
+    url("assets/comic-hero.png") center 42% / cover no-repeat;
+}
+
+.hero .hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.54)),
+    radial-gradient(circle at 76% 24%, rgba(243, 185, 76, 0.2), transparent 28%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(280px, 390px);
+  align-items: end;
+  gap: clamp(24px, 5vw, 70px);
+  width: min(1180px, calc(100% - 36px));
+  min-height: inherit;
+  margin: 0 auto;
+  padding: clamp(70px, 10vw, 150px) 0 clamp(44px, 7vw, 90px);
+  color: #fff;
+}
+
+.hero-copy h1 {
+  max-width: 820px;
+  color: #fff7dc;
+  font-size: clamp(3rem, 8vw, 7.2rem);
+  letter-spacing: 0;
+}
+
+.hero-lede {
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1.05rem, 1.7vw, 1.36rem);
+  font-weight: 700;
+  line-height: 1.58;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.primary-link,
+.secondary-link {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gold);
+  padding: 0 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.primary-link {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.secondary-link {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff7dc;
+}
+
+.hero-panel {
+  border: 1px solid rgba(255, 248, 232, 0.3);
+  background: rgba(21, 17, 13, 0.72);
+  box-shadow: var(--shadow);
+  padding: clamp(18px, 3vw, 28px);
+  backdrop-filter: blur(12px);
+}
+
+.hero-panel strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold);
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.hero-panel > span {
+  display: block;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.hero-metrics div {
+  border-top: 1px solid rgba(255, 248, 232, 0.22);
+  padding-top: 12px;
+}
+
+.hero-metrics b,
+.hero-metrics span {
+  display: block;
+}
+
+.hero-metrics b {
+  color: #fff;
+  font-size: 1.32rem;
+}
+
+.hero-metrics span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.roles-section,
+.model-section,
+.reward-section,
+.mvp-section {
+  padding: clamp(42px, 6vw, 88px) clamp(16px, 5vw, 58px);
+  border-bottom: 1px solid var(--line);
+}
+
+.roles-section,
+.reward-section {
+  background: rgba(255, 248, 232, 0.82);
+}
+
+.model-section {
+  background:
+    linear-gradient(rgba(21, 17, 13, 0.88), rgba(21, 17, 13, 0.9)),
+    url("assets/comic-night.png") center / cover no-repeat;
+  color: #fff7dc;
+}
+
+.model-section .section-copy p,
+.model-section .pattern-grid p {
+  color: rgba(255, 248, 232, 0.74);
+}
+
+.mvp-section {
+  background: rgba(64, 99, 63, 0.1);
+}
+
+.role-grid,
+.pattern-grid,
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.pattern-grid {
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+.role-card,
+.pattern-grid article,
+.reward-grid article {
+  border: 1px solid var(--line);
+  background: rgba(255, 248, 232, 0.92);
+  box-shadow: var(--shadow);
+  padding: clamp(18px, 2.6vw, 28px);
+}
+
+.model-section .pattern-grid article {
+  border-color: rgba(255, 248, 232, 0.18);
+  background: rgba(255, 248, 232, 0.08);
+}
+
+.role-card span,
+.pattern-grid span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border: 1px solid rgba(21, 17, 13, 0.18);
+  padding: 3px 9px;
+  color: var(--rust);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.model-section .pattern-grid span {
+  border-color: rgba(243, 185, 76, 0.46);
+  color: var(--gold);
+}
+
+.role-card h3,
+.reward-grid h3 {
+  margin-top: 16px;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+.pattern-grid h3 {
+  margin-top: 18px;
+  font-size: 1.28rem;
+}
+
+.role-card p,
+.role-card li,
+.reward-grid p,
+.pattern-grid p {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.role-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding-left: 18px;
+}
+
+.role-card.solar {
+  border-top: 5px solid var(--gold);
+}
+
+.role-card.ops {
+  border-top: 5px solid var(--green);
+}
+
+.role-card.cloud {
+  border-top: 5px solid #426f91;
+}
+
+.topbar nav {
+  max-width: min(760px, 60vw);
+  overflow-x: auto;
+}
+
+.topbar nav::-webkit-scrollbar {
+  display: none;
+}
+
+.action-status {
+  min-height: 22px;
+  margin: 12px 0 0;
+  color: var(--green);
+  font-weight: 900;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.applicant-card button:disabled {
+  background: var(--green);
+  color: #fff;
+}
+
+.progress-bar span {
+  transition: width 180ms ease;
+}
+
+.quest-card {
+  border-radius: 0;
+}
+
+.side-panel {
+  overflow-y: auto;
+}
+
+@media (max-width: 1180px) {
+  .hero-inner,
+  .role-grid,
+  .pattern-grid,
+  .reward-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .hero-panel {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 820px) {
+  .hero {
+    min-height: auto;
+  }
+
+  .hero-inner,
+  .role-grid,
+  .pattern-grid,
+  .reward-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-inner {
+    width: min(100% - 28px, 680px);
+    padding: 48px 0;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.6rem, 14vw, 4.8rem);
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    gap: 12px;
+  }
+
+  .topbar nav {
+    max-width: 100%;
+  }
+
+  .primary-link,
+  .secondary-link,
+  .ghost-button {
+    width: 100%;
+  }
+
+  .workspace {
+    min-height: auto;
   }
 }

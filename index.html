@@ -7,105 +7,144 @@
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="#board" aria-label="Sunrise Quest Board home">
-        <span class="brand-mark">▰</span>
+      <a class="brand" href="#top" aria-label="Sunrise Quest Board home">
+        <span class="brand-mark">SQ</span>
         <span>
           <strong>Sunrise Quest Board</strong>
-          <small>Operational companion</small>
+          <small>Greenworker Quest System MVP</small>
         </span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#system">System</a>
-        <a href="#marketplace">Flow</a>
+        <a href="#roles">Roles</a>
+        <a href="#model">Model</a>
+        <a href="#rewards">Rewards</a>
         <a href="#hire">Hire Desk</a>
-        <a href="#board">Board</a>
-        <a href="#journey">Timeline</a>
-        <a href="#research">MVP Use</a>
+        <a href="#board">Quest Board</a>
+        <a href="#mvp">MVP Test</a>
         <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Full Comic</a>
       </nav>
-      <div class="top-actions">
-        <button class="ghost-button" type="button" data-open-panel="applyPanel">Join a Quest</button>
-      </div>
+      <button class="ghost-button" type="button" data-open-panel="applyPanel">Apply</button>
     </header>
 
-    <main>
-      <section class="comic-hero" aria-labelledby="hero-title">
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
         <div class="hero-overlay"></div>
-        <div class="hero-content">
-          <p class="kicker">Sunrise Operational Extension</p>
-          <h1 id="hero-title">Sunrise Quest Board</h1>
-          <p>A two-sided recruiting and hiring workspace for Sunrise events: organizers post quests, contributors apply with Player Cards, and teams assign work based on fit, proof, availability, and trust.</p>
-          <div class="hero-actions">
-            <a href="#hire" class="scroll-cue">Post a Quest</a>
-            <a href="#board" class="secondary-cue">Find Work</a>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="kicker">Target Event · September 26 Sunrise Fair</p>
+            <h1 id="hero-title">Recruit, match, and assign Greenworkers.</h1>
+            <p class="hero-lede">A polished jump-out marketplace for the Sunrise comic site. Event leads can publish role-based quests, contributors can apply with Player Cards, and the system can compare readiness, rewards, proof, and role fit before the fair.</p>
+            <div class="hero-actions">
+              <a href="#hire" class="primary-link">Post a Quest</a>
+              <a href="#board" class="secondary-link">Browse Roles</a>
+            </div>
           </div>
+          <aside class="hero-panel" aria-label="MVP status">
+            <p class="eyebrow">MVP Deadline</p>
+            <strong>September 10</strong>
+            <span>Final comic guides and onboarding manuals ready for Greenworkers.</span>
+            <div class="hero-metrics">
+              <div><b>3</b><span>character roles</span></div>
+              <div><b>100%</b><span>readiness target</span></div>
+              <div><b>9/26</b><span>live test</span></div>
+            </div>
+          </aside>
         </div>
       </section>
 
-      <section class="system-strip" id="system" aria-labelledby="system-title">
+      <section class="roles-section" id="roles" aria-labelledby="roles-title">
         <div class="section-copy">
-          <p class="eyebrow">Core System</p>
-          <h2 id="system-title">A recruiting board plus a hiring desk.</h2>
+          <p class="eyebrow">Character Roles</p>
+          <h2 id="roles-title">The three MVP roles from the project one-pager.</h2>
+          <p>These are the roles the September test is actually built around. Each role gets a comic-book narrative, an onboarding character sheet, clear deliverables, and a review path after the event.</p>
         </div>
-        <div class="system-grid">
-          <article class="system-card primary-system">
-            <span class="system-number">01</span>
-            <div>
-              <h3>Recruit Contributors</h3>
-              <p>New participants browse open quests, filter by skill, see the expected commitment, and apply with a Player Card instead of a blank form.</p>
-            </div>
+        <div class="role-grid">
+          <article class="role-card solar">
+            <span>Solar / Technical</span>
+            <h3>Power Runners</h3>
+            <p>Manage energy distribution, solar hardware, battery readiness, cable safety, and power stability across the event site.</p>
             <ul>
-              <li>Quest categories for solar, operations, digital support, and media</li>
-              <li>Fit score based on skills, level, availability, and readiness</li>
-              <li>Role preview with reward, proof required, and support contact</li>
+              <li>Best for: solar, electrical, equipment, safety</li>
+              <li>Proof: battery logs, setup photos, power notes</li>
+              <li>Reports through: technical lead and Captain's Log</li>
             </ul>
           </article>
-          <article class="system-card secondary-system">
-            <span class="system-number">02</span>
-            <div>
-              <h3>Hire & Assign Teams</h3>
-              <p>Event leads compare applicants, review verified history, shortlist contributors, and assign a Quest Party with clear milestones.</p>
-            </div>
+          <article class="role-card ops">
+            <span>Operations</span>
+            <h3>Green Workers</h3>
+            <p>Handle physical infrastructure: tent setup, site logistics, vendor support, material movement, and breakdown.</p>
             <ul>
-              <li>Applicant comparison by reliability, proof, notes, and role fit</li>
-              <li>Milestone handoffs before, during, and after the event</li>
-              <li>Completion review that updates badges, credits, and reputation</li>
+              <li>Best for: setup, logistics, tools, guest flow</li>
+              <li>Proof: setup checklist, handoff notes, final sweep</li>
+              <li>Reports through: event director and crew standups</li>
+            </ul>
+          </article>
+          <article class="role-card cloud">
+            <span>Digital / Remote</span>
+            <h3>Cloud Support</h3>
+            <p>Support on-site teams from a distance with schedule updates, digital administration, documentation, and communication routing.</p>
+            <ul>
+              <li>Best for: documentation, maps, comms, admin</li>
+              <li>Proof: support log, issue notes, uploaded records</li>
+              <li>Reports through: remote dashboard and status queue</li>
             </ul>
           </article>
         </div>
       </section>
 
-      <section class="marketplace-band" id="marketplace" aria-labelledby="marketplace-title">
+      <section class="model-section" id="model" aria-labelledby="model-title">
         <div class="section-copy">
-          <p class="eyebrow">Marketplace Flow</p>
-          <h2 id="marketplace-title">How recruiting and hiring work together.</h2>
-          <p>The system is designed for both sides of the event: contributors need an easy way to find meaningful work, and organizers need a structured way to choose the right people without losing context.</p>
+          <p class="eyebrow">Marketplace Model</p>
+          <h2 id="model-title">Four marketplace patterns, rewritten for Sunrise.</h2>
+          <p>This is where the platform research becomes product design. The page should feel familiar to people who have used service marketplaces, but the language stays focused on community work, verified contribution, and event readiness.</p>
         </div>
-        <div class="flow-grid">
-          <article class="flow-card">
-            <span>Contributor Side</span>
-            <h3>Find a quest that fits.</h3>
-            <ol>
-              <li>Create a Player Card with skills, interests, availability, and training proof.</li>
-              <li>Browse recommended quests or search by role type, reward, and schedule.</li>
-              <li>Apply with a short note explaining why the role fits your background.</li>
-              <li>Complete milestones and build visible reputation after review.</li>
-            </ol>
+        <div class="pattern-grid">
+          <article>
+            <span>01</span>
+            <h3>Fast task intake</h3>
+            <p>Instead of making people read a long manual first, the board starts with role category, date, location, expected shift, and what needs to be done.</p>
           </article>
-          <article class="flow-card">
-            <span>Organizer Side</span>
-            <h3>Post, compare, assign.</h3>
-            <ol>
-              <li>Publish a quest with scope, time window, location, reward, and proof needed.</li>
-              <li>Review applicants through Player Cards instead of scattered messages.</li>
-              <li>Shortlist by trust signals, readiness, past work, and event-day availability.</li>
-              <li>Assign the Quest Party and track completion through the Captain's Log.</li>
-            </ol>
+          <article>
+            <span>02</span>
+            <h3>Guided comparison</h3>
+            <p>Applicants are compared by fit, availability, proof, skill tags, and readiness, so leads can choose people with context instead of guessing.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Packaged skill identity</h3>
+            <p>Player Cards package a contributor's skills, badges, prior work, and interests so they are discoverable for the right quest.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Milestone-based work</h3>
+            <p>Every quest has checkpoints: accept, prepare, standup, execute, submit proof, review, and update reputation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="reward-section" id="rewards" aria-labelledby="rewards-title">
+        <div class="section-copy">
+          <p class="eyebrow">Reward Types</p>
+          <h2 id="rewards-title">What the three reward filters mean.</h2>
+          <p>These are not decoration. They decide what type of opportunity a contributor is looking for and how the completion will be recorded after the event.</p>
+        </div>
+        <div class="reward-grid">
+          <article>
+            <h3>Quest Credits</h3>
+            <p>Internal contribution points. Credits show how much verified work someone has completed and can support future role recommendations.</p>
+          </article>
+          <article>
+            <h3>Stipend Eligible</h3>
+            <p>Marks quests that may qualify for paid support or program compensation. These roles usually need higher trust, clearer proof, and lead approval.</p>
+          </article>
+          <article>
+            <h3>Badge Progress</h3>
+            <p>Tracks skill growth. Completing a quest can unlock badges such as Solar 101, Site Safety, Crew Standup, or Documentation Support.</p>
           </article>
         </div>
       </section>
@@ -113,44 +152,28 @@
       <section class="hire-desk" id="hire" aria-labelledby="hire-title">
         <div class="section-copy">
           <p class="eyebrow">Hire Desk</p>
-          <h2 id="hire-title">Crew lead view for choosing the right support team.</h2>
-          <p>This is the part that makes the page feel like an actual hiring tool: open role details, applicant comparison, shortlisting, and assignment readiness.</p>
-        </div>
-        <div class="crew-leads" aria-label="Sunrise crew leads">
-          <article>
-            <span>Event Director</span>
-            <strong>Maya Chen</strong>
-            <p>Reviews operations support, volunteer flow, and event-day coordination roles.</p>
-          </article>
-          <article>
-            <span>Solar Tech Lead</span>
-            <strong>Marcus Johnson</strong>
-            <p>Reviews solar micro-grid support, battery monitoring, cable safety, and power-down roles.</p>
-          </article>
-          <article>
-            <span>Refreshments Coordinator</span>
-            <strong>Rosa Delgado</strong>
-            <p>Reviews refreshments station support, vendor care, food safety, and guest service roles.</p>
-          </article>
+          <h2 id="hire-title">Post a role, compare applicants, assign the crew.</h2>
+          <p>This section models the organizer side of the platform: leads create a quest post, review the applicant queue, shortlist candidates, then assign a Quest Party for the September test.</p>
         </div>
         <div class="hire-layout">
           <article class="post-panel">
-            <p class="eyebrow">Quest post</p>
-            <h3>Solar Micro-Grid Support</h3>
+            <p class="eyebrow">Draft Quest</p>
+            <h3>Power Runner · Solar Hardware Support</h3>
             <dl>
-              <div><dt>Event</dt><dd>September 26 Sunrise Fair</dd></div>
-              <div><dt>Reports to</dt><dd>Marcus Johnson · Solar Tech Lead</dd></div>
-              <div><dt>Shift</dt><dd>6:00 AM micro-grid unload · 9:00 AM power-up · 10:30 PM breakdown</dd></div>
-              <div><dt>Reward</dt><dd>Quest credits + solar operations badge + stipend eligible</dd></div>
-              <div><dt>Proof</dt><dd>Battery log, safety photos, final energy notes</dd></div>
+              <div><dt>Target event</dt><dd>September 26 Sunrise Fair</dd></div>
+              <div><dt>Role family</dt><dd>Power Runners · Solar / Technical</dd></div>
+              <div><dt>Shift</dt><dd>6:00 AM setup · 9:00 AM power-up · 10:30 PM breakdown</dd></div>
+              <div><dt>Reward</dt><dd>Quest credits + badge progress + stipend eligible</dd></div>
+              <div><dt>Proof required</dt><dd>Battery log, cable safety photos, end-of-night power notes</dd></div>
             </dl>
-            <button class="primary-button" type="button">Publish draft quest</button>
+            <button class="primary-button" type="button" id="publishQuest">Publish draft quest</button>
+            <p class="action-status" id="publishStatus" aria-live="polite"></p>
           </article>
           <div class="applicant-panel">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Applicant queue</p>
-                <h3>Compare candidates</h3>
+                <h3>Shortlist candidates</h3>
               </div>
               <span class="queue-count">4 ready</span>
             </div>
@@ -162,27 +185,33 @@
       <section class="workspace" id="board" aria-labelledby="board-title">
         <aside class="control-rail" aria-label="Quest controls">
           <div>
-            <p class="eyebrow">Quest Match</p>
-            <h2 id="board-title">Find work, apply, and build your record.</h2>
-            <p class="intro">Each quest card works like a role listing: it shows the scope, schedule, reward, proof required, and why the system thinks the contributor is a strong fit.</p>
+            <p class="eyebrow">Contributor Search</p>
+            <h2 id="board-title">Find quests by role fit and reward type.</h2>
+            <p class="intro">The controls work like a service-platform search: choose the skill area, set experience level, select rewards, then review recommended quests.</p>
           </div>
 
           <form class="matcher" id="matcher">
             <label for="skill">Skill focus</label>
             <select id="skill" name="skill">
               <option value="all">Any skill</option>
-              <option value="energy">Energy systems</option>
-              <option value="logistics">Logistics</option>
-              <option value="media">Media</option>
-              <option value="community">Community support</option>
+              <option value="energy">Solar / technical</option>
+              <option value="logistics">Operations / logistics</option>
+              <option value="media">Story / documentation</option>
+              <option value="community">Cloud / digital support</option>
             </select>
 
             <label for="experience">Experience level</label>
             <input id="experience" name="experience" type="range" min="1" max="4" value="2">
-            <div class="range-labels" aria-hidden="true">
+            <div class="range-labels" aria-live="polite">
               <span>New</span>
               <strong id="experienceValue">Level 2</strong>
               <span>Lead</span>
+            </div>
+            <div class="level-steps" role="group" aria-label="Experience level shortcuts">
+              <button type="button" data-level="1">L1</button>
+              <button type="button" data-level="2" class="active">L2</button>
+              <button type="button" data-level="3">L3</button>
+              <button type="button" data-level="4">L4</button>
             </div>
 
             <fieldset>
@@ -194,8 +223,8 @@
           </form>
 
           <div class="rail-note">
-            <strong>Matching logic</strong>
-            <span>Hybrid discovery: people can browse freely while the system highlights good starting quests.</span>
+            <strong>Why these inputs matter</strong>
+            <span>They shape the match score, the applicant queue, and the Player Card record after completion.</span>
           </div>
         </aside>
 
@@ -210,65 +239,64 @@
               <button type="button" data-view="all">All</button>
             </div>
           </div>
-
           <div class="quest-grid" id="questGrid"></div>
         </section>
 
         <aside class="profile-panel" aria-label="Player card and progress">
           <div class="player-card">
-            <div class="avatar">AP</div>
+            <div class="avatar">GW</div>
             <div>
-              <p class="eyebrow">Player card</p>
-              <h2 id="playerTitle">Solar Support Candidate</h2>
+              <p class="eyebrow">Player Card Preview</p>
+              <h2 id="playerTitle">Trained Greenworker</h2>
               <p id="playerMeta">Level 2 contributor · 18 credits · 3 badges</p>
             </div>
           </div>
 
           <div class="progress-wrap">
             <div class="progress-title">
-              <span>Level 3 readiness</span>
+              <span id="readinessLabel">Quest readiness</span>
               <strong id="levelPercent">68%</strong>
             </div>
-            <div class="progress-bar" aria-label="Level 3 readiness">
+            <div class="progress-bar" aria-label="Quest readiness">
               <span id="levelBar" style="width: 68%"></span>
             </div>
+            <p id="readinessNote">Ready for guided event-day support with lead review.</p>
           </div>
 
           <div class="badges" aria-label="Earned badges">
             <span>Solar 101</span>
             <span>Site Safety</span>
-            <span>Team Standup</span>
+            <span>Crew Standup</span>
           </div>
 
           <div class="detail-box" id="questDetail">
             <p class="eyebrow">Selected quest</p>
             <h3>Choose a quest</h3>
-            <p>Select a card to see responsibilities, proof needed, and the platform idea behind the feature.</p>
+            <p>Select a card to see responsibilities, proof needed, and why the match makes sense.</p>
           </div>
         </aside>
       </section>
 
       <section class="journey-band" id="journey" aria-labelledby="journey-title">
         <div class="section-copy">
-          <p class="eyebrow">Shared Timeline</p>
-          <h2 id="journey-title">From onboarding to post-event proof.</h2>
-          <p>The meeting notes emphasized player cards, role timelines, shared standups, remote support, and post-event documentation. This flow turns that into a clean participant journey.</p>
+          <p class="eyebrow">Quest Lifecycle</p>
+          <h2 id="journey-title">From onboarding to post-event review.</h2>
+          <p>The point of this section is to make the September test measurable: recruited Greenworkers should know what to read, what role they hold, what to do on site, and what proof to submit after the fair.</p>
         </div>
         <div class="timeline" id="timeline"></div>
       </section>
 
-      <section class="split-band" id="research" aria-labelledby="research-title">
+      <section class="mvp-section" id="mvp" aria-labelledby="mvp-title">
         <div class="section-copy">
-          <p class="eyebrow">MVP Use</p>
-          <h2 id="research-title">How this page supports the September Quest Board test.</h2>
-          <p>This section turns the project documents into practical product pieces: role clarity before the event, live coordination during the event, and proof after the event.</p>
+          <p class="eyebrow">MVP Test Plan</p>
+          <h2 id="mvp-title">Why this page exists for September.</h2>
+          <p>The page is not just a mockup. It is a test surface for role clarity, volunteer readiness, and expectation-versus-reality feedback after the September 26 Sunrise Fair.</p>
         </div>
         <div class="research-grid" id="researchGrid"></div>
       </section>
-
     </main>
 
-      <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
+    <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
       <button class="close-button" type="button" data-close-panel aria-label="Close quest intake">Close</button>
       <p class="eyebrow">Quest intake</p>
       <h2>Apply with a Player Card</h2>
@@ -277,23 +305,23 @@
         <input id="name" type="text" placeholder="Your name">
         <label for="role">Role target</label>
         <select id="role">
-          <option>Solar Micro-Grid Support</option>
-          <option>Event Operations Support</option>
-          <option>Refreshments Station Support</option>
-          <option>Breakdown Crew</option>
+          <option>Power Runner</option>
+          <option>Green Worker</option>
+          <option>Cloud Support</option>
         </select>
         <label for="interests">Skills and interests</label>
-        <textarea id="interests" rows="5" placeholder="Energy, media, logistics, community support..."></textarea>
+        <textarea id="interests" rows="4" placeholder="Solar hardware, logistics, documentation, remote support..."></textarea>
         <label for="availability">Availability</label>
         <select id="availability">
-          <option>Event day</option>
-          <option>Pre-event prep</option>
+          <option>Pre-event onboarding</option>
+          <option>Event day setup</option>
           <option>Remote support</option>
-          <option>Post-event reporting</option>
+          <option>Post-event feedback</option>
         </select>
         <label for="proof">Proof you can bring</label>
         <textarea id="proof" rows="3" placeholder="Training completed, photos, prior event work, certificates..."></textarea>
-        <button type="button" class="primary-button">Save draft card</button>
+        <button type="button" class="primary-button" id="saveApplication">Save draft card</button>
+        <p class="action-status" id="applicationStatus" aria-live="polite"></p>
       </form>
     </section>
 

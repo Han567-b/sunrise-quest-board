@@ -1,26 +1,58 @@
 # Sunrise Quest Board
 
-A static Quest Board prototype for Key Tech Labs / Circular Economy Co-op.
+External jump-out site for the Sunrise Operational comic:
 
-The site turns marketplace research into a two-sided Quest Board prototype for Sunrise Fair operations:
+https://sunrisecomics-jd2k6wxp.manus.space/
 
-- Recruit Contributors: role listings, smart matching, contributor applications, and Player Cards.
-- Hire & Assign Teams: quest posting, applicant comparison, shortlisting, assignment readiness, and milestone tracking.
-- Verify Work: proof collection, completion review, badges, credits, and visible contribution history.
+This prototype turns the September 26 Sunrise Fair volunteer system into a marketplace-style Quest Board. The main comic site stays unchanged; this repository hosts the recruiting, matching, and assignment layer that could open from the main site's top navigation.
 
-Role language is aligned to the Sunrise Operational comic crew structure:
+## MVP Purpose
 
-- Maya Chen: Event Director
-- Marcus Johnson: Solar Tech Lead
-- Rosa Delgado: Refreshments Coordinator
+Project: Sunrise Fair Greenworker Quest System
 
-## Open locally
+Target event: September 26 Sunrise Fair
 
-Open `index.html` in a browser.
+Product deadline: September 10, 2026
+
+Readiness target: all recruited Greenworkers complete the quest guide/manual by September 20.
+
+## Character Roles
+
+- Power Runners: solar and technical support for energy distribution, battery checks, cable safety, and power stability.
+- Green Workers: operations support for tents, physical infrastructure, logistics, site flow, and breakdown.
+- Cloud Support: remote digital support for documentation, status updates, issue routing, and post-event proof collection.
+
+## Marketplace Logic
+
+The site adapts common service-marketplace patterns into a Sunrise-specific system:
+
+- Fast quest posting instead of loose volunteer requests.
+- Applicant comparison by fit, readiness, proof, and availability.
+- Player Cards that package skills, badges, interests, and contribution history.
+- Milestone-based completion with proof, feedback, credits, and badge progress.
+
+## Reward Fields
+
+- Quest Credits: internal contribution points for verified completed work.
+- Stipend Eligible: roles that may qualify for compensation or program support after lead approval.
+- Badge Progress: skill-growth tracking for role readiness, such as Solar 101, Site Safety, Crew Standup, or Documentation Support.
+
+## Files
+
+- `index.html`: page structure and content
+- `styles.css`: visual design and responsive layout
+- `script.js`: filtering, readiness level, quest publishing, applicant shortlisting, and Player Card interactions
+- `assets/`: comic and supporting images
 
 ## Publish on GitHub Pages
 
-1. Push this folder to a GitHub repository.
-2. In GitHub, go to Settings > Pages.
-3. Choose the main branch and the root folder.
-4. Save. GitHub will provide the public website URL.
+After local edits are committed in GitHub Desktop, click `Push origin`.
+
+GitHub Pages is set to deploy from:
+
+- Branch: `main`
+- Folder: `/ (root)`
+
+Public URL:
+
+https://han567-b.github.io/sunrise-quest-board/
