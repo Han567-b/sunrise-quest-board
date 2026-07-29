@@ -536,9 +536,46 @@ figure {
 
 .journey-band,
 .split-band,
-.field-kit {
+.field-kit,
+.platform-strip {
   padding: clamp(38px, 6vw, 82px) clamp(16px, 5vw, 58px);
   border-bottom: 4px solid var(--ink);
+}
+
+.platform-strip {
+  background:
+    linear-gradient(rgba(243, 230, 210, 0.9), rgba(243, 230, 210, 0.9)),
+    url("assets/comic-field.png") center / cover no-repeat;
+}
+
+.feature-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.feature-row article {
+  min-height: 150px;
+  border: 3px solid var(--ink);
+  background: var(--paper-light);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.feature-row strong {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--rust);
+  font-family: Bangers, "Comic Sans MS", cursive;
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.feature-row span {
+  color: rgba(14, 10, 7, 0.76);
+  font-weight: 900;
+  line-height: 1.45;
 }
 
 .journey-band {
@@ -700,6 +737,10 @@ figcaption {
   .research-grid {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
+
+  .feature-row {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
 }
 
 @media (max-width: 820px) {
@@ -739,7 +780,8 @@ figcaption {
 
   .timeline,
   .research-grid,
-  .asset-strip {
+  .asset-strip,
+  .feature-row {
     grid-template-columns: 1fr;
   }
 }
