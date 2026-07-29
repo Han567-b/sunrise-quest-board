@@ -1164,16 +1164,16 @@ figcaption span {
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   background:
-    linear-gradient(90deg, rgba(21, 17, 13, 0.5), rgba(21, 17, 13, 0.12)),
-    url("assets/comic-hero.png") center 42% / cover no-repeat;
+    linear-gradient(90deg, rgba(21, 17, 13, 0.62), rgba(21, 17, 13, 0.18)),
+    url("assets/green-jobs-expo.png") center center / cover no-repeat;
 }
 
 .hero .hero-overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 248, 232, 0.04), rgba(243, 230, 210, 0.34)),
-    radial-gradient(circle at 76% 24%, rgba(243, 185, 76, 0.22), transparent 28%);
+    linear-gradient(180deg, rgba(255, 248, 232, 0.08), rgba(243, 230, 210, 0.28)),
+    radial-gradient(circle at 76% 24%, rgba(243, 185, 76, 0.18), transparent 30%);
 }
 
 .hero-inner {
