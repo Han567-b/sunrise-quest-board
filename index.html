@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sunrise Quest Board</title>
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=DM+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#board" aria-label="Sunrise Quest Board home">
+        <span class="brand-mark">▰</span>
+        <span>
+          <strong>Sunrise Quest Board</strong>
+          <small>Operational companion</small>
+        </span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#board">Board</a>
+        <a href="#journey">Journey</a>
+        <a href="#research">Research</a>
+        <a href="#assets">Field Kit</a>
+      </nav>
+      <div class="top-actions">
+        <button class="ghost-button" type="button" data-open-panel="applyPanel">Join a Quest</button>
+        <a class="main-site-button" href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Back to Comic</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="comic-hero" aria-labelledby="hero-title">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="kicker">A solar-powered community work system</p>
+          <h1 id="hero-title">Sunrise Quest Board</h1>
+          <p>A companion chapter launched from the Sunrise Operational comic: match people to event roles, track proof of contribution, and turn operational work into a visible community story.</p>
+          <a href="#board" class="scroll-cue">Open the Board</a>
+        </div>
+      </section>
+
+      <section class="workspace" id="board" aria-labelledby="board-title">
+        <aside class="control-rail" aria-label="Quest controls">
+          <div>
+            <p class="eyebrow">Chapter 00</p>
+            <h2 id="board-title">Find the right role for the next Sunrise event.</h2>
+            <p class="intro">A marketplace-style board inspired by TaskRabbit, Thumbtack, Fiverr, and Upwork, redesigned for cooperative quests, player cards, and event teams.</p>
+          </div>
+
+          <form class="matcher" id="matcher">
+            <label for="skill">Skill focus</label>
+            <select id="skill" name="skill">
+              <option value="all">Any skill</option>
+              <option value="energy">Energy systems</option>
+              <option value="logistics">Logistics</option>
+              <option value="media">Media</option>
+              <option value="community">Community support</option>
+            </select>
+
+            <label for="experience">Experience level</label>
+            <input id="experience" name="experience" type="range" min="1" max="4" value="2">
+            <div class="range-labels" aria-hidden="true">
+              <span>New</span>
+              <span>Lead</span>
+            </div>
+
+            <fieldset>
+              <legend>Reward type</legend>
+              <label><input type="checkbox" name="reward" value="credits" checked> Quest credits</label>
+              <label><input type="checkbox" name="reward" value="stipend"> Stipend eligible</label>
+              <label><input type="checkbox" name="reward" value="badge" checked> Badge progress</label>
+            </fieldset>
+          </form>
+
+          <div class="rail-note">
+            <strong>Matching logic</strong>
+            <span>Hybrid discovery: people can browse freely while the system highlights good starting quests.</span>
+          </div>
+        </aside>
+
+        <section class="board-panel" aria-label="Recommended quests">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Open quests</p>
+              <h2>Recommended Board</h2>
+            </div>
+            <div class="segmented" role="group" aria-label="Quest view">
+              <button type="button" class="active" data-view="recommended">Recommended</button>
+              <button type="button" data-view="all">All</button>
+            </div>
+          </div>
+
+          <div class="quest-grid" id="questGrid"></div>
+        </section>
+
+        <aside class="profile-panel" aria-label="Player card and progress">
+          <div class="player-card">
+            <div class="avatar">AP</div>
+            <div>
+              <p class="eyebrow">Player card</p>
+              <h2>Aspiring Power Runner</h2>
+              <p>Level 2 contributor · 18 credits · 3 badges</p>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-title">
+              <span>Level 3 readiness</span>
+              <strong>68%</strong>
+            </div>
+            <div class="progress-bar" aria-label="Level 3 readiness">
+              <span style="width: 68%"></span>
+            </div>
+          </div>
+
+          <div class="badges" aria-label="Earned badges">
+            <span>Solar 101</span>
+            <span>Site Safety</span>
+            <span>Team Standup</span>
+          </div>
+
+          <div class="detail-box" id="questDetail">
+            <p class="eyebrow">Selected quest</p>
+            <h3>Choose a quest</h3>
+            <p>Select a card to see responsibilities, proof needed, and the platform idea behind the feature.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="journey-band" id="journey" aria-labelledby="journey-title">
+        <div class="section-copy">
+          <p class="eyebrow">Chapter 01</p>
+          <h2 id="journey-title">From onboarding to post-event proof.</h2>
+          <p>The meeting notes emphasized player cards, role timelines, shared standups, remote support, and post-event documentation. This flow turns that into a clean participant journey.</p>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="split-band" id="research" aria-labelledby="research-title">
+        <div class="section-copy">
+          <p class="eyebrow">Chapter 02</p>
+          <h2 id="research-title">Four-platform DNA inside the Quest Board.</h2>
+        </div>
+        <div class="research-grid" id="researchGrid"></div>
+      </section>
+
+      <section class="field-kit" id="assets" aria-labelledby="assets-title">
+        <div class="section-copy">
+          <p class="eyebrow">Chapter 03</p>
+          <h2 id="assets-title">Use real event documents as quest context.</h2>
+          <p>Quest pages can attach maps, call sheets, journey maps, and proof templates so contributors know what to do before they arrive.</p>
+        </div>
+        <div class="asset-strip">
+          <figure>
+            <img src="assets/site-map.png" alt="Sunrise event site map">
+            <figcaption>Site Map</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/journey-map.png" alt="Green build journey map">
+            <figcaption>Journey Map</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/green-build-team.png" alt="Green build team roles">
+            <figcaption>Team Roles</figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
+      <button class="close-button" type="button" data-close-panel aria-label="Close quest intake">Close</button>
+      <p class="eyebrow">Quest intake</p>
+      <h2>Build a player card</h2>
+      <form class="apply-form">
+        <label for="name">Name</label>
+        <input id="name" type="text" placeholder="Your name">
+        <label for="interests">Skills and interests</label>
+        <textarea id="interests" rows="5" placeholder="Energy, media, logistics, community support..."></textarea>
+        <label for="availability">Availability</label>
+        <select id="availability">
+          <option>Event day</option>
+          <option>Pre-event prep</option>
+          <option>Remote support</option>
+          <option>Post-event reporting</option>
+        </select>
+        <button type="button" class="primary-button">Save draft card</button>
+      </form>
+    </section>
+
+    <div class="scrim" data-close-panel></div>
+    <script src="script.js"></script>
+  </body>
+</html>
