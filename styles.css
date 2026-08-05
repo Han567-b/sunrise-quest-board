@@ -260,9 +260,7 @@ h3 {
 }
 
 .hire-desk {
-  background:
-    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
-    url("assets/comic-night.png") center / cover no-repeat;
+  background: #f7ecd8;
 }
 
 .section-copy {
@@ -571,9 +569,7 @@ figure {
   padding: clamp(70px, 10vw, 130px) clamp(18px, 5vw, 64px);
   text-align: center;
   color: rgba(255, 248, 232, 0.82);
-  background:
-    linear-gradient(180deg, rgba(243, 230, 210, 0.85) 0%, rgba(21, 17, 13, 0.8) 36%, #05070e 100%),
-    url("assets/comic-night.png") center / cover no-repeat;
+  background: linear-gradient(180deg, #f3e6d2 0%, #1b1712 38%, #05070e 100%);
 }
 
 .footer-mark {
@@ -689,9 +685,7 @@ figure {
 }
 
 .board-panel {
-  background:
-    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
-    url("assets/comic-field.png") center / cover no-repeat;
+  background: #fff8e8;
 }
 
 .profile-panel {
@@ -949,9 +943,7 @@ fieldset label {
 }
 
 .journey-band {
-  background:
-    linear-gradient(rgba(243, 230, 210, 0.9), rgba(243, 230, 210, 0.9)),
-    url("assets/comic-night.png") center / cover no-repeat;
+  background: #f3e6d2;
 }
 
 .timeline {
@@ -1375,9 +1367,7 @@ figcaption span {
 }
 
 .model-section {
-  background:
-    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.9)),
-    url("assets/comic-night.png") center / cover no-repeat;
+  background: #fbf1df;
   color: var(--ink);
 }
 
@@ -1605,9 +1595,7 @@ button:disabled {
   padding: clamp(90px, 13vw, 170px) clamp(18px, 5vw, 64px);
   text-align: center;
   color: rgba(255, 248, 232, 0.82);
-  background:
-    linear-gradient(180deg, rgba(243, 230, 210, 0.14) 0%, rgba(10, 15, 27, 0.88) 26%, #03050b 100%),
-    url("assets/comic-night.png") center / cover no-repeat;
+  background: linear-gradient(180deg, #f3e6d2 0%, #111723 34%, #03050b 100%);
 }
 
 .site-footer .footer-mark {
@@ -1693,8 +1681,8 @@ button:disabled {
 .reward-section,
 .hire-desk,
 .role-timeline-section {
-  padding-top: clamp(72px, 9vw, 132px);
-  padding-bottom: clamp(72px, 9vw, 132px);
+  padding-top: clamp(92px, 11vw, 168px);
+  padding-bottom: clamp(92px, 11vw, 168px);
 }
 
 .role-grid,
@@ -1707,11 +1695,47 @@ button:disabled {
 
 .role-timeline-section {
   border-bottom: 1px solid var(--line);
-  background:
-    linear-gradient(rgba(255, 248, 232, 0.9), rgba(255, 248, 232, 0.82)),
-    url("assets/green-jobs-expo.png") center / cover no-repeat;
+  background: #fff4dd;
   padding-right: clamp(16px, 5vw, 58px);
   padding-left: clamp(16px, 5vw, 58px);
+}
+
+.role-timeline-block {
+  margin-top: clamp(48px, 7vw, 94px);
+}
+
+.role-timeline-block + .role-timeline-block {
+  border-top: 1px solid rgba(21, 17, 13, 0.14);
+  padding-top: clamp(48px, 7vw, 94px);
+}
+
+.timeline-role-header {
+  display: grid;
+  max-width: 860px;
+  gap: 10px;
+}
+
+.timeline-role-header span {
+  color: var(--rust);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.timeline-role-header h3 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.98;
+}
+
+.timeline-role-header p {
+  max-width: 740px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.5vw, 1.24rem);
+  font-weight: 800;
+  line-height: 1.55;
 }
 
 .phase-grid {
@@ -1852,8 +1876,8 @@ button:disabled {
   .reward-section,
   .hire-desk,
   .role-timeline-section {
-    padding-top: 58px;
-    padding-bottom: 58px;
+    padding-top: 72px;
+    padding-bottom: 72px;
   }
 
   .task-strip {
