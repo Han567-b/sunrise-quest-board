@@ -113,13 +113,13 @@ const research = [
     name: "Readiness before event day",
     focus: "Before September 26",
     lesson: "The board makes preparation visible: who accepted a role, who read the guide, and who still needs support before the fair.",
-    move: "This supports Adam's 100% readiness target before the September 26 Sunrise Fair."
+    move: "This supports the readiness target before the September 26 Sunrise Fair."
   },
   {
     name: "Role clarity",
-    focus: "Three character roles",
+    focus: "Five role paths",
     lesson: "Each quest must clearly say role family, responsibilities, shift window, proof required, and reward type.",
-    move: "This is why the site uses Power Runners, Green Workers, and Cloud Support instead of random volunteer titles."
+    move: "This is why the site uses Power Runners, Green Workers, Cloud Support, CE Vendors, and Event Leads instead of random volunteer titles."
   },
   {
     name: "Marketplace-style matching",

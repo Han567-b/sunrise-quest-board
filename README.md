@@ -16,11 +16,17 @@ Product deadline: September 10, 2026
 
 Readiness target: all recruited Greenworkers complete the quest guide/manual by September 20.
 
-## Character Roles
+## Character Paths
 
 - Power Runners: solar and technical support for energy distribution, battery checks, cable safety, and power stability.
 - Green Workers: operations support for tents, physical infrastructure, logistics, site flow, and breakdown.
 - Cloud Support: remote digital support for documentation, status updates, issue routing, and post-event proof collection.
+- CE Vendors: market-table participants who need setup, power, attendance flow, support requests, and closing reports.
+- Event Leads: coordination roles for crew training, shift changes, field decisions, and final event reporting.
+
+## Visual Role Guide
+
+The Power Runner path now includes a 15-beat storyboard gallery. Each beat pairs a role action with a visual panel so contributors can understand the day as a comic-style journey before they accept the quest.
 
 ## Marketplace Logic
 
