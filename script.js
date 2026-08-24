@@ -207,6 +207,9 @@ const applicationWorkspace = document.querySelector(".application-workspace");
 const submitApplication = document.querySelector("#submitApplication");
 const applicationSuccess = document.querySelector("#applicationSuccess");
 const editCompletedApplication = document.querySelector("#editCompletedApplication");
+const copySubmissionId = document.querySelector("#copySubmissionId");
+const printSubmissionConfirmation = document.querySelector("#printSubmissionConfirmation");
+const successActionStatus = document.querySelector("#successActionStatus");
 const resumeFileInput = document.querySelector("#resumeFile");
 const resumeDropzone = document.querySelector("#resumeDropzone");
 const resumeFileCard = document.querySelector("#resumeFileCard");
@@ -804,7 +807,8 @@ function saveSubmissionReceipt(result, payload) {
     submittedAtUtc: result.submittedAtUtc,
     name: payload.applicant.fullName,
     role: payload.application.roleTarget,
-    availability: payload.application.availabilityShift
+    availability: payload.application.availabilityShift,
+    rewards: payload.application.rewardPreferences
   };
   try {
     localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
@@ -832,6 +836,12 @@ function showApplicationSuccess(receipt = lastSubmissionReceipt) {
   document.querySelector("#successSubmissionId").textContent = receipt?.submissionId || "Pending";
   document.querySelector("#successRole").textContent = receipt?.role || "Selected role";
   document.querySelector("#successAvailability").textContent = receipt?.availability || "Selected shift";
+  const rewards = Array.isArray(receipt?.rewards) ? receipt.rewards : [];
+  const stipendStep = document.querySelector("#successStipendStep");
+  const badgeStep = document.querySelector("#successBadgeStep");
+  if (stipendStep) stipendStep.hidden = !rewards.includes("Stipend eligible review");
+  if (badgeStep) badgeStep.hidden = !rewards.includes("Badge progress");
+  if (successActionStatus) successActionStatus.textContent = "";
   if (applicationProgressBar) applicationProgressBar.style.width = "100%";
   applicationStepButtons.forEach((button) => button.classList.add("complete"));
 }
@@ -1124,6 +1134,30 @@ if (editCompletedApplication) {
     updateRoleChoiceState();
     updateApplicationReview();
     showApplicationForm(1);
+  });
+}
+
+if (copySubmissionId) {
+  copySubmissionId.addEventListener("click", async () => {
+    const submissionId = lastSubmissionReceipt?.submissionId;
+    if (!submissionId) return;
+    try {
+      await navigator.clipboard.writeText(submissionId);
+      copySubmissionId.textContent = "Submission ID copied";
+      if (successActionStatus) successActionStatus.textContent = `${submissionId} is ready to paste into a message or check-in form.`;
+      window.setTimeout(() => {
+        copySubmissionId.textContent = "Copy Submission ID";
+      }, 2200);
+    } catch (error) {
+      if (successActionStatus) successActionStatus.textContent = `Copy this Submission ID: ${submissionId}`;
+    }
+  });
+}
+
+if (printSubmissionConfirmation) {
+  printSubmissionConfirmation.addEventListener("click", () => {
+    if (successActionStatus) successActionStatus.textContent = "Choose Save as PDF in the print window to keep a digital confirmation.";
+    window.print();
   });
 }
 

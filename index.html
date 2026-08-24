@@ -931,20 +931,36 @@
 
           <section class="application-success" id="applicationSuccess" hidden aria-live="polite">
             <span class="success-mark" aria-hidden="true">✓</span>
-            <p class="eyebrow">Application submitted</p>
-            <h3>Your Player Card reached the Sunrise team.</h3>
-            <p>Thank you, <strong id="successApplicantName">contributor</strong>. Keep your Submission ID for follow-up and event-day check-in.</p>
+            <p class="eyebrow">Thank you for your submission</p>
+            <h3>Your Sunrise application is in.</h3>
+            <p>Thank you, <strong id="successApplicantName">contributor</strong>. The Event Lead team will review your application together and contact you if they need more details.</p>
             <dl>
               <div><dt>Submission ID</dt><dd id="successSubmissionId"></dd></div>
               <div><dt>Role</dt><dd id="successRole"></dd></div>
               <div><dt>Shift</dt><dd id="successAvailability"></dd></div>
               <div><dt>Status</dt><dd>Received for team review</dd></div>
             </dl>
-            <div class="success-warning"><strong>Submission received</strong><span>Your private application and the team's sanitized review record have been created.</span></div>
+            <section class="success-next-steps" aria-labelledby="success-next-title">
+              <p class="eyebrow">What happens next</p>
+              <h4 id="success-next-title">Review, match, and get quest-ready.</h4>
+              <ol>
+                <li><span>✓</span><div><strong>Event Lead review</strong><p>The team will review your role fit, availability, skills, and supporting materials. A lead may contact you for more information.</p></div></li>
+                <li id="successStipendStep" hidden><span>$</span><div><strong>Stipend eligibility proof</strong><p>Because you requested stipend review, be ready to provide any eligibility, training, certification, or relevant-work proof requested by the lead.</p></div></li>
+                <li id="successBadgeStep" hidden><span>★</span><div><strong>Badge progress</strong><p>After your application, comic acknowledgement, and completed quest evidence are reviewed, eligible badge progress can be upgraded.</p></div></li>
+              </ol>
+            </section>
+            <div class="success-comic-reminder">
+              <div><strong>Comic and role guide acknowledged</strong><span>You confirmed that you reviewed the Sunrise comic/guide. Revisit it before the event so your selected role and responsibilities stay clear.</span></div>
+              <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Review the full comic</a>
+            </div>
+            <div class="success-warning"><strong>Save this confirmation</strong><span>Keep your Submission ID for follow-up and event-day check-in. You can copy the ID or print and save this page.</span></div>
             <div class="action-row">
+              <button type="button" class="secondary-button" id="copySubmissionId">Copy Submission ID</button>
+              <button type="button" class="secondary-button" id="printSubmissionConfirmation">Print / Save</button>
               <button type="button" class="secondary-button" id="editCompletedApplication">Start another application</button>
               <button type="button" class="primary-button" data-close-panel>Close</button>
             </div>
+            <p class="success-action-status" id="successActionStatus" aria-live="polite"></p>
           </section>
         </div>
       </div>
