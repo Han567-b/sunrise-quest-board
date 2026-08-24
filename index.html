@@ -748,6 +748,50 @@
             <button type="button" data-application-step="5"><span>5</span><b>Review</b><small>Check your card</small></button>
           </nav>
 
+          <section class="event-field-guide" aria-labelledby="event-field-guide-title">
+            <div class="event-guide-heading">
+              <span class="event-guide-sun" aria-hidden="true">☀</span>
+              <div>
+                <p>September 26 · Auburn</p>
+                <h3 id="event-field-guide-title">Event field guide</h3>
+              </div>
+            </div>
+            <dl class="event-guide-logistics">
+              <div><dt>Fair</dt><dd>Saturday, September 26, 2026<br>12:00 PM–5:00 PM</dd></div>
+              <div><dt>Site</dt><dd>Sacred Land Collective<br><a href="https://maps.app.goo.gl/298489WFJTnUwNM2A" target="_blank" rel="noopener">37308 212th Way SE<br>Auburn, WA 98092</a></dd></div>
+            </dl>
+            <details>
+              <summary>Shifts, commitments &amp; pay <span aria-hidden="true">+</span></summary>
+              <div class="event-guide-details">
+                <section>
+                  <h4>Available shifts</h4>
+                  <ul>
+                    <li><strong>Shift 1 · Setup / Teardown</strong><span>9:00 AM–12:00 PM &amp; 5:00 PM–8:00 PM</span></li>
+                    <li><strong>Shift 2</strong><span>12:00 PM–3:00 PM</span></li>
+                    <li><strong>Shift 3</strong><span>2:00 PM–5:00 PM</span></li>
+                  </ul>
+                </section>
+                <section>
+                  <h4>Green Worker commitments</h4>
+                  <ul>
+                    <li><strong>Punctuality</strong><span>Arrive within 10 minutes of your approved shift.</span></li>
+                    <li><strong>Safety</strong><span>Complete the Smartwaiver before the event.</span></li>
+                    <li><strong>Conduct</strong><span>Support everyone with respect and kindness. Contact your Team Lead when direction or de-escalation is needed.</span></li>
+                    <li><strong>Preparedness</strong><span>Expect uneven terrain and summer heat. Bring a water bottle, sturdy shoes, a head covering, and sun protection.</span></li>
+                  </ul>
+                </section>
+                <section>
+                  <h4>Benefits &amp; compensation</h4>
+                  <ul>
+                    <li><strong>Green Futures Program</strong><span>Training for green trades and community land development.</span></li>
+                    <li><strong>$100 per completed 3-hour shift</strong><span>Available after the worker application and contract are completed. Payout is made 30–60 days after the event.</span></li>
+                    <li><strong>Meal &amp; break</strong><span>One meal ticket, one 15-minute break per shift, and rotating lunch breaks from 2:00–3:00 PM.</span></li>
+                  </ul>
+                </section>
+              </div>
+            </details>
+          </section>
+
           <div class="intake-summary" aria-label="What the Player Card creates">
             <article><span>01</span><div><strong>Role signal</strong><p>Choose your crew.</p></div></article>
             <article><span>02</span><div><strong>Proof trail</strong><p>Share what you can do.</p></div></article>
@@ -817,10 +861,8 @@
                 </div>
                 <label class="field full-width" for="availability"><span>Availability <em>*</em></span><select id="availability" name="availability" required>
                   <option>September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</option>
-                  <option>September 26 · Shift 2 midday · 12:00 PM–3:00 PM</option>
-                  <option>September 26 · Shift 3 afternoon / evening · 2:00 PM–5:00 PM</option>
-                  <option>September 26 · full event day · 9:00 AM–8:00 PM</option>
-                  <option>September 26 · remote support · 12:00 PM–5:00 PM</option>
+                  <option>September 26 · Shift 2 · 12:00 PM–3:00 PM</option>
+                  <option>September 26 · Shift 3 · 2:00 PM–5:00 PM</option>
                 </select></label>
                 <label class="field full-width conditional-field" id="leadExperienceField" for="leadExperience" hidden><span>Event Lead experience <em>*</em></span><textarea id="leadExperience" name="leadExperience" rows="4" placeholder="Tell us about crew coordination, event operations, shift leadership, or experience across multiple Sunrise roles."></textarea><small>Event Leads are an experienced coordination path. A team lead will review this information before assignment.</small></label>
               </div>
@@ -864,7 +906,7 @@
                 <legend>Reward preference <em>*</em></legend>
                 <label><input type="checkbox" name="applicationReward" value="Quest credits" checked><span><strong>Quest credits</strong><small>Build a record of verified contribution.</small></span></label>
                 <label><input type="checkbox" name="applicationReward" value="Volunteer status"><span><strong>Volunteer status</strong><small>Join simply to support the fair.</small></span></label>
-                <label><input type="checkbox" name="applicationReward" value="Stipend eligible review"><span><strong>Stipend eligible review</strong><small>Some roles may qualify for paid support after review.</small></span></label>
+                <label><input type="checkbox" name="applicationReward" value="Stipend eligible review"><span><strong>Green Worker compensation</strong><small>$100 per completed 3-hour shift after the worker application and contract are approved. Paid 30–60 days after the event.</small></span></label>
                 <label><input type="checkbox" name="applicationReward" value="Badge progress" checked><span><strong>Badge progress</strong><small>Build visible Sunrise role skills.</small></span></label>
               </fieldset>
               <div class="panel-note">
@@ -892,7 +934,7 @@
               <fieldset class="acknowledgement-list" id="acknowledgementList">
                 <legend>Final confirmation <em>*</em></legend>
                 <label><input type="checkbox" id="ackGuide" name="ackGuide" required><span>I have reviewed the Sunrise comic/guide and understand the expectations for this role.</span></label>
-                <label><input type="checkbox" id="ackCommitment" name="ackCommitment" required><span>I can commit to the role and shift shown above.</span></label>
+                <label><input type="checkbox" id="ackCommitment" name="ackCommitment" required><span>I can commit to the role, selected shift, and event expectations shown in this application.</span></label>
                 <label><input type="checkbox" id="ackAccuracy" name="ackAccuracy" required><span>The information in this application is accurate, and I am ready to submit.</span></label>
               </fieldset>
               <div class="panel-note connection-note">

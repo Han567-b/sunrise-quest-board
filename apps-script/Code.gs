@@ -58,10 +58,8 @@ var ALLOWED_ROLES = [
 
 var ALLOWED_SHIFTS = [
   "September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM",
-  "September 26 · Shift 2 midday · 12:00 PM–3:00 PM",
-  "September 26 · Shift 3 afternoon / evening · 2:00 PM–5:00 PM",
-  "September 26 · full event day · 9:00 AM–8:00 PM",
-  "September 26 · remote support · 12:00 PM–5:00 PM"
+  "September 26 · Shift 2 · 12:00 PM–3:00 PM",
+  "September 26 · Shift 3 · 2:00 PM–5:00 PM"
 ];
 
 var ALLOWED_REWARDS = [

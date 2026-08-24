@@ -96,7 +96,7 @@ Properties and must never be added to GitHub Pages.
   },
   "application": {
     "roleTarget": "Power Runner · solar / technical",
-    "availabilityShift": "September 26 · Shift 2 midday · 12:00 PM–3:00 PM",
+    "availabilityShift": "September 26 · Shift 2 · 12:00 PM–3:00 PM",
     "eventLeadExperience": "",
     "skillsInterests": "Solar setup and battery checks",
     "proofDescription": "Completed prior event setup training",

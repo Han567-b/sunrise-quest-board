@@ -2462,9 +2462,16 @@ body.application-open {
   display: flex;
   min-height: min(760px, calc(100vh - 72px));
   flex-direction: column;
-  background: var(--ink);
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 16% 3%, rgba(243, 185, 76, 0.16), transparent 26%),
+    radial-gradient(circle at 100% 72%, rgba(122, 76, 41, 0.22), transparent 34%),
+    linear-gradient(160deg, #2b2119 0%, #1d1713 52%, #302319 100%);
+  box-shadow: inset -1px 0 rgba(243, 185, 76, 0.18);
   color: var(--paper-soft);
   padding: 28px 24px 24px;
+  scrollbar-color: rgba(243, 185, 76, 0.44) transparent;
+  scrollbar-width: thin;
 }
 
 .application-rail-header {
@@ -2528,6 +2535,192 @@ body.application-open {
   font-size: 0.84rem;
   font-weight: 700;
   line-height: 1.5;
+}
+
+.event-field-guide {
+  position: relative;
+  margin: 0 0 24px;
+  border: 1px solid rgba(243, 185, 76, 0.3);
+  background: linear-gradient(145deg, rgba(255, 248, 232, 0.1), rgba(255, 248, 232, 0.035));
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+}
+
+.event-field-guide::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 52px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), #e9812f);
+  content: "";
+}
+
+.event-guide-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 11px;
+}
+
+.event-guide-sun {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(243, 185, 76, 0.55);
+  border-radius: 50%;
+  background: rgba(243, 185, 76, 0.1);
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+.event-guide-heading p,
+.event-guide-heading h3 {
+  margin: 0;
+}
+
+.event-guide-heading p {
+  color: var(--gold);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.event-guide-heading h3 {
+  margin-top: 2px;
+  color: #fff8e8;
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.event-guide-logistics {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid rgba(255, 248, 232, 0.12);
+}
+
+.event-guide-logistics div {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 9px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 248, 232, 0.09);
+}
+
+.event-guide-logistics dt,
+.event-guide-logistics dd {
+  margin: 0;
+}
+
+.event-guide-logistics dt {
+  color: rgba(243, 185, 76, 0.82);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.event-guide-logistics dd,
+.event-guide-logistics a {
+  color: rgba(255, 248, 232, 0.82);
+  font-size: 0.67rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.event-guide-logistics a {
+  color: #ffd779;
+  text-decoration-color: rgba(255, 215, 121, 0.42);
+  text-underline-offset: 3px;
+}
+
+.event-field-guide details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  color: #fff8e8;
+  padding: 12px 14px;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.025em;
+}
+
+.event-field-guide details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.event-field-guide details > summary span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(243, 185, 76, 0.5);
+  border-radius: 50%;
+  color: var(--gold);
+  transition: transform 180ms ease;
+}
+
+.event-field-guide details[open] > summary span {
+  transform: rotate(45deg);
+}
+
+.event-guide-details {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid rgba(255, 248, 232, 0.1);
+  padding: 14px;
+}
+
+.event-guide-details section {
+  display: grid;
+  gap: 8px;
+}
+
+.event-guide-details h4 {
+  margin: 0;
+  color: var(--gold);
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.event-guide-details ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-guide-details li {
+  display: grid;
+  gap: 2px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(243, 185, 76, 0.34);
+}
+
+.event-guide-details strong,
+.event-guide-details span {
+  display: block;
+}
+
+.event-guide-details strong {
+  color: #fff8e8;
+  font-size: 0.65rem;
+}
+
+.event-guide-details span {
+  color: rgba(255, 248, 232, 0.62);
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.42;
 }
 
 .application-rail .application-steps {
@@ -2856,6 +3049,7 @@ body.application-open {
   .application-rail {
     display: block;
     min-height: 0;
+    overflow: visible;
     padding: 14px 18px 0;
   }
 
@@ -2863,6 +3057,19 @@ body.application-open {
   .rail-progress-copy,
   .application-rail .intake-summary {
     display: none;
+  }
+
+  .event-field-guide {
+    margin: 0 0 12px;
+  }
+
+  .event-guide-heading,
+  .event-guide-logistics {
+    display: none;
+  }
+
+  .event-field-guide details > summary {
+    padding: 10px 12px;
   }
 
   .application-rail .application-steps {
