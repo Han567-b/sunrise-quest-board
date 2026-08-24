@@ -289,8 +289,8 @@ function buildPrivateRow_(payload, submissionId, submittedAtUtc) {
     payload.clientRequestId,
     payload.applicant.fullName,
     payload.applicant.email,
-    payload.applicant.phone,
-    payload.applicant.zipCode,
+    preserveTextCell_(payload.applicant.phone),
+    preserveTextCell_(payload.applicant.zipCode),
     payload.applicant.referralSource,
     payload.applicant.accessibilityHealthNeeds,
     payload.application.roleTarget,
@@ -538,6 +538,11 @@ function sanitizeCellValue_(value) {
   if (typeof value !== "string") return value;
   var normalized = value.replace(/\u0000/g, "");
   return /^[=+\-@]/.test(normalized) ? "'" + normalized : normalized;
+}
+
+function preserveTextCell_(value) {
+  var text = cleanString_(value);
+  return text ? "'" + text : "";
 }
 
 function hashToken_(token) {
