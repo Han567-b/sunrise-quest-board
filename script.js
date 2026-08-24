@@ -192,8 +192,43 @@ const applicationStatus = document.querySelector("#applicationStatus");
 const savedApplicationCard = document.querySelector("#savedApplicationCard");
 const editApplication = document.querySelector("#editApplication");
 const deleteApplication = document.querySelector("#deleteApplication");
+const applicationForm = document.querySelector("#applicationForm");
+const applicationStepPanels = document.querySelectorAll("[data-step-panel]");
+const applicationStepButtons = document.querySelectorAll("[data-application-step]");
+const previousApplicationStep = document.querySelector("#previousApplicationStep");
+const nextApplicationStep = document.querySelector("#nextApplicationStep");
+const applicationStepStatus = document.querySelector("#applicationStepStatus");
+const roleInput = document.querySelector("#role");
+const leadExperienceField = document.querySelector("#leadExperienceField");
+const roleTimelineSection = document.querySelector("#role-timeline");
+const roleChoiceButtons = document.querySelectorAll("[data-role-choice]");
+const applicationProgressBar = document.querySelector("#applicationProgressBar");
+const applicationWorkspace = document.querySelector(".application-workspace");
+const submitApplication = document.querySelector("#submitApplication");
+const applicationSuccess = document.querySelector("#applicationSuccess");
+const editCompletedApplication = document.querySelector("#editCompletedApplication");
+const resumeFileInput = document.querySelector("#resumeFile");
+const resumeDropzone = document.querySelector("#resumeDropzone");
+const resumeFileCard = document.querySelector("#resumeFileCard");
+const resumeFileName = document.querySelector("#resumeFileName");
+const resumeFileMeta = document.querySelector("#resumeFileMeta");
+const removeResumeFile = document.querySelector("#removeResumeFile");
+const resumeRestoreNote = document.querySelector("#resumeRestoreNote");
 const levelButtons = document.querySelectorAll("[data-level]");
+const APPLICATION_DRAFT_KEY = "sunriseQuestApplicationDraftV2";
+const APPLICATION_RECEIPT_KEY = "sunriseQuestSubmissionReceiptV1";
+const SUBMISSION_ENDPOINT = document.querySelector('meta[name="sunrise-submission-endpoint"]')?.content.trim() || "";
 let currentView = "recommended";
+let currentApplicationStep = 1;
+let applicationOpenTrigger = null;
+let selectedResumeFile = null;
+let savedResumeMetadata = null;
+let draftSaveTimer = null;
+let applicationCompletedLocally = false;
+let draftWasExplicitlySaved = false;
+let applicationClientRequestId = "";
+let lastSubmissionReceipt = null;
+let applicationSubmitting = false;
 
 function selectedRewards() {
   if (!matcher) return [];
@@ -352,22 +387,581 @@ document.querySelectorAll("[data-view]").forEach((button) => {
   });
 });
 
+function updateApplicationReview() {
+  const review = (key, value) => {
+    const target = document.querySelector(`[data-review="${key}"]`);
+    if (target) target.textContent = value;
+  };
+  const name = document.querySelector("#name")?.value.trim() || "Draft contributor";
+  const email = document.querySelector("#email")?.value.trim();
+  const phone = document.querySelector("#phone")?.value.trim();
+  const contact = [email, phone].filter(Boolean).join(" · ") || "Not added yet";
+  const role = roleInput?.value || "Power Runner · solar / technical";
+  const availability = document.querySelector("#availability")?.value || "September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM";
+  const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
+  const proofText = document.querySelector("#proof")?.value.trim();
+  const supportingLinks = document.querySelector("#supportingLinks")?.value.trim();
+  const proof = proofText || "No proof added yet";
+  const links = supportingLinks
+    ? supportingLinks.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).join(" · ")
+    : "No links added";
+  const rewards = [...document.querySelectorAll('input[name="applicationReward"]:checked')]
+    .map((item) => item.value)
+    .join(", ") || "No reward preference selected";
+
+  review("name", name);
+  review("contact", contact);
+  review("role", role);
+  review("availability", availability);
+  review("skills", skills);
+  review("proof", proof);
+  review("links", links);
+  review("rewards", rewards);
+}
+
+function updateLeadExperienceField() {
+  if (!leadExperienceField) return;
+  leadExperienceField.hidden = !roleInput?.value.startsWith("Event Lead");
+}
+
+function updateRoleChoiceState() {
+  roleChoiceButtons.forEach((button) => {
+    const isActive = button.dataset.roleChoice === roleInput?.value;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Unknown size";
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function validationContainer(input) {
+  if (!input) return null;
+  if (input.name === "applicationReward") return document.querySelector(".reward-choice-grid");
+  if (["ackGuide", "ackCommitment", "ackAccuracy"].includes(input.id)) return document.querySelector("#acknowledgementList");
+  if (input.id === "role") return document.querySelector(".role-picker");
+  return input.closest(".field") || input.parentElement;
+}
+
+function clearValidationError(input) {
+  const container = validationContainer(input);
+  if (!container) return;
+  container.classList.remove("has-error");
+  container.querySelectorAll("[data-validation-error]").forEach((item) => item.remove());
+  if (input) input.removeAttribute("aria-invalid");
+}
+
+function setValidationError(input, message) {
+  const container = validationContainer(input);
+  if (!container) return;
+  clearValidationError(input);
+  container.classList.add("has-error");
+  input?.setAttribute("aria-invalid", "true");
+  const error = document.createElement("p");
+  error.className = "field-error";
+  error.dataset.validationError = "true";
+  error.textContent = message;
+  container.appendChild(error);
+}
+
+function validateApplicationStep(step, revealErrors = true) {
+  const checks = [];
+  const addRequired = (selector, message) => {
+    const input = document.querySelector(selector);
+    if (!input) return;
+    let valid = Boolean(input.value?.trim());
+    if (valid && input.type === "email") valid = input.validity.valid;
+    checks.push({ input, valid, message: input.type === "email" && input.value && !input.validity.valid ? "Enter a valid email address." : message });
+  };
+
+  if (step === 1) {
+    addRequired("#name", "Add your name to continue.");
+    addRequired("#email", "Add your email to continue.");
+    addRequired("#phone", "Add your phone number to continue.");
+    addRequired("#zip", "Add your zip code to continue.");
+    addRequired("#referral", "Choose how you heard about this opportunity.");
+  }
+  if (step === 2) {
+    addRequired("#role", "Choose a role target.");
+    addRequired("#availability", "Choose an event-day shift.");
+    if (roleInput?.value.startsWith("Event Lead")) {
+      addRequired("#leadExperience", "Tell us about your coordination experience.");
+    }
+  }
+  if (step === 3) {
+    addRequired("#interests", "Add at least one skill or interest.");
+    const linksInput = document.querySelector("#supportingLinks");
+    const invalidLink = parseSupportingLinks(linksInput?.value).find((link) => !isValidSupportingLink(link));
+    checks.push({
+      input: linksInput,
+      valid: !invalidLink,
+      message: "Use complete http:// or https:// links, one per line."
+    });
+  }
+  if (step === 4) {
+    const firstReward = document.querySelector('input[name="applicationReward"]');
+    const valid = Boolean(document.querySelector('input[name="applicationReward"]:checked'));
+    checks.push({ input: firstReward, valid, message: "Choose at least one participation or reward preference." });
+  }
+  if (step === 5) {
+    [
+      ["#ackGuide", "Confirm that you reviewed and understand the guide."],
+      ["#ackCommitment", "Confirm that you can commit to this role and shift."],
+      ["#ackAccuracy", "Confirm that your information is accurate and ready to submit."]
+    ].forEach(([selector, message]) => {
+      const input = document.querySelector(selector);
+      checks.push({ input, valid: Boolean(input?.checked), message });
+    });
+  }
+
+  checks.forEach(({ input, valid, message }) => {
+    if (valid) clearValidationError(input);
+    else if (revealErrors) setValidationError(input, message);
+  });
+  const firstInvalid = checks.find((check) => !check.valid)?.input || null;
+  return { valid: !firstInvalid, firstInvalid };
+}
+
+function focusInvalidField(input) {
+  if (!input) return;
+  if (input.id === "role") roleChoiceButtons[0]?.focus();
+  else input.focus();
+}
+
+function updateCompletedSteps() {
+  applicationStepButtons.forEach((button) => {
+    const step = Number(button.dataset.applicationStep);
+    button.classList.toggle("complete", step < currentApplicationStep && validateApplicationStep(step, false).valid);
+  });
+}
+
+function collectApplicationDraft() {
+  const value = (selector) => document.querySelector(selector)?.value || "";
+  return {
+    version: 2,
+    clientRequestId: getOrCreateClientRequestId(),
+    updatedAt: new Date().toISOString(),
+    currentStep: currentApplicationStep,
+    savedExplicitly: draftWasExplicitlySaved,
+    completedLocally: false,
+    completedAt: "",
+    name: value("#name"),
+    email: value("#email"),
+    phone: value("#phone"),
+    zip: value("#zip"),
+    referral: value("#referral"),
+    accessibility: value("#accessibility"),
+    role: value("#role"),
+    availability: value("#availability"),
+    leadExperience: value("#leadExperience"),
+    interests: value("#interests"),
+    proof: value("#proof"),
+    supportingLinks: value("#supportingLinks"),
+    rewards: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value),
+    acknowledgements: {
+      guide: Boolean(document.querySelector("#ackGuide")?.checked),
+      commitment: Boolean(document.querySelector("#ackCommitment")?.checked),
+      accuracy: Boolean(document.querySelector("#ackAccuracy")?.checked)
+    },
+    resume: selectedResumeFile
+      ? { name: selectedResumeFile.name, size: selectedResumeFile.size, type: selectedResumeFile.type }
+      : savedResumeMetadata
+  };
+}
+
+function populateSavedDraftCard(data = collectApplicationDraft()) {
+  document.querySelector("#savedCardName").textContent = data.name.trim() || "Draft contributor";
+  document.querySelector("#savedCardRole").textContent = data.role || "selected role";
+  document.querySelector("#savedCardAvailability").textContent = data.availability || "selected availability";
+  document.querySelector("#savedCardSkills").textContent = data.interests.trim() || "No skills added yet";
+  document.querySelector("#savedCardProof").textContent = data.proof.trim() || "No proof added yet";
+}
+
+function persistApplicationDraft({ explicit = false } = {}) {
+  if (!applicationForm) return false;
+  if (explicit) draftWasExplicitlySaved = true;
+  const data = collectApplicationDraft();
+  try {
+    localStorage.setItem(APPLICATION_DRAFT_KEY, JSON.stringify(data));
+    if (explicit) {
+      populateSavedDraftCard(data);
+      if (savedApplicationCard) savedApplicationCard.hidden = false;
+      applicationWorkspace?.classList.add("has-draft");
+      if (applicationStatus) applicationStatus.textContent = "Draft saved in this browser. It has not been submitted to the Sunrise team.";
+    }
+    return true;
+  } catch (error) {
+    if (applicationStatus) applicationStatus.textContent = "This browser could not save the draft. Keep this page open and try again.";
+    return false;
+  }
+}
+
+function scheduleDraftSave() {
+  window.clearTimeout(draftSaveTimer);
+  draftSaveTimer = window.setTimeout(() => persistApplicationDraft(), 250);
+}
+
+function restoreApplicationDraft() {
+  let data;
+  try {
+    data = JSON.parse(localStorage.getItem(APPLICATION_DRAFT_KEY) || "null");
+  } catch (error) {
+    data = null;
+  }
+  if (!data || data.version !== 2 || !applicationForm) return false;
+
+  applicationClientRequestId = typeof data.clientRequestId === "string" ? data.clientRequestId : "";
+
+  ["name", "email", "phone", "zip", "referral", "accessibility", "role", "availability", "leadExperience", "interests", "proof", "supportingLinks"]
+    .forEach((key) => {
+      const input = document.querySelector(`#${key}`);
+      if (input && typeof data[key] === "string") input.value = data[key];
+    });
+  document.querySelectorAll('input[name="applicationReward"]').forEach((input) => {
+    input.checked = Array.isArray(data.rewards) && data.rewards.includes(input.value);
+  });
+  if (data.acknowledgements) {
+    document.querySelector("#ackGuide").checked = Boolean(data.acknowledgements.guide);
+    document.querySelector("#ackCommitment").checked = Boolean(data.acknowledgements.commitment);
+    document.querySelector("#ackAccuracy").checked = Boolean(data.acknowledgements.accuracy);
+  }
+  savedResumeMetadata = data.resume || null;
+  if (savedResumeMetadata?.name && resumeRestoreNote) {
+    resumeRestoreNote.textContent = `${savedResumeMetadata.name} was listed in this draft. Please attach the file again before final submission.`;
+    resumeRestoreNote.hidden = false;
+  }
+  draftWasExplicitlySaved = Boolean(data.savedExplicitly);
+  applicationCompletedLocally = false;
+  currentApplicationStep = Math.max(1, Math.min(5, Number(data.currentStep) || 1));
+  updateLeadExperienceField();
+  updateRoleChoiceState();
+  updateApplicationReview();
+  if (draftWasExplicitlySaved) {
+    populateSavedDraftCard(data);
+    if (savedApplicationCard) savedApplicationCard.hidden = false;
+    applicationWorkspace?.classList.add("has-draft");
+  }
+  return true;
+}
+
+function updateResumeFileUi() {
+  if (selectedResumeFile) {
+    if (resumeFileName) resumeFileName.textContent = selectedResumeFile.name;
+    if (resumeFileMeta) resumeFileMeta.textContent = `${formatFileSize(selectedResumeFile.size)} · ready on this device`;
+    if (resumeFileCard) resumeFileCard.hidden = false;
+    if (resumeDropzone) resumeDropzone.hidden = true;
+    if (resumeRestoreNote) resumeRestoreNote.hidden = true;
+  } else {
+    if (resumeFileCard) resumeFileCard.hidden = true;
+    if (resumeDropzone) resumeDropzone.hidden = false;
+  }
+  updateApplicationReview();
+}
+
+function acceptResumeFile(file) {
+  if (!file) return;
+  const allowed = ["pdf", "doc", "docx"];
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const field = document.querySelector(".resume-upload-field");
+  field?.querySelectorAll("[data-validation-error]").forEach((item) => item.remove());
+  field?.classList.remove("has-error");
+  if (!allowed.includes(extension)) {
+    setValidationError(resumeFileInput, "Choose a PDF, DOC, or DOCX file.");
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    setValidationError(resumeFileInput, "This file is larger than 10 MB.");
+    return;
+  }
+  selectedResumeFile = file;
+  savedResumeMetadata = { name: file.name, size: file.size, type: file.type };
+  updateResumeFileUi();
+  scheduleDraftSave();
+}
+
+function parseSupportingLinks(value) {
+  return String(value || "").split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+}
+
+function isValidSupportingLink(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+}
+
+function getOrCreateClientRequestId() {
+  if (applicationClientRequestId) return applicationClientRequestId;
+  applicationClientRequestId = window.crypto?.randomUUID
+    ? window.crypto.randomUUID()
+    : `sq-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return applicationClientRequestId;
+}
+
+function buildSubmissionPayload() {
+  const value = (selector) => document.querySelector(selector)?.value.trim() || "";
+  return {
+    schemaVersion: "2B.1",
+    clientRequestId: getOrCreateClientRequestId(),
+    clientCompletedAt: new Date().toISOString(),
+    applicant: {
+      fullName: value("#name"),
+      email: value("#email"),
+      phone: value("#phone"),
+      zipCode: value("#zip"),
+      referralSource: value("#referral"),
+      accessibilityHealthNeeds: value("#accessibility")
+    },
+    application: {
+      roleTarget: value("#role"),
+      availabilityShift: value("#availability"),
+      eventLeadExperience: value("#leadExperience"),
+      skillsInterests: value("#interests"),
+      proofDescription: value("#proof"),
+      supportingLinks: parseSupportingLinks(value("#supportingLinks")),
+      rewardPreferences: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value)
+    },
+    acknowledgements: {
+      trainingComic: Boolean(document.querySelector("#ackGuide")?.checked),
+      commitment: Boolean(document.querySelector("#ackCommitment")?.checked),
+      accuracy: Boolean(document.querySelector("#ackAccuracy")?.checked)
+    }
+  };
+}
+
+async function submitApplicationToEndpoint(payload) {
+  if (!SUBMISSION_ENDPOINT) {
+    throw new Error("The Sunrise submission endpoint has not been configured yet. Your draft is still saved in this browser.");
+  }
+
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(SUBMISSION_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      mode: "cors",
+      cache: "no-store",
+      redirect: "follow",
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error("The Sunrise application service did not respond successfully. Please try again.");
+    const result = await response.json();
+    if (!result?.ok) {
+      const error = new Error(result?.message || "The application could not be submitted. Please try again.");
+      error.result = result;
+      throw error;
+    }
+    return result;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("The submission took too long. Your draft is safe; please try again.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+function applyServerFieldErrors(fieldErrors = {}) {
+  const fieldMap = {
+    fullName: "#name",
+    email: "#email",
+    phone: "#phone",
+    zipCode: "#zip",
+    referralSource: "#referral",
+    accessibilityHealthNeeds: "#accessibility",
+    roleTarget: "#role",
+    availabilityShift: "#availability",
+    eventLeadExperience: "#leadExperience",
+    skillsInterests: "#interests",
+    proofDescription: "#proof",
+    supportingLinks: "#supportingLinks",
+    rewardPreferences: 'input[name="applicationReward"]',
+    ackTrainingComic: "#ackGuide",
+    ackCommitment: "#ackCommitment",
+    ackAccuracy: "#ackAccuracy"
+  };
+  let firstInvalid = null;
+  Object.entries(fieldErrors).forEach(([field, message]) => {
+    const input = document.querySelector(fieldMap[field]);
+    if (!input) return;
+    setValidationError(input, message);
+    if (!firstInvalid) firstInvalid = input;
+  });
+  return firstInvalid;
+}
+
+function saveSubmissionReceipt(result, payload) {
+  lastSubmissionReceipt = {
+    submissionId: result.submissionId,
+    submittedAtUtc: result.submittedAtUtc,
+    name: payload.applicant.fullName,
+    role: payload.application.roleTarget,
+    availability: payload.application.availabilityShift
+  };
+  try {
+    localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
+  } catch (error) {
+    // The visible confirmation still contains the Submission ID.
+  }
+}
+
+function restoreSubmissionReceipt() {
+  try {
+    const receipt = JSON.parse(localStorage.getItem(APPLICATION_RECEIPT_KEY) || "null");
+    if (!receipt?.submissionId) return false;
+    lastSubmissionReceipt = receipt;
+    applicationCompletedLocally = true;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function showApplicationSuccess(receipt = lastSubmissionReceipt) {
+  applicationWorkspace.hidden = true;
+  applicationSuccess.hidden = false;
+  document.querySelector("#successApplicantName").textContent = receipt?.name || "contributor";
+  document.querySelector("#successSubmissionId").textContent = receipt?.submissionId || "Pending";
+  document.querySelector("#successRole").textContent = receipt?.role || "Selected role";
+  document.querySelector("#successAvailability").textContent = receipt?.availability || "Selected shift";
+  if (applicationProgressBar) applicationProgressBar.style.width = "100%";
+  applicationStepButtons.forEach((button) => button.classList.add("complete"));
+}
+
+function showApplicationForm(step = currentApplicationStep) {
+  applicationWorkspace.hidden = false;
+  applicationSuccess.hidden = true;
+  showApplicationStep(step);
+}
+
+function showApplicationStep(step) {
+  currentApplicationStep = Math.max(1, Math.min(5, Number(step) || 1));
+  applicationStepPanels.forEach((panel) => {
+    const isActive = Number(panel.dataset.stepPanel) === currentApplicationStep;
+    panel.hidden = !isActive;
+    panel.classList.toggle("active", isActive);
+  });
+  applicationStepButtons.forEach((button) => {
+    const isActive = Number(button.dataset.applicationStep) === currentApplicationStep;
+    button.classList.toggle("active", isActive);
+    if (isActive) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  });
+  if (previousApplicationStep) previousApplicationStep.hidden = currentApplicationStep === 1;
+  if (nextApplicationStep) nextApplicationStep.hidden = currentApplicationStep === 5;
+  if (saveApplication) saveApplication.hidden = false;
+  if (submitApplication) submitApplication.hidden = currentApplicationStep !== 5;
+  if (applicationStepStatus) applicationStepStatus.textContent = `Step ${currentApplicationStep} of 5`;
+  if (applicationProgressBar) applicationProgressBar.style.width = `${currentApplicationStep * 20}%`;
+  if (currentApplicationStep === 5) updateApplicationReview();
+  updateCompletedSteps();
+}
+
+function closeApplicationPanel() {
+  const panel = document.querySelector(".application-modal");
+  panel?.classList.remove("open");
+  panel?.setAttribute("aria-hidden", "true");
+  document.querySelector(".scrim")?.classList.remove("open");
+  document.body.classList.remove("application-open");
+  applicationOpenTrigger?.focus();
+}
+
+function reorderRoleJourneys() {
+  if (!roleTimelineSection) return;
+  [".timeline-lead", ".timeline-power", ".timeline-green", ".timeline-cloud", ".timeline-vendor"]
+    .forEach((selector) => {
+      const journey = roleTimelineSection.querySelector(selector);
+      if (journey) roleTimelineSection.appendChild(journey);
+    });
+}
+
 document.querySelectorAll("[data-open-panel]").forEach((button) => {
   button.addEventListener("click", () => {
     const panel = document.getElementById(button.dataset.openPanel);
     if (!panel) return;
+    applicationOpenTrigger = button;
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
     document.querySelector(".scrim")?.classList.add("open");
+    document.body.classList.add("application-open");
+    if (applicationCompletedLocally) showApplicationSuccess();
+    else showApplicationForm(currentApplicationStep);
+    panel.querySelector(".close-button")?.focus();
   });
 });
 
 document.querySelectorAll("[data-close-panel]").forEach((button) => {
+  button.addEventListener("click", closeApplicationPanel);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.querySelector(".application-modal.open")) {
+    closeApplicationPanel();
+  }
+});
+
+applicationStepButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const panel = document.querySelector(".side-panel");
-    panel?.classList.remove("open");
-    panel?.setAttribute("aria-hidden", "true");
-    document.querySelector(".scrim")?.classList.remove("open");
+    const targetStep = Number(button.dataset.applicationStep);
+    if (targetStep <= currentApplicationStep) {
+      showApplicationStep(targetStep);
+      return;
+    }
+    for (let step = currentApplicationStep; step < targetStep; step += 1) {
+      const result = validateApplicationStep(step, true);
+      if (!result.valid) {
+        showApplicationStep(step);
+        if (applicationStatus) applicationStatus.textContent = "Complete the required fields before moving forward.";
+        window.setTimeout(() => focusInvalidField(result.firstInvalid), 0);
+        return;
+      }
+    }
+    showApplicationStep(targetStep);
+    scheduleDraftSave();
+  });
+});
+
+if (previousApplicationStep) {
+  previousApplicationStep.addEventListener("click", () => showApplicationStep(currentApplicationStep - 1));
+}
+
+if (nextApplicationStep) {
+  nextApplicationStep.addEventListener("click", () => {
+    const result = validateApplicationStep(currentApplicationStep, true);
+    if (!result.valid) {
+      if (applicationStatus) applicationStatus.textContent = "Complete the required fields before moving forward.";
+      focusInvalidField(result.firstInvalid);
+      return;
+    }
+    if (applicationStatus) applicationStatus.textContent = "";
+    showApplicationStep(currentApplicationStep + 1);
+    scheduleDraftSave();
+  });
+}
+
+if (roleInput) {
+  roleInput.addEventListener("change", () => {
+    updateLeadExperienceField();
+    updateRoleChoiceState();
+  });
+}
+
+roleChoiceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (!roleInput) return;
+    roleInput.value = button.dataset.roleChoice;
+    updateLeadExperienceField();
+    updateRoleChoiceState();
+    clearValidationError(roleInput);
+    scheduleDraftSave();
   });
 });
 
@@ -429,25 +1023,14 @@ document.addEventListener("click", (event) => {
 
 if (saveApplication) {
   saveApplication.addEventListener("click", () => {
-    const name = document.querySelector("#name")?.value.trim() || "Draft contributor";
-    const role = document.querySelector("#role")?.value || "selected role";
-    const availability = document.querySelector("#availability")?.value || "selected availability";
-    const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
-    const proof = document.querySelector("#proof")?.value.trim() || "No proof added yet";
-    document.querySelector("#savedCardName").textContent = name;
-    document.querySelector("#savedCardRole").textContent = role;
-    document.querySelector("#savedCardAvailability").textContent = availability;
-    document.querySelector("#savedCardSkills").textContent = skills;
-    document.querySelector("#savedCardProof").textContent = proof;
-    if (savedApplicationCard) savedApplicationCard.hidden = false;
-    if (applicationStatus) {
-      applicationStatus.textContent = "Draft saved below. You can edit it or delete it before submitting.";
-    }
+    persistApplicationDraft({ explicit: true });
   });
 }
 
 if (editApplication) {
   editApplication.addEventListener("click", () => {
+    applicationCompletedLocally = false;
+    showApplicationForm(1);
     document.querySelector("#name")?.focus();
     if (applicationStatus) {
       applicationStatus.textContent = "Editing mode: update the fields, then save the draft again.";
@@ -457,16 +1040,151 @@ if (editApplication) {
 
 if (deleteApplication) {
   deleteApplication.addEventListener("click", () => {
-    document.querySelector(".apply-form")?.reset();
+    applicationForm?.reset();
+    localStorage.removeItem(APPLICATION_DRAFT_KEY);
+    draftWasExplicitlySaved = false;
+    applicationCompletedLocally = false;
+    applicationClientRequestId = "";
+    selectedResumeFile = null;
+    savedResumeMetadata = null;
+    if (resumeFileInput) resumeFileInput.value = "";
     if (savedApplicationCard) savedApplicationCard.hidden = true;
+    applicationWorkspace?.classList.remove("has-draft");
+    applicationForm?.querySelectorAll(".has-error").forEach((item) => item.classList.remove("has-error"));
+    applicationForm?.querySelectorAll("[data-validation-error]").forEach((item) => item.remove());
+    updateLeadExperienceField();
+    updateRoleChoiceState();
+    updateResumeFileUi();
+    if (resumeRestoreNote) resumeRestoreNote.hidden = true;
+    showApplicationForm(1);
     if (applicationStatus) {
       applicationStatus.textContent = "Draft deleted. You can start a new Player Card.";
     }
   });
 }
 
+if (submitApplication) {
+  submitApplication.addEventListener("click", async () => {
+    if (applicationSubmitting) return;
+    for (let step = 1; step <= 5; step += 1) {
+      const result = validateApplicationStep(step, true);
+      if (!result.valid) {
+        showApplicationStep(step);
+        if (applicationStatus) applicationStatus.textContent = "Your application still needs a few required details.";
+        window.setTimeout(() => focusInvalidField(result.firstInvalid), 0);
+        return;
+      }
+    }
+    persistApplicationDraft({ explicit: true });
+    const payload = buildSubmissionPayload();
+    applicationSubmitting = true;
+    submitApplication.disabled = true;
+    submitApplication.textContent = "Submitting…";
+    applicationForm?.setAttribute("aria-busy", "true");
+    if (applicationStatus) applicationStatus.textContent = "Sending your application securely to the Sunrise team…";
+
+    try {
+      const result = await submitApplicationToEndpoint(payload);
+      saveSubmissionReceipt(result, payload);
+      applicationCompletedLocally = true;
+      localStorage.removeItem(APPLICATION_DRAFT_KEY);
+      draftWasExplicitlySaved = false;
+      if (savedApplicationCard) savedApplicationCard.hidden = true;
+      applicationWorkspace?.classList.remove("has-draft");
+      if (applicationStatus) applicationStatus.textContent = "";
+      showApplicationSuccess(lastSubmissionReceipt);
+    } catch (error) {
+      const firstInvalid = applyServerFieldErrors(error.result?.fieldErrors);
+      if (firstInvalid) focusInvalidField(firstInvalid);
+      if (applicationStatus) applicationStatus.textContent = error.message || "The application could not be submitted. Your draft is still saved.";
+    } finally {
+      applicationSubmitting = false;
+      submitApplication.disabled = false;
+      submitApplication.textContent = "Submit Application";
+      applicationForm?.removeAttribute("aria-busy");
+    }
+  });
+}
+
+if (editCompletedApplication) {
+  editCompletedApplication.addEventListener("click", () => {
+    applicationForm?.reset();
+    localStorage.removeItem(APPLICATION_RECEIPT_KEY);
+    localStorage.removeItem(APPLICATION_DRAFT_KEY);
+    lastSubmissionReceipt = null;
+    applicationCompletedLocally = false;
+    applicationClientRequestId = "";
+    currentApplicationStep = 1;
+    draftWasExplicitlySaved = false;
+    selectedResumeFile = null;
+    savedResumeMetadata = null;
+    if (savedApplicationCard) savedApplicationCard.hidden = true;
+    applicationWorkspace?.classList.remove("has-draft");
+    updateLeadExperienceField();
+    updateRoleChoiceState();
+    updateApplicationReview();
+    showApplicationForm(1);
+  });
+}
+
+if (resumeDropzone && resumeFileInput) {
+  resumeDropzone.addEventListener("click", () => resumeFileInput.click());
+  resumeDropzone.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      resumeFileInput.click();
+    }
+  });
+  ["dragenter", "dragover"].forEach((type) => {
+    resumeDropzone.addEventListener(type, (event) => {
+      event.preventDefault();
+      resumeDropzone.classList.add("drag-over");
+    });
+  });
+  ["dragleave", "drop"].forEach((type) => {
+    resumeDropzone.addEventListener(type, (event) => {
+      event.preventDefault();
+      resumeDropzone.classList.remove("drag-over");
+    });
+  });
+  resumeDropzone.addEventListener("drop", (event) => acceptResumeFile(event.dataTransfer?.files?.[0]));
+  resumeFileInput.addEventListener("change", () => acceptResumeFile(resumeFileInput.files?.[0]));
+}
+
+if (removeResumeFile) {
+  removeResumeFile.addEventListener("click", () => {
+    selectedResumeFile = null;
+    savedResumeMetadata = null;
+    if (resumeFileInput) resumeFileInput.value = "";
+    if (resumeRestoreNote) resumeRestoreNote.hidden = true;
+    updateResumeFileUi();
+    scheduleDraftSave();
+  });
+}
+
+if (applicationForm) {
+  applicationForm.addEventListener("input", (event) => {
+    clearValidationError(event.target);
+    updateApplicationReview();
+    scheduleDraftSave();
+  });
+  applicationForm.addEventListener("change", (event) => {
+    clearValidationError(event.target);
+    updateApplicationReview();
+    scheduleDraftSave();
+  });
+}
+
 updatePlayerProgress();
 renderResearch();
 renderTimeline();
+reorderRoleJourneys();
 renderApplicants();
 renderQuests();
+updateLeadExperienceField();
+updateRoleChoiceState();
+restoreApplicationDraft();
+restoreSubmissionReceipt();
+updateResumeFileUi();
+if (applicationCompletedLocally) showApplicationSuccess(lastSubmissionReceipt);
+else showApplicationForm(currentApplicationStep);

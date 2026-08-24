@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="sunrise-submission-endpoint" content="">
     <title>Sunrise Quest Board</title>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,8 +46,8 @@
           </div>
           <aside class="hero-panel" aria-label="Quest status">
             <p class="eyebrow">Open Roles</p>
-            <strong>3 ways in</strong>
-            <span>Power, setup, and remote support teams are forming now.</span>
+            <strong>3 crew paths</strong>
+            <span>Power, setup, and remote support teams work under Event Lead coordination. Vendors join through a separate market path.</span>
             <div class="hero-metrics">
               <div><b>Power</b><span>solar support</span></div>
               <div><b>Green</b><span>site crew</span></div>
@@ -59,41 +60,65 @@
       <section class="roles-section" id="roles" aria-labelledby="roles-title">
         <div class="section-copy">
           <p class="eyebrow">Choose a path</p>
-          <h2 id="roles-title">Five paths. One fair.</h2>
-          <p>Each quest gives people a role, a shift, a checklist, and a way to show what they completed.</p>
+          <h2 id="roles-title">One coordinated crew. Four ways to contribute.</h2>
+          <p>Event Leads guide three operational teams, while vendors join through a separate market path. Every quest still gives people a role, a shift, a checklist, and a way to show what they completed.</p>
         </div>
-        <div class="role-grid">
-          <article class="role-card solar">
-            <span>Solar / Technical</span>
-            <h3>Power Runners</h3>
-            <p>Help keep solar gear, batteries, and power flow ready for the day.</p>
+        <div class="role-hierarchy">
+          <article class="role-card lead lead-layer">
+            <div>
+              <span>Coordination Layer</span>
+              <h3>Event Leads</h3>
+              <p>Guide crews through setup, monitor schedule changes, coordinate vendors, and close the day with useful reports.</p>
+            </div>
             <dl class="role-details">
-              <div><dt>Best for</dt><dd>Hands-on helpers who like gear, cables, batteries, and checklists.</dd></div>
-              <div><dt>Quest work</dt><dd>Unload solar hardware, check battery status, watch power flow, flag safety issues.</dd></div>
-              <div><dt>Earn</dt><dd>Quest credits, Solar 101 badge, Site Safety badge, stipend review for higher-responsibility shifts.</dd></div>
+              <div><dt>Best for</dt><dd>Experienced organizers who understand multiple roles and can keep people moving through the plan.</dd></div>
+              <div><dt>Quest work</dt><dd>Run crew training, manage shift changes, solve field issues, and collect final reports.</dd></div>
+              <div><dt>Grow into it</dt><dd>Build experience across operational quests, then step into coordination with a stronger field record.</dd></div>
             </dl>
           </article>
-          <article class="role-card ops">
-            <span>Operations</span>
-            <h3>Green Workers</h3>
-            <p>Set up tents, move materials, guide flow, and help reset the site.</p>
-            <dl class="role-details">
-              <div><dt>Best for</dt><dd>People who can move quickly, solve small problems, and support the on-site crew.</dd></div>
-              <div><dt>Quest work</dt><dd>Build the event layout, support tables and signs, move supplies, help breakdown.</dd></div>
-              <div><dt>Earn</dt><dd>Quest credits, Crew Standup badge, Operations badge, stronger fit for future lead roles.</dd></div>
-            </dl>
-          </article>
-          <article class="role-card cloud">
-            <span>Digital / Remote</span>
-            <h3>Cloud Support</h3>
-            <p>Track updates, organize notes, route questions, and support the team remotely.</p>
-            <dl class="role-details">
-              <div><dt>Best for</dt><dd>Remote contributors who are organized, responsive, and good with digital notes.</dd></div>
-              <div><dt>Quest work</dt><dd>Update status logs, collect proof, organize photos, route questions to the right lead.</dd></div>
-              <div><dt>Earn</dt><dd>Quest credits, Documentation badge, Cloud Support badge, post-event portfolio proof.</dd></div>
-            </dl>
-          </article>
-          <article class="role-card vendor">
+
+          <div class="coordination-line" aria-hidden="true"><span>Coordinates the operational crew</span></div>
+
+          <div class="operational-paths" aria-label="Operational paths coordinated by Event Leads">
+            <article class="role-card solar">
+              <span>Solar / Technical</span>
+              <h3>Power Runners</h3>
+              <p>Help keep solar gear, batteries, and power flow ready for the day.</p>
+              <dl class="role-details">
+                <div><dt>Best for</dt><dd>Hands-on helpers who like gear, cables, batteries, and checklists.</dd></div>
+                <div><dt>Quest work</dt><dd>Unload solar hardware, check battery status, watch power flow, flag safety issues.</dd></div>
+                <div><dt>Earn</dt><dd>Quest credits, Solar 101 badge, Site Safety badge, stipend review for higher-responsibility shifts.</dd></div>
+              </dl>
+            </article>
+            <article class="role-card ops">
+              <span>Operations</span>
+              <h3>Green Workers</h3>
+              <p>Set up tents, move materials, guide flow, and help reset the site.</p>
+              <dl class="role-details">
+                <div><dt>Best for</dt><dd>People who can move quickly, solve small problems, and support the on-site crew.</dd></div>
+                <div><dt>Quest work</dt><dd>Build the event layout, support tables and signs, move supplies, help breakdown.</dd></div>
+                <div><dt>Earn</dt><dd>Quest credits, Crew Standup badge, Operations badge, stronger fit for future lead roles.</dd></div>
+              </dl>
+            </article>
+            <article class="role-card cloud">
+              <span>Digital / Remote</span>
+              <h3>Cloud Support</h3>
+              <p>Track updates, organize notes, route questions, and support the team remotely.</p>
+              <dl class="role-details">
+                <div><dt>Best for</dt><dd>Remote contributors who are organized, responsive, and good with digital notes.</dd></div>
+                <div><dt>Quest work</dt><dd>Update status logs, collect proof, organize photos, route questions to the right lead.</dd></div>
+                <div><dt>Earn</dt><dd>Quest credits, Documentation badge, Cloud Support badge, post-event portfolio proof.</dd></div>
+              </dl>
+            </article>
+          </div>
+
+          <aside class="vendor-path" aria-labelledby="vendor-path-title">
+            <div class="vendor-path-copy">
+              <p class="eyebrow">Separate Vendor / Market Path</p>
+              <h3 id="vendor-path-title">Build the market alongside the crew.</h3>
+              <p>Vendors coordinate with Event Leads and support teams, but follow their own arrival, market, and closeout journey.</p>
+            </div>
+            <article class="role-card vendor">
             <span>Vendor / Market</span>
             <h3>CE Vendors</h3>
             <p>Operate a market table, communicate needs, and help document what local businesses need from the event system.</p>
@@ -102,17 +127,8 @@
               <div><dt>Quest work</dt><dd>Arrive with table gear, run the booth, communicate support needs, and submit a simple closing report.</dd></div>
               <div><dt>Earn</dt><dd>Vendor profile proof, participation record, market feedback, and stronger fit for future events.</dd></div>
             </dl>
-          </article>
-          <article class="role-card lead">
-            <span>Lead / Coordination</span>
-            <h3>Event Leads</h3>
-            <p>Guide crews through setup, monitor schedule changes, coordinate vendors, and close the day with useful reports.</p>
-            <dl class="role-details">
-              <div><dt>Best for</dt><dd>Experienced organizers who understand multiple roles and can keep people moving through the plan.</dd></div>
-              <div><dt>Quest work</dt><dd>Run crew training, manage shift changes, solve field issues, and collect final reports.</dd></div>
-              <div><dt>Earn</dt><dd>Lead record, coordination badge, performance review data, and a stronger operational playbook.</dd></div>
-            </dl>
-          </article>
+            </article>
+          </aside>
         </div>
       </section>
 
@@ -205,10 +221,10 @@
         <div class="section-copy">
           <p class="eyebrow">Event-day timeline</p>
           <h2 id="role-timeline-title">Role journeys and field storylines.</h2>
-          <p>Each storyline has a beginning, middle, and end so people know what to prepare, how to operate during the fair, and what proof or report to hand back when the work is finished.</p>
+          <p>Start with the Event Lead coordination view, then follow each operational crew journey. The separate Vendor / Market path closes the set. Every storyline keeps its beginning, middle, end, and final proof or report.</p>
         </div>
 
-        <article class="role-timeline-block">
+        <article class="role-timeline-block timeline-power">
           <div class="timeline-role-header">
             <span>Power Runners</span>
             <h3>Solar hardware and battery flow</h3>
@@ -364,7 +380,7 @@
           </div>
         </article>
 
-        <article class="role-timeline-block">
+        <article class="role-timeline-block timeline-cloud">
           <div class="timeline-role-header">
             <span>Cloud Support</span>
             <h3>Live communications and event reporting</h3>
@@ -421,9 +437,9 @@
           </div>
         </article>
 
-        <article class="role-timeline-block">
+        <article class="role-timeline-block timeline-green">
           <div class="timeline-role-header">
-            <span>Setup &amp; Breakdown Team</span>
+            <span>Green Workers · Setup &amp; Breakdown</span>
             <h3>Infrastructure setup, changes, and reset</h3>
             <p>For Green Workers who learn the gear, build the physical site, support active infrastructure changes, and close the field cleanly.</p>
           </div>
@@ -478,9 +494,9 @@
           </div>
         </article>
 
-        <article class="role-timeline-block">
+        <article class="role-timeline-block timeline-vendor">
           <div class="timeline-role-header">
-            <span>CE Vendor</span>
+            <span>CE Vendor · Separate Market Path</span>
             <h3>Vendor arrival, market work, and table closeout</h3>
             <p>For vendors or micro-businesses moving through the fair as participants: arrive prepared, operate the table, respond to schedule needs, and close with a clear vendor report.</p>
           </div>
@@ -535,11 +551,11 @@
           </div>
         </article>
 
-        <article class="role-timeline-block">
+        <article class="role-timeline-block timeline-lead">
           <div class="timeline-role-header">
-            <span>Event Lead</span>
+            <span>Event Lead · Coordination Layer</span>
             <h3>Crew training, stage changes, and final accountability</h3>
-            <p>For the person guiding the system: train crews, watch shift changes, coordinate infrastructure needs, and turn the day into a complete operations record.</p>
+            <p>For the person guiding the system: train the three operational crews, watch shift changes, coordinate vendor needs, and turn the day into a complete operations record.</p>
           </div>
           <div class="phase-grid" aria-label="Event Lead timeline phases">
             <article class="phase-card beginning">
@@ -707,77 +723,231 @@
 
     </main>
 
-    <section class="side-panel" id="applyPanel" aria-hidden="true" aria-label="Join a quest panel">
-      <button class="close-button" type="button" data-close-panel aria-label="Close quest intake">Close</button>
-      <p class="eyebrow">Quest intake</p>
-      <h2>Join a Sunrise quest.</h2>
-      <p class="panel-intro">Tell us what you can help with. We will match you to a clear role.</p>
-      <div class="intake-summary" aria-label="What the Player Card creates">
-        <article>
-          <span>01</span>
-          <strong>Role signal</strong>
-          <p>Choose your crew.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <strong>Proof trail</strong>
-          <p>Share what you can do.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <strong>Match record</strong>
-          <p>Get a recommended quest.</p>
-        </article>
+    <section class="application-modal" id="applyPanel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="application-title">
+      <div class="application-shell">
+        <aside class="application-rail">
+          <div class="application-rail-header">
+            <span class="application-mark">SQ</span>
+            <div>
+              <p>Sunrise Fair</p>
+              <strong>Quest application</strong>
+            </div>
+          </div>
+
+          <div class="rail-progress-copy">
+            <p class="eyebrow">Build your Player Card</p>
+            <h3>A clear role starts with a clear signal.</h3>
+            <p>Five short steps help the team understand where you fit and how you can contribute.</p>
+          </div>
+
+          <nav class="application-steps" aria-label="Application progress">
+            <button type="button" class="active" data-application-step="1"><span>1</span><b>Contact</b><small>How we reach you</small></button>
+            <button type="button" data-application-step="2"><span>2</span><b>Role &amp; shift</b><small>Where you fit</small></button>
+            <button type="button" data-application-step="3"><span>3</span><b>Skills &amp; proof</b><small>What you bring</small></button>
+            <button type="button" data-application-step="4"><span>4</span><b>Rewards</b><small>How you participate</small></button>
+            <button type="button" data-application-step="5"><span>5</span><b>Review</b><small>Check your card</small></button>
+          </nav>
+
+          <div class="intake-summary" aria-label="What the Player Card creates">
+            <article><span>01</span><div><strong>Role signal</strong><p>Choose your crew.</p></div></article>
+            <article><span>02</span><div><strong>Proof trail</strong><p>Share what you can do.</p></div></article>
+            <article><span>03</span><div><strong>Match record</strong><p>Get a recommended quest.</p></div></article>
+          </div>
+        </aside>
+
+        <div class="application-main">
+          <header class="application-header">
+            <div>
+              <p class="eyebrow">Quest intake</p>
+              <h2 id="application-title">Join a Sunrise quest.</h2>
+              <p class="panel-intro">Tell us what you can help with. We will match you to a clear role.</p>
+            </div>
+            <button class="close-button" type="button" data-close-panel aria-label="Close quest intake">Close</button>
+          </header>
+
+          <div class="application-progress-track" aria-hidden="true"><span id="applicationProgressBar"></span></div>
+
+          <div class="application-workspace">
+          <form class="apply-form application-form" id="applicationForm">
+            <section class="application-step-panel active" data-step-panel="1" aria-labelledby="step-contact-title">
+              <div class="step-heading">
+                <p class="eyebrow">Step 1 of 5</p>
+                <h3 id="step-contact-title">How can the team reach you?</h3>
+                <p>Start with the contact details a team lead will need for matching and follow-up.</p>
+              </div>
+              <div class="form-grid two-column">
+                <label class="field full-width" for="name"><span>Name <em>*</em></span><input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" required></label>
+                <label class="field" for="email"><span>Email <em>*</em></span><input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required></label>
+                <label class="field" for="phone"><span>Phone number <em>*</em></span><input id="phone" name="phone" type="tel" placeholder="Your best contact number" autocomplete="tel" required></label>
+                <label class="field" for="zip"><span>Zip code <em>*</em></span><input id="zip" name="zip" type="text" inputmode="numeric" placeholder="Your zip code" autocomplete="postal-code" required></label>
+                <label class="field" for="referral"><span>How did you hear about this opportunity? <em>*</em></span><select id="referral" name="referral" required><option value="">Choose one</option><option>Sunrise Fair team</option><option>Friend or community partner</option><option>Social media</option><option>School or training program</option><option>Other</option></select></label>
+                <label class="field full-width" for="accessibility"><span>Accessibility or health needs</span><textarea id="accessibility" name="accessibility" rows="3" placeholder="Share anything that would help us plan a respectful, safe role for you."></textarea></label>
+              </div>
+            </section>
+
+            <section class="application-step-panel" data-step-panel="2" aria-labelledby="step-role-title" hidden>
+              <div class="step-heading">
+                <p class="eyebrow">Step 2 of 5</p>
+                <h3 id="step-role-title">Choose your path and shift.</h3>
+                <p>Event Leads coordinate the three standard crew paths. Vendors join through a separate market path.</p>
+              </div>
+              <div class="form-grid two-column">
+                <div class="field full-width role-picker">
+                  <span>Role target <em>*</em></span>
+                  <select class="visually-hidden" id="role" name="role" aria-hidden="true" tabindex="-1" required>
+                  <optgroup label="Operational paths · coordinated by Event Leads">
+                    <option>Power Runner · solar / technical</option>
+                    <option>Green Worker · operations / logistics</option>
+                    <option>Cloud Support · remote digital desk</option>
+                  </optgroup>
+                  <optgroup label="Separate Vendor / Market path">
+                    <option>CE Vendor · vendor / market</option>
+                  </optgroup>
+                  <optgroup label="Coordination interest">
+                    <option>Event Lead · experienced coordination</option>
+                  </optgroup>
+                  </select>
+                  <div class="role-choice-grid" role="group" aria-label="Choose a role target">
+                    <button type="button" class="role-choice active solar-choice" data-role-choice="Power Runner · solar / technical" aria-pressed="true"><span>Power</span><strong>Power Runner</strong><small>Solar gear, batteries, and power flow.</small></button>
+                    <button type="button" class="role-choice green-choice" data-role-choice="Green Worker · operations / logistics" aria-pressed="false"><span>Green</span><strong>Green Worker</strong><small>Setup, logistics, and site reset.</small></button>
+                    <button type="button" class="role-choice cloud-choice" data-role-choice="Cloud Support · remote digital desk" aria-pressed="false"><span>Cloud</span><strong>Cloud Support</strong><small>Live communications and reporting.</small></button>
+                    <button type="button" class="role-choice vendor-choice" data-role-choice="CE Vendor · vendor / market" aria-pressed="false"><span>Market</span><strong>CE Vendor</strong><small>A separate vendor participation path.</small></button>
+                    <button type="button" class="role-choice lead-choice" data-role-choice="Event Lead · experienced coordination" aria-pressed="false"><span>Lead</span><strong>Event Lead</strong><small>Experienced crew coordination.</small></button>
+                  </div>
+                </div>
+                <label class="field full-width" for="availability"><span>Availability <em>*</em></span><select id="availability" name="availability" required>
+                  <option>September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</option>
+                  <option>September 26 · Shift 2 midday · 12:00 PM–3:00 PM</option>
+                  <option>September 26 · Shift 3 afternoon / evening · 2:00 PM–5:00 PM</option>
+                  <option>September 26 · full event day · 9:00 AM–8:00 PM</option>
+                  <option>September 26 · remote support · 12:00 PM–5:00 PM</option>
+                </select></label>
+                <label class="field full-width conditional-field" id="leadExperienceField" for="leadExperience" hidden><span>Event Lead experience <em>*</em></span><textarea id="leadExperience" name="leadExperience" rows="4" placeholder="Tell us about crew coordination, event operations, shift leadership, or experience across multiple Sunrise roles."></textarea><small>Event Leads are an experienced coordination path. A team lead will review this information before assignment.</small></label>
+              </div>
+            </section>
+
+            <section class="application-step-panel" data-step-panel="3" aria-labelledby="step-proof-title" hidden>
+              <div class="step-heading">
+                <p class="eyebrow">Step 3 of 5</p>
+                <h3 id="step-proof-title">Show what you can bring.</h3>
+                <p>Skills, prior work, and supporting proof help the team match you to a clear quest.</p>
+              </div>
+              <div class="form-grid">
+                <label class="field" for="interests"><span>Skills and interests <em>*</em></span><textarea id="interests" name="interests" rows="4" placeholder="Example: battery checks, tent setup, crew standups, remote documentation..." required></textarea></label>
+                <label class="field" for="proof"><span>Proof you can bring</span><textarea id="proof" name="proof" rows="3" placeholder="Training completed, setup photos, prior event work, support logs, certificates..."></textarea></label>
+                <label class="field" for="supportingLinks"><span>Resume, certification, portfolio, or work sample links</span><textarea id="supportingLinks" name="supportingLinks" rows="3" placeholder="Add complete shareable links, one per line."></textarea><small>For this MVP, use links instead of uploading a file. Confirm that the Sunrise team can open each link.</small></label>
+                <div class="field resume-upload-field" hidden aria-hidden="true">
+                  <span>Resume or certification file</span>
+                  <input class="visually-hidden" id="resumeFile" name="resumeFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                  <div class="resume-dropzone" id="resumeDropzone" tabindex="0" role="button" aria-controls="resumeFile">
+                    <span class="upload-icon" aria-hidden="true">↑</span>
+                    <strong>Drop your resume here</strong>
+                    <p>or click to choose a PDF, DOC, or DOCX file</p>
+                    <small>Maximum file size: 10 MB. The file stays on this device until backend upload is connected.</small>
+                  </div>
+                  <div class="resume-file-card" id="resumeFileCard" hidden>
+                    <div><strong id="resumeFileName"></strong><small id="resumeFileMeta"></small></div>
+                    <button type="button" class="undo-button" id="removeResumeFile">Remove</button>
+                  </div>
+                  <p class="resume-restore-note" id="resumeRestoreNote" hidden>A previous draft included this filename. Please attach the file again before final submission.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="application-step-panel" data-step-panel="4" aria-labelledby="step-rewards-title" hidden>
+              <div class="step-heading">
+                <p class="eyebrow">Step 4 of 5</p>
+                <h3 id="step-rewards-title">Choose how you want to participate.</h3>
+                <p>Select every option that fits. Reward preferences help leads understand your goals.</p>
+              </div>
+              <fieldset class="compact-fieldset reward-choice-grid">
+                <legend>Reward preference <em>*</em></legend>
+                <label><input type="checkbox" name="applicationReward" value="Quest credits" checked><span><strong>Quest credits</strong><small>Build a record of verified contribution.</small></span></label>
+                <label><input type="checkbox" name="applicationReward" value="Volunteer status"><span><strong>Volunteer status</strong><small>Join simply to support the fair.</small></span></label>
+                <label><input type="checkbox" name="applicationReward" value="Stipend eligible review"><span><strong>Stipend eligible review</strong><small>Some roles may qualify for paid support after review.</small></span></label>
+                <label><input type="checkbox" name="applicationReward" value="Badge progress" checked><span><strong>Badge progress</strong><small>Build visible Sunrise role skills.</small></span></label>
+              </fieldset>
+              <div class="panel-note">
+                <strong>Save Draft</strong>
+                <span>A draft stays in this browser so you can refresh and continue later. It is not sent to the Sunrise team.</span>
+              </div>
+            </section>
+
+            <section class="application-step-panel" data-step-panel="5" aria-labelledby="step-review-title" hidden>
+              <div class="step-heading">
+                <p class="eyebrow">Step 5 of 5</p>
+                <h3 id="step-review-title">Review your Player Card.</h3>
+                <p>Check your role, availability, skills, and supporting links before sending your application to the Sunrise team.</p>
+              </div>
+              <dl class="application-review" id="applicationReview">
+                <div><dt>Name</dt><dd data-review="name">Draft contributor</dd></div>
+                <div><dt>Contact</dt><dd data-review="contact">Not added yet</dd></div>
+                <div><dt>Role</dt><dd data-review="role">Power Runner · solar / technical</dd></div>
+                <div><dt>Availability</dt><dd data-review="availability">September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</dd></div>
+                <div><dt>Skills</dt><dd data-review="skills">No skills added yet</dd></div>
+                <div><dt>Proof</dt><dd data-review="proof">No proof added yet</dd></div>
+                <div><dt>Supporting links</dt><dd data-review="links">No links added</dd></div>
+                <div><dt>Rewards</dt><dd data-review="rewards">Quest credits, Badge progress</dd></div>
+              </dl>
+              <fieldset class="acknowledgement-list" id="acknowledgementList">
+                <legend>Final confirmation <em>*</em></legend>
+                <label><input type="checkbox" id="ackGuide" name="ackGuide" required><span>I have reviewed the Sunrise comic/guide and understand the expectations for this role.</span></label>
+                <label><input type="checkbox" id="ackCommitment" name="ackCommitment" required><span>I can commit to the role and shift shown above.</span></label>
+                <label><input type="checkbox" id="ackAccuracy" name="ackAccuracy" required><span>The information in this application is accurate, and I am ready to submit.</span></label>
+              </fieldset>
+              <div class="panel-note connection-note">
+                <strong>Final Submit</strong>
+                <span>This sends your application to the Sunrise team. Save Draft remains private to this browser.</span>
+              </div>
+            </section>
+
+            <footer class="application-actions">
+              <button type="button" class="secondary-button" id="previousApplicationStep" hidden>Back</button>
+              <span class="step-status" id="applicationStepStatus">Step 1 of 5</span>
+              <button type="button" class="secondary-button save-draft-button" id="saveApplication">Save Draft</button>
+              <button type="button" class="primary-button" id="nextApplicationStep">Continue</button>
+              <button type="button" class="primary-button submit-application-button" id="submitApplication" hidden>Submit Application</button>
+            </footer>
+            <p class="action-status" id="applicationStatus" aria-live="polite"></p>
+          </form>
+
+          <aside class="draft-panel" aria-label="Saved application draft">
+            <article class="saved-card" id="savedApplicationCard" hidden aria-live="polite">
+              <p class="eyebrow">Saved Player Card</p>
+              <h3 id="savedCardName">Draft contributor</h3>
+              <dl>
+                <div><dt>Role</dt><dd id="savedCardRole"></dd></div>
+                <div><dt>Availability</dt><dd id="savedCardAvailability"></dd></div>
+                <div><dt>Skills</dt><dd id="savedCardSkills"></dd></div>
+                <div><dt>Proof</dt><dd id="savedCardProof"></dd></div>
+              </dl>
+              <div class="action-row">
+                <button class="undo-button" type="button" id="editApplication">Edit again</button>
+                <button class="danger-button" type="button" id="deleteApplication">Delete draft</button>
+              </div>
+            </article>
+          </aside>
+          </div>
+
+          <section class="application-success" id="applicationSuccess" hidden aria-live="polite">
+            <span class="success-mark" aria-hidden="true">✓</span>
+            <p class="eyebrow">Application submitted</p>
+            <h3>Your Player Card reached the Sunrise team.</h3>
+            <p>Thank you, <strong id="successApplicantName">contributor</strong>. Keep your Submission ID for follow-up and event-day check-in.</p>
+            <dl>
+              <div><dt>Submission ID</dt><dd id="successSubmissionId"></dd></div>
+              <div><dt>Role</dt><dd id="successRole"></dd></div>
+              <div><dt>Shift</dt><dd id="successAvailability"></dd></div>
+              <div><dt>Status</dt><dd>Received for team review</dd></div>
+            </dl>
+            <div class="success-warning"><strong>Submission received</strong><span>Your private application and the team's sanitized review record have been created.</span></div>
+            <div class="action-row">
+              <button type="button" class="secondary-button" id="editCompletedApplication">Start another application</button>
+              <button type="button" class="primary-button" data-close-panel>Close</button>
+            </div>
+          </section>
+        </div>
       </div>
-      <form class="apply-form">
-        <label for="name">Name</label>
-        <input id="name" type="text" placeholder="Your name">
-        <label for="role">Role target</label>
-        <select id="role">
-          <option>Power Runner · solar / technical</option>
-          <option>Green Worker · operations / logistics</option>
-          <option>Cloud Support · remote digital desk</option>
-        </select>
-        <label for="interests">Skills and interests</label>
-        <textarea id="interests" rows="4" placeholder="Example: battery checks, tent setup, crew standups, remote documentation..."></textarea>
-        <label for="availability">Availability</label>
-        <select id="availability">
-          <option>September 26 · morning setup</option>
-          <option>September 26 · live event support</option>
-          <option>September 26 · afternoon support</option>
-          <option>September 26 · evening breakdown</option>
-          <option>September 26 · full event day</option>
-          <option>September 26 · remote support</option>
-        </select>
-        <label for="proof">Proof you can bring</label>
-        <textarea id="proof" rows="3" placeholder="Training completed, setup photos, prior event work, support logs, certificates..."></textarea>
-        <fieldset class="compact-fieldset">
-          <legend>Reward preference</legend>
-          <label><input type="checkbox" checked> Quest credits</label>
-          <label><input type="checkbox"> Stipend eligible review</label>
-          <label><input type="checkbox" checked> Badge progress</label>
-        </fieldset>
-        <div class="panel-note">
-          <strong>After saving</strong>
-          <span>Your draft card can be reviewed and matched to an open quest.</span>
-        </div>
-        <button type="button" class="primary-button" id="saveApplication">Save draft card</button>
-        <p class="action-status" id="applicationStatus" aria-live="polite"></p>
-      </form>
-      <article class="saved-card" id="savedApplicationCard" hidden aria-live="polite">
-        <p class="eyebrow">Saved Player Card</p>
-        <h3 id="savedCardName">Draft contributor</h3>
-        <dl>
-          <div><dt>Role</dt><dd id="savedCardRole"></dd></div>
-          <div><dt>Availability</dt><dd id="savedCardAvailability"></dd></div>
-          <div><dt>Skills</dt><dd id="savedCardSkills"></dd></div>
-          <div><dt>Proof</dt><dd id="savedCardProof"></dd></div>
-        </dl>
-        <div class="action-row">
-          <button class="undo-button" type="button" id="editApplication">Edit again</button>
-          <button class="danger-button" type="button" id="deleteApplication">Delete draft</button>
-        </div>
-      </article>
     </section>
 
     <div class="scrim" data-close-panel></div>
