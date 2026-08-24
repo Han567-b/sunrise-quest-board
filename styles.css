@@ -2723,6 +2723,107 @@ body.application-open {
   line-height: 1.42;
 }
 
+.application-main > .event-field-guide {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(330px, 1.7fr) minmax(180px, 0.8fr);
+  margin: 18px clamp(28px, 4vw, 48px) 0;
+  border-color: rgba(166, 94, 35, 0.24);
+  background:
+    radial-gradient(circle at 4% 0%, rgba(243, 185, 76, 0.18), transparent 34%),
+    linear-gradient(135deg, #fff8e8, #fffdf7);
+  box-shadow: 0 12px 30px rgba(62, 38, 18, 0.08);
+}
+
+.application-main > .event-field-guide::before {
+  right: auto;
+  left: 0;
+  width: 74px;
+}
+
+.application-main > .event-field-guide .event-guide-heading {
+  padding: 15px 16px;
+}
+
+.application-main > .event-field-guide .event-guide-sun {
+  border-color: rgba(174, 92, 29, 0.32);
+  background: rgba(243, 185, 76, 0.17);
+  color: var(--rust);
+}
+
+.application-main > .event-field-guide .event-guide-heading p,
+.application-main > .event-field-guide .event-guide-details h4 {
+  color: var(--rust);
+}
+
+.application-main > .event-field-guide .event-guide-heading h3,
+.application-main > .event-field-guide .event-guide-details strong {
+  color: var(--ink);
+}
+
+.application-main > .event-field-guide .event-guide-logistics {
+  grid-template-columns: minmax(150px, 0.8fr) minmax(190px, 1.2fr);
+  align-content: center;
+  border-top: 0;
+  border-left: 1px solid rgba(21, 17, 13, 0.1);
+}
+
+.application-main > .event-field-guide .event-guide-logistics div {
+  display: block;
+  padding: 13px 16px;
+  border-right: 1px solid rgba(21, 17, 13, 0.08);
+  border-bottom: 0;
+}
+
+.application-main > .event-field-guide .event-guide-logistics dt {
+  margin-bottom: 4px;
+  color: var(--rust);
+}
+
+.application-main > .event-field-guide .event-guide-logistics dd,
+.application-main > .event-field-guide .event-guide-logistics a {
+  color: var(--ink);
+}
+
+.application-main > .event-field-guide details {
+  align-self: stretch;
+  border-left: 1px solid rgba(21, 17, 13, 0.1);
+}
+
+.application-main > .event-field-guide details > summary {
+  min-height: 100%;
+  color: var(--ink);
+  padding: 15px 16px;
+}
+
+.application-main > .event-field-guide details > summary span {
+  border-color: rgba(166, 94, 35, 0.34);
+  color: var(--rust);
+}
+
+.application-main > .event-field-guide details[open] {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(21, 17, 13, 0.1);
+  border-left: 0;
+}
+
+.application-main > .event-field-guide details[open] > summary {
+  min-height: 0;
+}
+
+.application-main > .event-field-guide .event-guide-details {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top-color: rgba(21, 17, 13, 0.1);
+  padding: 18px;
+}
+
+.application-main > .event-field-guide .event-guide-details li {
+  border-left-color: rgba(166, 94, 35, 0.3);
+}
+
+.application-main > .event-field-guide .event-guide-details span {
+  color: var(--muted);
+}
+
 .application-rail .application-steps {
   display: grid;
   grid-template-columns: 1fr;
@@ -3059,19 +3160,6 @@ body.application-open {
     display: none;
   }
 
-  .event-field-guide {
-    margin: 0 0 12px;
-  }
-
-  .event-guide-heading,
-  .event-guide-logistics {
-    display: none;
-  }
-
-  .event-field-guide details > summary {
-    padding: 10px 12px;
-  }
-
   .application-rail .application-steps {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -3117,6 +3205,30 @@ body.application-open {
 
   .application-main .application-header h2 {
     max-width: 280px;
+  }
+
+  .application-main > .event-field-guide {
+    grid-template-columns: 1fr;
+    margin: 14px 20px 0;
+  }
+
+  .application-main > .event-field-guide .event-guide-logistics {
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid rgba(21, 17, 13, 0.1);
+    border-left: 0;
+  }
+
+  .application-main > .event-field-guide details {
+    border-top: 1px solid rgba(21, 17, 13, 0.1);
+    border-left: 0;
+  }
+
+  .application-main > .event-field-guide details > summary {
+    min-height: 0;
+  }
+
+  .application-main > .event-field-guide .event-guide-details {
+    grid-template-columns: 1fr;
   }
 
   .application-main .application-form {
