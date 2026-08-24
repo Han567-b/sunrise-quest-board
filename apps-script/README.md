@@ -20,7 +20,7 @@ Keep this file **Restricted**. Create a sheet named `Applications_Private` with
 this exact first row:
 
 ```text
-submission_id,submitted_at_utc,schema_version,client_request_id,full_name,email,phone,zip_code,referral_source,accessibility_health_needs,role_target,availability_shift,event_lead_experience,skills_interests,proof_description,supporting_links,reward_preferences,ack_training_comic,ack_commitment,ack_accuracy
+submission_id,submitted_at_utc,schema_version,client_request_id,full_name,email,phone,zip_code,referral_source,accessibility_health_needs,role_target,availability_shift,event_lead_experience,skills_interests,proof_description,supporting_links,reward_preferences,ack_training_comic,ack_commitment,ack_accuracy,submission_status,withdrawal_token_hash,withdrawn_at_utc
 ```
 
 ### 2. Sunrise Team Review
@@ -30,7 +30,7 @@ and invite Event Lead editors separately. Create a sheet named `Team_Review`
 with this exact first row:
 
 ```text
-submission_id,submitted_at_utc,display_name,role_target,availability_shift,skills_summary,supporting_material_available,reward_preferences,readiness_status,team_notes
+submission_id,submitted_at_utc,display_name,role_target,availability_shift,skills_summary,supporting_material_available,reward_preferences,readiness_status,team_notes,submission_status,withdrawn_at_utc
 ```
 
 The endpoint creates this row through an explicit allowlist. It never includes
@@ -82,7 +82,9 @@ Properties and must never be added to GitHub Pages.
 ```json
 {
   "schemaVersion": "2B.1",
+  "action": "submit_application",
   "clientRequestId": "browser-generated-uuid",
+  "withdrawalToken": "browser-generated-random-token",
   "clientCompletedAt": "2026-08-24T12:00:00.000Z",
   "applicant": {
     "fullName": "Example Applicant",
@@ -112,6 +114,25 @@ Properties and must never be added to GitHub Pages.
 Resume and certification binaries are intentionally not part of the MVP. An
 applicant supplies shareable `http://` or `https://` links instead.
 
+The browser keeps the raw withdrawal token in the applicant's local receipt.
+Only its SHA-256 hash is written to the restricted Private Applications file;
+the Team Review file never receives the token or hash.
+
+Withdrawal request:
+
+```json
+{
+  "action": "withdraw_application",
+  "schemaVersion": "2B.1",
+  "submissionId": "SQ-20260926-000001",
+  "withdrawalToken": "browser-saved-random-token"
+}
+```
+
+A successful withdrawal changes `submission_status` to `Withdrawn` and writes
+`withdrawn_at_utc` in both files. Rows are retained rather than deleted so the
+team keeps a clear audit trail.
+
 ## Response contract
 
 Success:
@@ -132,6 +153,7 @@ Failure responses use `ok: false` and one of these public codes:
 - `CONFIG_ERROR`
 - `PRIVATE_WRITE_FAILED`
 - `TEAM_WRITE_FAILED`
+- `WITHDRAWAL_NOT_AUTHORIZED`
 - `SERVICE_BUSY`
 - `INTERNAL_ERROR`
 

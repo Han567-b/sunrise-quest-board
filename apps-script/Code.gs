@@ -27,7 +27,10 @@ var PRIVATE_HEADERS = [
   "reward_preferences",
   "ack_training_comic",
   "ack_commitment",
-  "ack_accuracy"
+  "ack_accuracy",
+  "submission_status",
+  "withdrawal_token_hash",
+  "withdrawn_at_utc"
 ];
 
 var TEAM_HEADERS = [
@@ -40,7 +43,9 @@ var TEAM_HEADERS = [
   "supporting_material_available",
   "reward_preferences",
   "readiness_status",
-  "team_notes"
+  "team_notes",
+  "submission_status",
+  "withdrawn_at_utc"
 ];
 
 var ALLOWED_ROLES = [
@@ -77,7 +82,8 @@ var MAX_LENGTHS = {
   skillsInterests: 3000,
   proofDescription: 3000,
   supportingLink: 2000,
-  clientRequestId: 100
+  clientRequestId: 100,
+  withdrawalToken: 200
 };
 
 function doPost(e) {
@@ -85,6 +91,9 @@ function doPost(e) {
 
   try {
     var payload = parseRequest_(e);
+    if (cleanString_(payload.action) === "withdraw_application") {
+      return handleWithdrawal_(payload, requestContext);
+    }
     requestContext.stage = "validate";
     var validation = validatePayload_(payload);
 
@@ -113,7 +122,7 @@ function doPost(e) {
         if (!sheetContainsValue_(teamSheet, "submission_id", existing.submissionId)) {
           requestContext.stage = "team_retry";
           try {
-            appendTeamReview_(teamSheet, buildTeamReviewRow_(normalized, existing.submissionId, existing.submittedAtUtc));
+            appendTeamReviewRow_(teamSheet, buildTeamReviewRow_(normalized, existing.submissionId, existing.submittedAtUtc));
           } catch (teamRetryError) {
             logError_("TEAM_WRITE_FAILED", requestContext, teamRetryError);
             return errorResponse_(
@@ -144,7 +153,7 @@ function doPost(e) {
 
       requestContext.stage = "team_write";
       try {
-        appendTeamReview_(teamSheet, buildTeamReviewRow_(normalized, submissionId, submittedAtUtc));
+        appendTeamReviewRow_(teamSheet, buildTeamReviewRow_(normalized, submissionId, submittedAtUtc));
       } catch (teamError) {
         logError_("TEAM_WRITE_FAILED", requestContext, teamError);
         return errorResponse_(
@@ -193,6 +202,7 @@ function validatePayload_(payload) {
   }
   if (cleanString_(payload.schemaVersion) !== SCHEMA_VERSION) errors.schemaVersion = "This application version is no longer supported.";
   validateRequiredText_(errors, "clientRequestId", payload.clientRequestId, MAX_LENGTHS.clientRequestId);
+  validateRequiredText_(errors, "withdrawalToken", payload.withdrawalToken, MAX_LENGTHS.withdrawalToken);
   validateRequiredText_(errors, "fullName", applicant.fullName, MAX_LENGTHS.fullName);
   validateRequiredText_(errors, "email", applicant.email, MAX_LENGTHS.email);
   validateRequiredText_(errors, "phone", applicant.phone, MAX_LENGTHS.phone);
@@ -205,6 +215,9 @@ function validatePayload_(payload) {
 
   if (cleanString_(payload.clientRequestId) && !/^[A-Za-z0-9._:-]{8,100}$/.test(cleanString_(payload.clientRequestId))) {
     errors.clientRequestId = "The application request identifier is invalid.";
+  }
+  if (cleanString_(payload.withdrawalToken) && !/^[A-Za-z0-9._:-]{16,200}$/.test(cleanString_(payload.withdrawalToken))) {
+    errors.withdrawalToken = "The application withdrawal identifier is invalid.";
   }
 
   if (cleanString_(applicant.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanString_(applicant.email))) {
@@ -235,6 +248,7 @@ function normalizePayload_(payload) {
   return {
     schemaVersion: SCHEMA_VERSION,
     clientRequestId: cleanString_(payload.clientRequestId),
+    withdrawalToken: cleanString_(payload.withdrawalToken),
     applicant: {
       fullName: cleanString_(payload.applicant.fullName),
       email: cleanString_(payload.applicant.email).toLowerCase(),
@@ -288,7 +302,10 @@ function buildPrivateRow_(payload, submissionId, submittedAtUtc) {
     payload.application.rewardPreferences.join(", "),
     payload.acknowledgements.trainingComic,
     payload.acknowledgements.commitment,
-    payload.acknowledgements.accuracy
+    payload.acknowledgements.accuracy,
+    "Submitted",
+    hashToken_(payload.withdrawalToken),
+    ""
   ];
 }
 
@@ -306,6 +323,8 @@ function buildTeamReviewRow_(payload, submissionId, submittedAtUtc) {
     hasSupportingMaterial ? "Yes" : "No",
     payload.application.rewardPreferences.join(", "),
     hasSupportingMaterial ? "Ready for Review" : "Needs Follow-Up",
+    "",
+    "Submitted",
     ""
   ];
 }
@@ -314,8 +333,84 @@ function appendPrivateApplication_(sheet, row) {
   appendSanitizedRow_(sheet, row, PRIVATE_HEADERS.length);
 }
 
-function appendTeamReview_(sheet, row) {
+function appendTeamReviewRow_(sheet, row) {
   appendSanitizedRow_(sheet, row, TEAM_HEADERS.length);
+}
+
+function handleWithdrawal_(payload, requestContext) {
+  var validation = validateWithdrawalPayload_(payload);
+  if (!validation.valid) {
+    return errorResponse_("VALIDATION_ERROR", "The withdrawal request is incomplete.", {
+      fieldErrors: validation.fieldErrors
+    });
+  }
+
+  var config = getConfig_();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) {
+    return errorResponse_("SERVICE_BUSY", "The application service is busy. Please try again.");
+  }
+
+  try {
+    requestContext.stage = "withdrawal_lookup";
+    requestContext.submissionId = cleanString_(payload.submissionId);
+    var privateSheet = getSheet_(config.privateSpreadsheetId, config.privateSheetName, PRIVATE_HEADERS);
+    var teamSheet = getSheet_(config.teamSpreadsheetId, config.teamSheetName, TEAM_HEADERS);
+    var privateRowNumber = findRowByValue_(privateSheet, "submission_id", requestContext.submissionId);
+
+    if (!privateRowNumber) {
+      throw publicError_("WITHDRAWAL_NOT_AUTHORIZED", "This application could not be withdrawn from this browser.");
+    }
+
+    var privateMap = headerIndexMap_(PRIVATE_HEADERS);
+    var privateValues = privateSheet.getRange(privateRowNumber, 1, 1, PRIVATE_HEADERS.length).getDisplayValues()[0];
+    var expectedHash = privateValues[privateMap.withdrawal_token_hash];
+    var providedHash = hashToken_(cleanString_(payload.withdrawalToken));
+    if (!expectedHash || !secureEquals_(expectedHash, providedHash)) {
+      throw publicError_("WITHDRAWAL_NOT_AUTHORIZED", "This application could not be withdrawn from this browser.");
+    }
+
+    var withdrawnAtUtc = privateValues[privateMap.withdrawn_at_utc] || new Date().toISOString();
+    requestContext.stage = "private_withdrawal_write";
+    updateRowStatus_(privateSheet, privateRowNumber, PRIVATE_HEADERS, "Withdrawn", withdrawnAtUtc);
+
+    requestContext.stage = "team_withdrawal_write";
+    var teamRowNumber = findRowByValue_(teamSheet, "submission_id", requestContext.submissionId);
+    if (teamRowNumber) {
+      updateRowStatus_(teamSheet, teamRowNumber, TEAM_HEADERS, "Withdrawn", withdrawnAtUtc);
+    }
+
+    return jsonResponse_({
+      ok: true,
+      action: "withdrawn",
+      submissionId: requestContext.submissionId,
+      withdrawnAtUtc: withdrawnAtUtc
+    });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function validateWithdrawalPayload_(payload) {
+  var errors = {};
+  if (cleanString_(payload.schemaVersion) !== SCHEMA_VERSION) {
+    errors.schemaVersion = "This application version is no longer supported.";
+  }
+  validateRequiredText_(errors, "submissionId", payload.submissionId, 80);
+  validateRequiredText_(errors, "withdrawalToken", payload.withdrawalToken, MAX_LENGTHS.withdrawalToken);
+  if (cleanString_(payload.submissionId) && !/^SQ-\d{8}-\d{6}$/.test(cleanString_(payload.submissionId))) {
+    errors.submissionId = "The Submission ID is invalid.";
+  }
+  if (cleanString_(payload.withdrawalToken) && !/^[A-Za-z0-9._:-]{16,200}$/.test(cleanString_(payload.withdrawalToken))) {
+    errors.withdrawalToken = "The withdrawal identifier is invalid.";
+  }
+  return { valid: Object.keys(errors).length === 0, fieldErrors: errors };
+}
+
+function updateRowStatus_(sheet, rowNumber, headers, status, timestamp) {
+  var headerMap = headerIndexMap_(headers);
+  sheet.getRange(rowNumber, headerMap.submission_status + 1).setValue(sanitizeCellValue_(status));
+  sheet.getRange(rowNumber, headerMap.withdrawn_at_utc + 1).setValue(sanitizeCellValue_(timestamp));
 }
 
 function appendSanitizedRow_(sheet, row, expectedLength) {
@@ -443,6 +538,29 @@ function sanitizeCellValue_(value) {
   if (typeof value !== "string") return value;
   var normalized = value.replace(/\u0000/g, "");
   return /^[=+\-@]/.test(normalized) ? "'" + normalized : normalized;
+}
+
+function hashToken_(token) {
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    cleanString_(token),
+    Utilities.Charset.UTF_8
+  );
+  return digest.map(function (byte) {
+    return ("0" + ((byte + 256) % 256).toString(16)).slice(-2);
+  }).join("");
+}
+
+function secureEquals_(left, right) {
+  var a = String(left || "");
+  var b = String(right || "");
+  var mismatch = a.length ^ b.length;
+  var length = Math.max(a.length, b.length);
+  for (var index = 0; index < length; index += 1) {
+    mismatch |= (a.charCodeAt(index % Math.max(a.length, 1)) || 0)
+      ^ (b.charCodeAt(index % Math.max(b.length, 1)) || 0);
+  }
+  return mismatch === 0;
 }
 
 function buildDisplayName_(fullName) {

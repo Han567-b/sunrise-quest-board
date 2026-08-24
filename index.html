@@ -931,16 +931,16 @@
 
           <section class="application-success" id="applicationSuccess" hidden aria-live="polite">
             <span class="success-mark" aria-hidden="true">✓</span>
-            <p class="eyebrow">Thank you for your submission</p>
-            <h3>Your Sunrise application is in.</h3>
-            <p>Thank you, <strong id="successApplicantName">contributor</strong>. The Event Lead team will review your application together and contact you if they need more details.</p>
+            <p class="eyebrow" id="successEyebrow">Thank you for your submission</p>
+            <h3 id="successTitle">Your Sunrise application is in.</h3>
+            <p id="successMessage">Thank you, <strong id="successApplicantName">contributor</strong>. The Event Lead team will review your application together and contact you if they need more details.</p>
             <dl>
               <div><dt>Submission ID</dt><dd id="successSubmissionId"></dd></div>
               <div><dt>Role</dt><dd id="successRole"></dd></div>
               <div><dt>Shift</dt><dd id="successAvailability"></dd></div>
-              <div><dt>Status</dt><dd>Received for team review</dd></div>
+              <div><dt>Status</dt><dd id="successStatus">Received for team review</dd></div>
             </dl>
-            <section class="success-next-steps" aria-labelledby="success-next-title">
+            <section class="success-next-steps" id="successNextSteps" aria-labelledby="success-next-title">
               <p class="eyebrow">What happens next</p>
               <h4 id="success-next-title">Review, match, and get quest-ready.</h4>
               <ol>
@@ -957,6 +957,7 @@
             <div class="action-row">
               <button type="button" class="secondary-button" id="copySubmissionId">Copy Submission ID</button>
               <button type="button" class="secondary-button" id="printSubmissionConfirmation">Print / Save</button>
+              <button type="button" class="danger-button" id="withdrawApplication">Withdraw application</button>
               <button type="button" class="secondary-button" id="editCompletedApplication">Start another application</button>
               <button type="button" class="primary-button" data-close-panel>Close</button>
             </div>

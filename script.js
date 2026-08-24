@@ -209,6 +209,7 @@ const applicationSuccess = document.querySelector("#applicationSuccess");
 const editCompletedApplication = document.querySelector("#editCompletedApplication");
 const copySubmissionId = document.querySelector("#copySubmissionId");
 const printSubmissionConfirmation = document.querySelector("#printSubmissionConfirmation");
+const withdrawApplication = document.querySelector("#withdrawApplication");
 const successActionStatus = document.querySelector("#successActionStatus");
 const resumeFileInput = document.querySelector("#resumeFile");
 const resumeDropzone = document.querySelector("#resumeDropzone");
@@ -230,6 +231,7 @@ let draftSaveTimer = null;
 let applicationCompletedLocally = false;
 let draftWasExplicitlySaved = false;
 let applicationClientRequestId = "";
+let applicationWithdrawalToken = "";
 let lastSubmissionReceipt = null;
 let applicationSubmitting = false;
 
@@ -546,6 +548,7 @@ function collectApplicationDraft() {
   return {
     version: 2,
     clientRequestId: getOrCreateClientRequestId(),
+    withdrawalToken: getOrCreateWithdrawalToken(),
     updatedAt: new Date().toISOString(),
     currentStep: currentApplicationStep,
     savedExplicitly: draftWasExplicitlySaved,
@@ -617,6 +620,7 @@ function restoreApplicationDraft() {
   if (!data || data.version !== 2 || !applicationForm) return false;
 
   applicationClientRequestId = typeof data.clientRequestId === "string" ? data.clientRequestId : "";
+  applicationWithdrawalToken = typeof data.withdrawalToken === "string" ? data.withdrawalToken : "";
 
   ["name", "email", "phone", "zip", "referral", "accessibility", "role", "availability", "leadExperience", "interests", "proof", "supportingLinks"]
     .forEach((key) => {
@@ -706,11 +710,22 @@ function getOrCreateClientRequestId() {
   return applicationClientRequestId;
 }
 
+function getOrCreateWithdrawalToken() {
+  if (applicationWithdrawalToken) return applicationWithdrawalToken;
+  const randomPart = () => window.crypto?.randomUUID
+    ? window.crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  applicationWithdrawalToken = `${randomPart()}.${randomPart()}`;
+  return applicationWithdrawalToken;
+}
+
 function buildSubmissionPayload() {
   const value = (selector) => document.querySelector(selector)?.value.trim() || "";
   return {
+    action: "submit_application",
     schemaVersion: "2B.1",
     clientRequestId: getOrCreateClientRequestId(),
+    withdrawalToken: getOrCreateWithdrawalToken(),
     clientCompletedAt: new Date().toISOString(),
     applicant: {
       fullName: value("#name"),
@@ -808,7 +823,9 @@ function saveSubmissionReceipt(result, payload) {
     name: payload.applicant.fullName,
     role: payload.application.roleTarget,
     availability: payload.application.availabilityShift,
-    rewards: payload.application.rewardPreferences
+    rewards: payload.application.rewardPreferences,
+    status: "Submitted",
+    withdrawalToken: payload.withdrawalToken
   };
   try {
     localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
@@ -832,10 +849,28 @@ function restoreSubmissionReceipt() {
 function showApplicationSuccess(receipt = lastSubmissionReceipt) {
   applicationWorkspace.hidden = true;
   applicationSuccess.hidden = false;
-  document.querySelector("#successApplicantName").textContent = receipt?.name || "contributor";
+  const withdrawn = receipt?.status === "Withdrawn";
+  const applicantName = receipt?.name || "contributor";
   document.querySelector("#successSubmissionId").textContent = receipt?.submissionId || "Pending";
   document.querySelector("#successRole").textContent = receipt?.role || "Selected role";
   document.querySelector("#successAvailability").textContent = receipt?.availability || "Selected shift";
+  document.querySelector("#successEyebrow").textContent = withdrawn ? "Withdrawal confirmed" : "Thank you for your submission";
+  document.querySelector("#successTitle").textContent = withdrawn ? "Your Sunrise application was withdrawn." : "Your Sunrise application is in.";
+  const successMessage = document.querySelector("#successMessage");
+  const nameElement = document.createElement("strong");
+  nameElement.id = "successApplicantName";
+  nameElement.textContent = applicantName;
+  successMessage.replaceChildren(
+    withdrawn ? "Your application is no longer active, " : "Thank you, ",
+    nameElement,
+    withdrawn
+      ? ". The withdrawal has been recorded for the Event Lead team."
+      : ". The Event Lead team will review your application together and contact you if they need more details."
+  );
+  document.querySelector("#successStatus").textContent = withdrawn ? "Withdrawn" : "Received for team review";
+  const nextSteps = document.querySelector("#successNextSteps");
+  if (nextSteps) nextSteps.hidden = withdrawn;
+  if (withdrawApplication) withdrawApplication.hidden = withdrawn || !receipt?.withdrawalToken;
   const rewards = Array.isArray(receipt?.rewards) ? receipt.rewards : [];
   const stipendStep = document.querySelector("#successStipendStep");
   const badgeStep = document.querySelector("#successBadgeStep");
@@ -1055,6 +1090,7 @@ if (deleteApplication) {
     draftWasExplicitlySaved = false;
     applicationCompletedLocally = false;
     applicationClientRequestId = "";
+    applicationWithdrawalToken = "";
     selectedResumeFile = null;
     savedResumeMetadata = null;
     if (resumeFileInput) resumeFileInput.value = "";
@@ -1116,6 +1152,52 @@ if (submitApplication) {
   });
 }
 
+if (withdrawApplication) {
+  withdrawApplication.addEventListener("click", async () => {
+    if (applicationSubmitting || !lastSubmissionReceipt?.withdrawalToken) return;
+    const confirmed = window.confirm(
+      "Withdraw this Sunrise application? The team will see it as Withdrawn, and it will no longer be active."
+    );
+    if (!confirmed) return;
+
+    applicationSubmitting = true;
+    withdrawApplication.disabled = true;
+    withdrawApplication.textContent = "Withdrawing…";
+    if (successActionStatus) successActionStatus.textContent = "Recording your withdrawal with the Sunrise team…";
+
+    try {
+      const result = await submitApplicationToEndpoint({
+        action: "withdraw_application",
+        schemaVersion: "2B.1",
+        submissionId: lastSubmissionReceipt.submissionId,
+        withdrawalToken: lastSubmissionReceipt.withdrawalToken
+      });
+      lastSubmissionReceipt = {
+        ...lastSubmissionReceipt,
+        status: "Withdrawn",
+        withdrawnAtUtc: result.withdrawnAtUtc
+      };
+      try {
+        localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
+      } catch (storageError) {
+        // The server-confirmed withdrawal still appears in the current page.
+      }
+      showApplicationSuccess(lastSubmissionReceipt);
+      if (successActionStatus) {
+        successActionStatus.textContent = `${lastSubmissionReceipt.submissionId} was withdrawn successfully.`;
+      }
+    } catch (error) {
+      if (successActionStatus) {
+        successActionStatus.textContent = error.message || "The withdrawal could not be completed. Please try again.";
+      }
+    } finally {
+      applicationSubmitting = false;
+      withdrawApplication.disabled = false;
+      withdrawApplication.textContent = "Withdraw application";
+    }
+  });
+}
+
 if (editCompletedApplication) {
   editCompletedApplication.addEventListener("click", () => {
     applicationForm?.reset();
@@ -1124,6 +1206,7 @@ if (editCompletedApplication) {
     lastSubmissionReceipt = null;
     applicationCompletedLocally = false;
     applicationClientRequestId = "";
+    applicationWithdrawalToken = "";
     currentApplicationStep = 1;
     draftWasExplicitlySaved = false;
     selectedResumeFile = null;
