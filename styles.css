@@ -1939,6 +1939,56 @@ button:disabled {
   line-height: 1.42;
 }
 
+.vendor-storyboard {
+  border-top-color: rgba(58, 81, 48, 0.28);
+}
+
+.vendor-storyboard .storyboard-card {
+  border-color: rgba(58, 81, 48, 0.24);
+  box-shadow: 0 18px 38px rgba(51, 64, 38, 0.12);
+}
+
+.vendor-storyboard .storyboard-card span {
+  border-color: rgba(58, 81, 48, 0.28);
+  background: #e5d6a8;
+}
+
+.storyboard-placeholder-art {
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(58, 81, 48, 0.2);
+  background:
+    radial-gradient(circle at 76% 20%, rgba(231, 176, 60, 0.3), transparent 24%),
+    linear-gradient(135deg, #20392b 0%, #405a3d 52%, #756443 100%);
+  color: #fff9e8;
+  text-align: center;
+}
+
+.storyboard-placeholder-art::before {
+  width: 42px;
+  height: 42px;
+  border: 2px solid #e7b03c;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px rgba(231, 176, 60, 0.1);
+  content: "";
+}
+
+.storyboard-placeholder-art b {
+  color: #e7b03c;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 0.95;
+}
+
+.storyboard-placeholder-art strong {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .timeline-next {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
