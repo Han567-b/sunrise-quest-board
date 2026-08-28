@@ -1708,6 +1708,7 @@ button:disabled {
 .role-timeline-section {
   border-bottom: 1px solid var(--line);
   background: #fff4dd;
+  margin-bottom: clamp(64px, 8vw, 120px);
   padding-right: clamp(16px, 5vw, 58px);
   padding-left: clamp(16px, 5vw, 58px);
 }
@@ -1953,6 +1954,20 @@ button:disabled {
   background: #e5d6a8;
 }
 
+.cloud-storyboard {
+  border-top-color: rgba(66, 111, 145, 0.3);
+}
+
+.cloud-storyboard .storyboard-card {
+  border-color: rgba(66, 111, 145, 0.24);
+  box-shadow: 0 18px 38px rgba(37, 69, 93, 0.12);
+}
+
+.cloud-storyboard .storyboard-card span {
+  border-color: rgba(66, 111, 145, 0.3);
+  background: #c8dfeb;
+}
+
 .lead-storyboard {
   border-top-color: rgba(194, 89, 45, 0.28);
 }
@@ -1965,6 +1980,22 @@ button:disabled {
 .lead-storyboard .storyboard-card span {
   border-color: rgba(194, 89, 45, 0.28);
   background: #f4c792;
+}
+
+.timeline-cloud .phase-grid {
+  row-gap: clamp(22px, 3vw, 32px);
+}
+
+.timeline-cloud .task-strip {
+  margin-top: clamp(34px, 5vw, 56px);
+}
+
+.cloud-storyboard {
+  margin-top: clamp(52px, 7vw, 88px);
+}
+
+.cloud-storyboard .storyboard-grid {
+  gap: clamp(20px, 3vw, 30px);
 }
 
 .storyboard-placeholder-art {
