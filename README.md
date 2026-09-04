@@ -49,6 +49,16 @@ The site adapts common service-marketplace patterns into a Sunrise-specific syst
 - `styles.css`: visual design and responsive layout
 - `script.js`: filtering, readiness level, quest publishing, applicant shortlisting, and Player Card interactions
 - `assets/`: comic and supporting images
+- `apps-script/`: Google Apps Script application, review, upload, withdrawal, and Player Card backend
+- `tests/`: local fake-data backend and front-end contract tests
+
+## Backend and privacy
+
+Production Google Workspace ownership, authorization, deployment, and future automation connections must use `han@keytechlabs.org`.
+
+The backend keeps full applications in Restricted Private Applications, sends only an allowlisted summary to Restricted Team Review, stores uploads in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards are non-public by default and require explicit applicant opt-in before public visibility. Google resource IDs stay in Apps Script Script Properties and must never be committed.
+
+See [`apps-script/README.md`](apps-script/README.md) for schemas, setup, deployment, admin workflow, tests, and the manual access-control checklist.
 
 ## Publish on GitHub Pages
 

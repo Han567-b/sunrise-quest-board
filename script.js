@@ -218,15 +218,20 @@ const resumeFileName = document.querySelector("#resumeFileName");
 const resumeFileMeta = document.querySelector("#resumeFileMeta");
 const removeResumeFile = document.querySelector("#removeResumeFile");
 const resumeRestoreNote = document.querySelector("#resumeRestoreNote");
+const certificationFileInput = document.querySelector("#certificationFiles");
+const certificationFileList = document.querySelector("#certificationFileList");
 const levelButtons = document.querySelectorAll("[data-level]");
-const APPLICATION_DRAFT_KEY = "sunriseQuestApplicationDraftV2";
+const APPLICATION_DRAFT_KEY = "sunriseQuestApplicationDraftV3";
+const LEGACY_APPLICATION_DRAFT_KEY = "sunriseQuestApplicationDraftV2";
 const APPLICATION_RECEIPT_KEY = "sunriseQuestSubmissionReceiptV1";
 const SUBMISSION_ENDPOINT = document.querySelector('meta[name="sunrise-submission-endpoint"]')?.content.trim() || "";
 let currentView = "recommended";
 let currentApplicationStep = 1;
 let applicationOpenTrigger = null;
 let selectedResumeFile = null;
+let selectedCertificationFiles = [];
 let savedResumeMetadata = null;
+let savedCertificationMetadata = [];
 let draftSaveTimer = null;
 let applicationCompletedLocally = false;
 let draftWasExplicitlySaved = false;
@@ -397,19 +402,22 @@ function updateApplicationReview() {
     const target = document.querySelector(`[data-review="${key}"]`);
     if (target) target.textContent = value;
   };
-  const name = document.querySelector("#name")?.value.trim() || "Draft contributor";
+  const name = [document.querySelector("#firstName")?.value.trim(), document.querySelector("#lastName")?.value.trim()]
+    .filter(Boolean)
+    .join(" ") || "Draft contributor";
   const email = document.querySelector("#email")?.value.trim();
   const phone = document.querySelector("#phone")?.value.trim();
   const contact = [email, phone].filter(Boolean).join(" · ") || "Not added yet";
-  const role = roleInput?.value || "Power Runner · solar / technical";
+  const secondaryRole = document.querySelector("#secondaryRole")?.value;
+  const role = [roleInput?.value || "Power Runner · solar / technical", secondaryRole ? `Secondary: ${secondaryRole}` : ""]
+    .filter(Boolean)
+    .join(" · ");
   const availability = document.querySelector("#availability")?.value || "September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM";
   const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
-  const proofText = document.querySelector("#proof")?.value.trim();
-  const supportingLinks = document.querySelector("#supportingLinks")?.value.trim();
-  const proof = proofText || "No proof added yet";
-  const links = supportingLinks
-    ? supportingLinks.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).join(" · ")
-    : "No links added";
+  const resume = selectedResumeFile?.name || savedResumeMetadata?.name || "No resume attached";
+  const certificationNames = selectedCertificationFiles.length
+    ? selectedCertificationFiles.map((file) => file.name)
+    : savedCertificationMetadata.map((file) => file.name);
   const rewards = [...document.querySelectorAll('input[name="applicationReward"]:checked')]
     .map((item) => item.value)
     .join(", ") || "No reward preference selected";
@@ -419,8 +427,8 @@ function updateApplicationReview() {
   review("role", role);
   review("availability", availability);
   review("skills", skills);
-  review("proof", proof);
-  review("links", links);
+  review("resume", resume);
+  review("certifications", certificationNames.join(" · ") || "No certifications attached");
   review("rewards", rewards);
 }
 
@@ -483,7 +491,8 @@ function validateApplicationStep(step, revealErrors = true) {
   };
 
   if (step === 1) {
-    addRequired("#name", "Add your name to continue.");
+    addRequired("#firstName", "Add your first name to continue.");
+    addRequired("#lastName", "Add your last name to continue.");
     addRequired("#email", "Add your email to continue.");
     addRequired("#phone", "Add your phone number to continue.");
     addRequired("#zip", "Add your zip code to continue.");
@@ -492,18 +501,24 @@ function validateApplicationStep(step, revealErrors = true) {
   if (step === 2) {
     addRequired("#role", "Choose a role target.");
     addRequired("#availability", "Choose an event-day shift.");
+    const secondaryRoleInput = document.querySelector("#secondaryRole");
+    checks.push({
+      input: secondaryRoleInput,
+      valid: !secondaryRoleInput?.value || secondaryRoleInput.value !== roleInput?.value,
+      message: "Choose a different secondary role or leave it blank."
+    });
     if (roleInput?.value.startsWith("Event Lead")) {
       addRequired("#leadExperience", "Tell us about your coordination experience.");
     }
   }
   if (step === 3) {
     addRequired("#interests", "Add at least one skill or interest.");
-    const linksInput = document.querySelector("#supportingLinks");
-    const invalidLink = parseSupportingLinks(linksInput?.value).find((link) => !isValidSupportingLink(link));
+    const combinedUploadSize = (selectedResumeFile?.size || 0)
+      + selectedCertificationFiles.reduce((total, file) => total + file.size, 0);
     checks.push({
-      input: linksInput,
-      valid: !invalidLink,
-      message: "Use complete http:// or https:// links, one per line."
+      input: certificationFileInput,
+      valid: selectedCertificationFiles.length <= 3 && combinedUploadSize <= 12 * 1024 * 1024,
+      message: "Use no more than 3 certification files and keep all uploads at 12 MB or less."
     });
   }
   if (step === 4) {
@@ -546,7 +561,7 @@ function updateCompletedSteps() {
 function collectApplicationDraft() {
   const value = (selector) => document.querySelector(selector)?.value || "";
   return {
-    version: 2,
+    version: 3,
     clientRequestId: getOrCreateClientRequestId(),
     withdrawalToken: getOrCreateWithdrawalToken(),
     updatedAt: new Date().toISOString(),
@@ -554,18 +569,18 @@ function collectApplicationDraft() {
     savedExplicitly: draftWasExplicitlySaved,
     completedLocally: false,
     completedAt: "",
-    name: value("#name"),
+    firstName: value("#firstName"),
+    lastName: value("#lastName"),
     email: value("#email"),
     phone: value("#phone"),
     zip: value("#zip"),
     referral: value("#referral"),
-    accessibility: value("#accessibility"),
+    // Accessibility notes are deliberately excluded from browser storage.
     role: value("#role"),
+    secondaryRole: value("#secondaryRole"),
     availability: value("#availability"),
     leadExperience: value("#leadExperience"),
     interests: value("#interests"),
-    proof: value("#proof"),
-    supportingLinks: value("#supportingLinks"),
     rewards: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value),
     acknowledgements: {
       guide: Boolean(document.querySelector("#ackGuide")?.checked),
@@ -574,16 +589,22 @@ function collectApplicationDraft() {
     },
     resume: selectedResumeFile
       ? { name: selectedResumeFile.name, size: selectedResumeFile.size, type: selectedResumeFile.type }
-      : savedResumeMetadata
+      : savedResumeMetadata,
+    certifications: selectedCertificationFiles.length
+      ? selectedCertificationFiles.map((file) => ({ name: file.name, size: file.size, type: file.type }))
+      : savedCertificationMetadata
   };
 }
 
 function populateSavedDraftCard(data = collectApplicationDraft()) {
-  document.querySelector("#savedCardName").textContent = data.name.trim() || "Draft contributor";
+  document.querySelector("#savedCardName").textContent = [data.firstName, data.lastName].filter(Boolean).join(" ") || "Draft contributor";
   document.querySelector("#savedCardRole").textContent = data.role || "selected role";
   document.querySelector("#savedCardAvailability").textContent = data.availability || "selected availability";
   document.querySelector("#savedCardSkills").textContent = data.interests.trim() || "No skills added yet";
-  document.querySelector("#savedCardProof").textContent = data.proof.trim() || "No proof added yet";
+  const qualificationCount = (data.resume ? 1 : 0) + (Array.isArray(data.certifications) ? data.certifications.length : 0);
+  document.querySelector("#savedCardProof").textContent = qualificationCount
+    ? `${qualificationCount} qualification file${qualificationCount === 1 ? "" : "s"} to reattach before submission`
+    : "No qualification files added yet";
 }
 
 function persistApplicationDraft({ explicit = false } = {}) {
@@ -606,6 +627,7 @@ function persistApplicationDraft({ explicit = false } = {}) {
 }
 
 function scheduleDraftSave() {
+  if (!draftWasExplicitlySaved) return;
   window.clearTimeout(draftSaveTimer);
   draftSaveTimer = window.setTimeout(() => persistApplicationDraft(), 250);
 }
@@ -617,12 +639,12 @@ function restoreApplicationDraft() {
   } catch (error) {
     data = null;
   }
-  if (!data || data.version !== 2 || !applicationForm) return false;
+  if (!data || data.version !== 3 || !applicationForm) return false;
 
   applicationClientRequestId = typeof data.clientRequestId === "string" ? data.clientRequestId : "";
   applicationWithdrawalToken = typeof data.withdrawalToken === "string" ? data.withdrawalToken : "";
 
-  ["name", "email", "phone", "zip", "referral", "accessibility", "role", "availability", "leadExperience", "interests", "proof", "supportingLinks"]
+  ["firstName", "lastName", "email", "phone", "zip", "referral", "role", "secondaryRole", "availability", "leadExperience", "interests"]
     .forEach((key) => {
       const input = document.querySelector(`#${key}`);
       if (input && typeof data[key] === "string") input.value = data[key];
@@ -640,6 +662,8 @@ function restoreApplicationDraft() {
     resumeRestoreNote.textContent = `${savedResumeMetadata.name} was listed in this draft. Please attach the file again before final submission.`;
     resumeRestoreNote.hidden = false;
   }
+  savedCertificationMetadata = Array.isArray(data.certifications) ? data.certifications : [];
+  updateCertificationFileUi();
   draftWasExplicitlySaved = Boolean(data.savedExplicitly);
   applicationCompletedLocally = false;
   currentApplicationStep = Math.max(1, Math.min(5, Number(data.currentStep) || 1));
@@ -679,8 +703,13 @@ function acceptResumeFile(file) {
     setValidationError(resumeFileInput, "Choose a PDF, DOC, or DOCX file.");
     return;
   }
-  if (file.size > 10 * 1024 * 1024) {
-    setValidationError(resumeFileInput, "This file is larger than 10 MB.");
+  if (file.size > 5 * 1024 * 1024) {
+    setValidationError(resumeFileInput, "This file is larger than 5 MB.");
+    return;
+  }
+  const combinedSize = file.size + selectedCertificationFiles.reduce((total, item) => total + item.size, 0);
+  if (combinedSize > 12 * 1024 * 1024) {
+    setValidationError(resumeFileInput, "All uploaded files must total 12 MB or less.");
     return;
   }
   selectedResumeFile = file;
@@ -689,17 +718,61 @@ function acceptResumeFile(file) {
   scheduleDraftSave();
 }
 
-function parseSupportingLinks(value) {
-  return String(value || "").split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+function updateCertificationFileUi() {
+  if (!certificationFileList) return;
+  certificationFileList.replaceChildren();
+  const files = selectedCertificationFiles.length ? selectedCertificationFiles : savedCertificationMetadata;
+  files.forEach((file, index) => {
+    const item = document.createElement("li");
+    const details = document.createElement("span");
+    const name = document.createElement("strong");
+    const metadata = document.createElement("small");
+    name.textContent = file.name;
+    metadata.textContent = selectedCertificationFiles.length
+      ? `${formatFileSize(file.size)} · ready on this device`
+      : `${formatFileSize(file.size)} · reattach before submission`;
+    details.append(name, metadata);
+    item.appendChild(details);
+    if (selectedCertificationFiles.length) {
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "undo-button";
+      removeButton.dataset.removeCertification = String(index);
+      removeButton.textContent = "Remove";
+      item.appendChild(removeButton);
+    }
+    certificationFileList.appendChild(item);
+  });
+  updateApplicationReview();
 }
 
-function isValidSupportingLink(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch (error) {
-    return false;
+function acceptCertificationFiles(fileList) {
+  const files = [...(fileList || [])];
+  const allowed = ["pdf", "jpg", "jpeg", "png"];
+  const invalidType = files.find((file) => !allowed.includes(file.name.split(".").pop()?.toLowerCase()));
+  const tooLarge = files.find((file) => file.size > 5 * 1024 * 1024);
+  clearValidationError(certificationFileInput);
+  if (files.length > 3) {
+    setValidationError(certificationFileInput, "Choose no more than 3 certification files.");
+    return;
   }
+  if (invalidType) {
+    setValidationError(certificationFileInput, "Choose PDF, JPG, or PNG certification files.");
+    return;
+  }
+  if (tooLarge) {
+    setValidationError(certificationFileInput, "Each certification file must be 5 MB or less.");
+    return;
+  }
+  const combinedSize = (selectedResumeFile?.size || 0) + files.reduce((total, file) => total + file.size, 0);
+  if (combinedSize > 12 * 1024 * 1024) {
+    setValidationError(certificationFileInput, "All uploaded files must total 12 MB or less.");
+    return;
+  }
+  selectedCertificationFiles = files;
+  savedCertificationMetadata = files.map((file) => ({ name: file.name, size: file.size, type: file.type }));
+  updateCertificationFileUi();
+  scheduleDraftSave();
 }
 
 function getOrCreateClientRequestId() {
@@ -719,35 +792,75 @@ function getOrCreateWithdrawalToken() {
   return applicationWithdrawalToken;
 }
 
-function buildSubmissionPayload() {
+function effectiveMimeType(file) {
+  if (file.type) return file.type;
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return {
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png"
+  }[extension] || "application/octet-stream";
+}
+
+function fileToDescriptor(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const encoded = String(reader.result || "").split(",")[1];
+      if (!encoded) {
+        reject(new Error(`Could not read ${file.name}. Please attach it again.`));
+        return;
+      }
+      resolve({
+        name: file.name,
+        mimeType: effectiveMimeType(file),
+        size: file.size,
+        base64: encoded
+      });
+    });
+    reader.addEventListener("error", () => reject(new Error(`Could not read ${file.name}. Please attach it again.`)));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function buildSubmissionPayload() {
   const value = (selector) => document.querySelector(selector)?.value.trim() || "";
+  const skills = [
+    value("#interests"),
+    value("#leadExperience") ? `Event Lead experience: ${value("#leadExperience")}` : ""
+  ].filter(Boolean).join("\n\n");
   return {
     action: "submit_application",
-    schemaVersion: "2B.1",
+    schemaVersion: "3.0",
     clientRequestId: getOrCreateClientRequestId(),
     withdrawalToken: getOrCreateWithdrawalToken(),
-    clientCompletedAt: new Date().toISOString(),
     applicant: {
-      fullName: value("#name"),
+      firstName: value("#firstName"),
+      lastName: value("#lastName"),
       email: value("#email"),
       phone: value("#phone"),
       zipCode: value("#zip"),
-      referralSource: value("#referral"),
-      accessibilityHealthNeeds: value("#accessibility")
+      accessibilityNotes: value("#accessibility"),
+      heardAboutUs: value("#referral")
     },
     application: {
-      roleTarget: value("#role"),
-      availabilityShift: value("#availability"),
-      eventLeadExperience: value("#leadExperience"),
-      skillsInterests: value("#interests"),
-      proofDescription: value("#proof"),
-      supportingLinks: parseSupportingLinks(value("#supportingLinks")),
+      primaryRole: value("#role"),
+      secondaryRole: value("#secondaryRole"),
+      skills,
+      availability: value("#availability"),
       rewardPreferences: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value)
     },
     acknowledgements: {
       trainingComic: Boolean(document.querySelector("#ackGuide")?.checked),
       commitment: Boolean(document.querySelector("#ackCommitment")?.checked),
       accuracy: Boolean(document.querySelector("#ackAccuracy")?.checked)
+    },
+    files: {
+      resume: selectedResumeFile ? await fileToDescriptor(selectedResumeFile) : null,
+      certifications: await Promise.all(selectedCertificationFiles.map(fileToDescriptor))
     }
   };
 }
@@ -758,7 +871,7 @@ async function submitApplicationToEndpoint(payload) {
   }
 
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 30000);
+  const timeout = window.setTimeout(() => controller.abort(), 60000);
   try {
     const response = await fetch(SUBMISSION_ENDPOINT, {
       method: "POST",
@@ -772,8 +885,8 @@ async function submitApplicationToEndpoint(payload) {
     if (!response.ok) throw new Error("The Sunrise application service did not respond successfully. Please try again.");
     const result = await response.json();
     if (!result?.ok) {
-      const error = new Error(result?.message || "The application could not be submitted. Please try again.");
-      error.result = result;
+      const error = new Error(result?.error?.message || "The application could not be submitted. Please try again.");
+      error.result = result?.error || {};
       throw error;
     }
     return result;
@@ -789,22 +902,24 @@ async function submitApplicationToEndpoint(payload) {
 
 function applyServerFieldErrors(fieldErrors = {}) {
   const fieldMap = {
-    fullName: "#name",
+    firstName: "#firstName",
+    lastName: "#lastName",
     email: "#email",
     phone: "#phone",
     zipCode: "#zip",
-    referralSource: "#referral",
-    accessibilityHealthNeeds: "#accessibility",
-    roleTarget: "#role",
-    availabilityShift: "#availability",
-    eventLeadExperience: "#leadExperience",
-    skillsInterests: "#interests",
-    proofDescription: "#proof",
-    supportingLinks: "#supportingLinks",
+    heardAboutUs: "#referral",
+    accessibilityNotes: "#accessibility",
+    primaryRole: "#role",
+    secondaryRole: "#secondaryRole",
+    availability: "#availability",
+    skills: "#interests",
+    resume: "#resumeFile",
+    certifications: "#certificationFiles",
+    files: "#certificationFiles",
     rewardPreferences: 'input[name="applicationReward"]',
-    ackTrainingComic: "#ackGuide",
-    ackCommitment: "#ackCommitment",
-    ackAccuracy: "#ackAccuracy"
+    trainingComic: "#ackGuide",
+    commitment: "#ackCommitment",
+    accuracy: "#ackAccuracy"
   };
   let firstInvalid = null;
   Object.entries(fieldErrors).forEach(([field, message]) => {
@@ -819,10 +934,10 @@ function applyServerFieldErrors(fieldErrors = {}) {
 function saveSubmissionReceipt(result, payload) {
   lastSubmissionReceipt = {
     submissionId: result.submissionId,
-    submittedAtUtc: result.submittedAtUtc,
-    name: payload.applicant.fullName,
-    role: payload.application.roleTarget,
-    availability: payload.application.availabilityShift,
+    submittedAt: result.submittedAt,
+    name: [payload.applicant.firstName, payload.applicant.lastName].filter(Boolean).join(" "),
+    role: payload.application.primaryRole,
+    availability: payload.application.availability,
     rewards: payload.application.rewardPreferences,
     status: "Submitted",
     withdrawalToken: payload.withdrawalToken
@@ -1076,7 +1191,7 @@ if (editApplication) {
   editApplication.addEventListener("click", () => {
     applicationCompletedLocally = false;
     showApplicationForm(1);
-    document.querySelector("#name")?.focus();
+    document.querySelector("#firstName")?.focus();
     if (applicationStatus) {
       applicationStatus.textContent = "Editing mode: update the fields, then save the draft again.";
     }
@@ -1092,8 +1207,11 @@ if (deleteApplication) {
     applicationClientRequestId = "";
     applicationWithdrawalToken = "";
     selectedResumeFile = null;
+    selectedCertificationFiles = [];
     savedResumeMetadata = null;
+    savedCertificationMetadata = [];
     if (resumeFileInput) resumeFileInput.value = "";
+    if (certificationFileInput) certificationFileInput.value = "";
     if (savedApplicationCard) savedApplicationCard.hidden = true;
     applicationWorkspace?.classList.remove("has-draft");
     applicationForm?.querySelectorAll(".has-error").forEach((item) => item.classList.remove("has-error"));
@@ -1101,6 +1219,7 @@ if (deleteApplication) {
     updateLeadExperienceField();
     updateRoleChoiceState();
     updateResumeFileUi();
+    updateCertificationFileUi();
     if (resumeRestoreNote) resumeRestoreNote.hidden = true;
     showApplicationForm(1);
     if (applicationStatus) {
@@ -1121,8 +1240,6 @@ if (submitApplication) {
         return;
       }
     }
-    persistApplicationDraft({ explicit: true });
-    const payload = buildSubmissionPayload();
     applicationSubmitting = true;
     submitApplication.disabled = true;
     submitApplication.textContent = "Submitting…";
@@ -1130,6 +1247,7 @@ if (submitApplication) {
     if (applicationStatus) applicationStatus.textContent = "Sending your application securely to the Sunrise team…";
 
     try {
+      const payload = await buildSubmissionPayload();
       const result = await submitApplicationToEndpoint(payload);
       saveSubmissionReceipt(result, payload);
       applicationCompletedLocally = true;
@@ -1156,7 +1274,7 @@ if (withdrawApplication) {
   withdrawApplication.addEventListener("click", async () => {
     if (applicationSubmitting || !lastSubmissionReceipt?.withdrawalToken) return;
     const confirmed = window.confirm(
-      "Withdraw this Sunrise application? The team will see it as Withdrawn, and it will no longer be active."
+      "Withdraw this Sunrise application? It will remain in the private historical record but will no longer be active."
     );
     if (!confirmed) return;
 
@@ -1168,14 +1286,14 @@ if (withdrawApplication) {
     try {
       const result = await submitApplicationToEndpoint({
         action: "withdraw_application",
-        schemaVersion: "2B.1",
+        schemaVersion: "3.0",
         submissionId: lastSubmissionReceipt.submissionId,
         withdrawalToken: lastSubmissionReceipt.withdrawalToken
       });
       lastSubmissionReceipt = {
         ...lastSubmissionReceipt,
         status: "Withdrawn",
-        withdrawnAtUtc: result.withdrawnAtUtc
+        withdrawnAt: result.withdrawnAt
       };
       try {
         localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
@@ -1210,11 +1328,17 @@ if (editCompletedApplication) {
     currentApplicationStep = 1;
     draftWasExplicitlySaved = false;
     selectedResumeFile = null;
+    selectedCertificationFiles = [];
     savedResumeMetadata = null;
+    savedCertificationMetadata = [];
+    if (resumeFileInput) resumeFileInput.value = "";
+    if (certificationFileInput) certificationFileInput.value = "";
     if (savedApplicationCard) savedApplicationCard.hidden = true;
     applicationWorkspace?.classList.remove("has-draft");
     updateLeadExperienceField();
     updateRoleChoiceState();
+    updateResumeFileUi();
+    updateCertificationFileUi();
     updateApplicationReview();
     showApplicationForm(1);
   });
@@ -1279,6 +1403,26 @@ if (removeResumeFile) {
   });
 }
 
+if (certificationFileInput) {
+  certificationFileInput.addEventListener("change", () => acceptCertificationFiles(certificationFileInput.files));
+}
+
+if (certificationFileList) {
+  certificationFileList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-certification]");
+    if (!button) return;
+    selectedCertificationFiles.splice(Number(button.dataset.removeCertification), 1);
+    savedCertificationMetadata = selectedCertificationFiles.map((file) => ({
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }));
+    if (certificationFileInput) certificationFileInput.value = "";
+    updateCertificationFileUi();
+    scheduleDraftSave();
+  });
+}
+
 if (applicationForm) {
   applicationForm.addEventListener("input", (event) => {
     clearValidationError(event.target);
@@ -1300,8 +1444,14 @@ renderApplicants();
 renderQuests();
 updateLeadExperienceField();
 updateRoleChoiceState();
+try {
+  localStorage.removeItem(LEGACY_APPLICATION_DRAFT_KEY);
+} catch (error) {
+  // Private browsing or storage policies may block cleanup; the form still works.
+}
 restoreApplicationDraft();
 restoreSubmissionReceipt();
 updateResumeFileUi();
+updateCertificationFileUi();
 if (applicationCompletedLocally) showApplicationSuccess(lastSubmissionReceipt);
 else showApplicationForm(currentApplicationStep);

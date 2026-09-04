@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="sunrise-submission-endpoint" content="https://script.google.com/macros/s/AKfycbwfKEmVn4N8XGfOMmDaU_3Je9av6uHAGvJx3kChBmCzvOuJ07cCBW8o8Xz7PADIBSQq/exec">
+    <meta name="sunrise-submission-endpoint" content="https://script.google.com/macros/s/AKfycbziPXsE4NBR8K8PCSotIZEm_6RfFdTEDBXnR8XDOft16Hlo_-KWakYF_jWbgTpYdMOjAg/exec">
     <title>Sunrise Quest Board</title>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1048,7 +1048,8 @@
                 <p>Start with the contact details a team lead will need for matching and follow-up.</p>
               </div>
               <div class="form-grid two-column">
-                <label class="field full-width" for="name"><span>Name <em>*</em></span><input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" required></label>
+                <label class="field" for="firstName"><span>First name <em>*</em></span><input id="firstName" name="firstName" type="text" placeholder="First name" autocomplete="given-name" required></label>
+                <label class="field" for="lastName"><span>Last name <em>*</em></span><input id="lastName" name="lastName" type="text" placeholder="Last name" autocomplete="family-name" required></label>
                 <label class="field" for="email"><span>Email <em>*</em></span><input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required></label>
                 <label class="field" for="phone"><span>Phone number <em>*</em></span><input id="phone" name="phone" type="tel" placeholder="Your best contact number" autocomplete="tel" required></label>
                 <label class="field" for="zip"><span>Zip code <em>*</em></span><input id="zip" name="zip" type="text" inputmode="numeric" placeholder="Your zip code" autocomplete="postal-code" required></label>
@@ -1087,6 +1088,14 @@
                     <button type="button" class="role-choice lead-choice" data-role-choice="Event Lead · experienced coordination" aria-pressed="false"><span>Lead</span><strong>Event Lead</strong><small>Experienced crew coordination.</small></button>
                   </div>
                 </div>
+                <label class="field full-width" for="secondaryRole"><span>Secondary role preference</span><select id="secondaryRole" name="secondaryRole">
+                  <option value="">No secondary role</option>
+                  <option>Power Runner · solar / technical</option>
+                  <option>Green Worker · operations / logistics</option>
+                  <option>Cloud Support · remote digital desk</option>
+                  <option>CE Vendor · vendor / market</option>
+                  <option>Event Lead · experienced coordination</option>
+                </select><small>Optional. Choose a different path the team may consider if your first choice is full.</small></label>
                 <label class="field full-width" for="availability"><span>Availability <em>*</em></span><select id="availability" name="availability" required>
                   <option>September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</option>
                   <option>September 26 · Shift 2 · 12:00 PM–3:00 PM</option>
@@ -1104,22 +1113,26 @@
               </div>
               <div class="form-grid">
                 <label class="field" for="interests"><span>Skills and interests <em>*</em></span><textarea id="interests" name="interests" rows="4" placeholder="Example: battery checks, tent setup, crew standups, remote documentation..." required></textarea></label>
-                <label class="field" for="proof"><span>Proof you can bring</span><textarea id="proof" name="proof" rows="3" placeholder="Training completed, setup photos, prior event work, support logs, certificates..."></textarea></label>
-                <label class="field" for="supportingLinks"><span>Resume, certification, portfolio, or work sample links</span><textarea id="supportingLinks" name="supportingLinks" rows="3" placeholder="Add complete shareable links, one per line."></textarea><small>For this MVP, use links instead of uploading a file. Confirm that the Sunrise team can open each link.</small></label>
-                <div class="field resume-upload-field" hidden aria-hidden="true">
-                  <span>Resume or certification file</span>
+                <div class="field resume-upload-field">
+                  <span>Resume</span>
                   <input class="visually-hidden" id="resumeFile" name="resumeFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                   <div class="resume-dropzone" id="resumeDropzone" tabindex="0" role="button" aria-controls="resumeFile">
                     <span class="upload-icon" aria-hidden="true">↑</span>
                     <strong>Drop your resume here</strong>
                     <p>or click to choose a PDF, DOC, or DOCX file</p>
-                    <small>Maximum file size: 10 MB. The file stays on this device until backend upload is connected.</small>
+                    <small>Optional · maximum 5 MB. Files are sent only when you submit.</small>
                   </div>
                   <div class="resume-file-card" id="resumeFileCard" hidden>
                     <div><strong id="resumeFileName"></strong><small id="resumeFileMeta"></small></div>
                     <button type="button" class="undo-button" id="removeResumeFile">Remove</button>
                   </div>
                   <p class="resume-restore-note" id="resumeRestoreNote" hidden>A previous draft included this filename. Please attach the file again before final submission.</p>
+                </div>
+                <div class="field certification-upload-field">
+                  <label for="certificationFiles"><span>Certifications or qualification proof</span></label>
+                  <input id="certificationFiles" name="certificationFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                  <small>Optional · up to 3 PDF, JPG, or PNG files, 5 MB each and 12 MB combined with your resume.</small>
+                  <ul class="certification-file-list" id="certificationFileList" aria-live="polite"></ul>
                 </div>
               </div>
             </section>
@@ -1139,7 +1152,7 @@
               </fieldset>
               <div class="panel-note">
                 <strong>Save Draft</strong>
-                <span>A draft stays in this browser so you can refresh and continue later. It is not sent to the Sunrise team.</span>
+                <span>A draft is saved only when you choose Save Draft. Accessibility notes and file contents are never stored in the browser draft.</span>
               </div>
             </section>
 
@@ -1147,7 +1160,7 @@
               <div class="step-heading">
                 <p class="eyebrow">Step 5 of 5</p>
                 <h3 id="step-review-title">Review your Player Card.</h3>
-                <p>Check your role, availability, skills, and supporting links before sending your application to the Sunrise team.</p>
+                <p>Check your role, availability, skills, and qualification files before sending your application to the Sunrise team.</p>
               </div>
               <dl class="application-review" id="applicationReview">
                 <div><dt>Name</dt><dd data-review="name">Draft contributor</dd></div>
@@ -1155,8 +1168,8 @@
                 <div><dt>Role</dt><dd data-review="role">Power Runner · solar / technical</dd></div>
                 <div><dt>Availability</dt><dd data-review="availability">September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</dd></div>
                 <div><dt>Skills</dt><dd data-review="skills">No skills added yet</dd></div>
-                <div><dt>Proof</dt><dd data-review="proof">No proof added yet</dd></div>
-                <div><dt>Supporting links</dt><dd data-review="links">No links added</dd></div>
+                <div><dt>Resume</dt><dd data-review="resume">No resume attached</dd></div>
+                <div><dt>Certifications</dt><dd data-review="certifications">No certifications attached</dd></div>
                 <div><dt>Rewards</dt><dd data-review="rewards">Quest credits, Badge progress</dd></div>
               </dl>
               <fieldset class="acknowledgement-list" id="acknowledgementList">

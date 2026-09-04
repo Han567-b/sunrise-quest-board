@@ -1,52 +1,85 @@
 /**
- * Sunrise Quest Board — Phase 2B MVP submission endpoint.
+ * Sunrise Quest Board backend MVP.
  *
- * This script writes full applications and sanitized review summaries to two
- * separate Google Spreadsheet files. Spreadsheet IDs stay in Script
- * Properties and are never sent to the browser.
+ * Production ownership and authorization must use han@keytechlabs.org.
+ * Resource IDs are read only from Script Properties. This code never changes
+ * Drive or spreadsheet sharing; all production resources must remain Restricted.
  */
 
-var SCHEMA_VERSION = "2B.1";
-var PRIVATE_HEADERS = [
+var SCHEMA_VERSION = "3.0";
+
+var PRIVATE_BASE_HEADERS = [
   "submission_id",
-  "submitted_at_utc",
-  "schema_version",
-  "client_request_id",
-  "full_name",
+  "first_name",
+  "last_name",
   "email",
   "phone",
-  "zip_code",
-  "referral_source",
-  "accessibility_health_needs",
-  "role_target",
-  "availability_shift",
-  "event_lead_experience",
-  "skills_interests",
-  "proof_description",
-  "supporting_links",
+  "primary_role",
+  "secondary_role",
+  "skills",
+  "availability",
   "reward_preferences",
-  "ack_training_comic",
-  "ack_commitment",
-  "ack_accuracy",
-  "submission_status",
-  "withdrawal_token_hash",
-  "withdrawn_at_utc"
+  "resume_file_id",
+  "certification_file_ids",
+  "accessibility_notes",
+  "heard_about_us",
+  "review_status",
+  "admin_notes",
+  "player_card_created",
+  "created_at",
+  "updated_at"
 ];
 
-var TEAM_HEADERS = [
-  "submission_id",
-  "submitted_at_utc",
-  "display_name",
-  "role_target",
-  "availability_shift",
-  "skills_summary",
-  "supporting_material_available",
-  "reward_preferences",
-  "readiness_status",
-  "team_notes",
-  "submission_status",
-  "withdrawn_at_utc"
+// Private-only extension columns are appended without replacing the existing 19 columns.
+var PRIVATE_INTERNAL_HEADERS = [
+  "zip_code",
+  "client_request_id",
+  "withdrawal_token_hash",
+  "is_withdrawn",
+  "withdrawn_at"
 ];
+
+var TEAM_REVIEW_HEADERS = [
+  "submission_id",
+  "name",
+  "primary_role",
+  "skills_summary",
+  "availability_summary",
+  "qualification_summary",
+  "review_status",
+  "admin_notes",
+  "player_card_status",
+  "last_updated"
+];
+
+var PLAYER_CARD_HEADERS = [
+  "player_id",
+  "submission_id",
+  "name",
+  "primary_role",
+  "secondary_role",
+  "skills",
+  "verified_qualifications",
+  "badges",
+  "quest_credits",
+  "completed_quests",
+  "stipend_eligibility",
+  "member_status",
+  "public_profile_consent",
+  "created_at",
+  "updated_at"
+];
+
+var REVIEW_STATUSES = [
+  "Pending Review",
+  "Approved",
+  "Rejected",
+  "Needs Info"
+];
+
+var DEFAULT_REVIEW_STATUS = "Pending Review";
+var DEFAULT_PLAYER_CARD_STATUS = "Not Created";
+var WITHDRAWN_PLAYER_CARD_STATUS = "Not Created — Applicant Withdrawn";
 
 var ALLOWED_ROLES = [
   "Power Runner · solar / technical",
@@ -69,557 +102,1043 @@ var ALLOWED_REWARDS = [
   "Badge progress"
 ];
 
+var FILE_RULES = {
+  maxResumeBytes: 5 * 1024 * 1024,
+  maxCertificationBytes: 5 * 1024 * 1024,
+  maxCertificationCount: 3,
+  maxCombinedBytes: 12 * 1024 * 1024,
+  resumeMimeTypes: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ],
+  certificationMimeTypes: [
+    "application/pdf",
+    "image/jpeg",
+    "image/png"
+  ]
+};
+
 var MAX_LENGTHS = {
-  fullName: 120,
+  firstName: 80,
+  lastName: 80,
   email: 254,
   phone: 60,
   zipCode: 20,
-  referralSource: 120,
-  accessibilityHealthNeeds: 2000,
-  eventLeadExperience: 3000,
-  skillsInterests: 3000,
-  proofDescription: 3000,
-  supportingLink: 2000,
+  skills: 3000,
+  availability: 1000,
+  accessibilityNotes: 2000,
+  heardAboutUs: 240,
   clientRequestId: 100,
-  withdrawalToken: 200
+  withdrawalToken: 200,
+  adminNotes: 3000
 };
 
+/** Public web-app entry point. Admin changes are intentionally not exposed here. */
 function doPost(e) {
-  var requestContext = { submissionId: "", stage: "parse" };
+  var context = { stage: "parse", submissionId: "" };
 
   try {
     var payload = parseRequest_(e);
-    if (cleanString_(payload.action) === "withdraw_application") {
-      return handleWithdrawal_(payload, requestContext);
-    }
-    requestContext.stage = "validate";
-    var validation = validatePayload_(payload);
+    var action = cleanString_(payload.action || "submit_application");
 
-    if (!validation.valid) {
-      return errorResponse_("VALIDATION_ERROR", "Please review the highlighted application fields.", {
-        fieldErrors: validation.fieldErrors
+    if (action === "withdraw_application") {
+      return handleWithdrawal_(payload, context);
+    }
+
+    if (action !== "submit_application") {
+      return errorResponse_("UNSUPPORTED_ACTION", "This request action is not supported.", {
+        stage: context.stage
       });
     }
 
-    var normalized = normalizePayload_(payload);
-    var config = getConfig_();
-    var lock = LockService.getScriptLock();
-
-    if (!lock.tryLock(10000)) {
-      return errorResponse_("SERVICE_BUSY", "The application service is busy. Please try again.");
-    }
-
-    try {
-      requestContext.stage = "duplicate_check";
-      var privateSheet = getSheet_(config.privateSpreadsheetId, config.privateSheetName, PRIVATE_HEADERS);
-      var teamSheet = getSheet_(config.teamSpreadsheetId, config.teamSheetName, TEAM_HEADERS);
-      var existing = findSubmissionByClientRequest_(privateSheet, normalized.clientRequestId);
-
-      if (existing) {
-        requestContext.submissionId = existing.submissionId;
-        if (!sheetContainsValue_(teamSheet, "submission_id", existing.submissionId)) {
-          requestContext.stage = "team_retry";
-          try {
-            appendTeamReviewRow_(teamSheet, buildTeamReviewRow_(normalized, existing.submissionId, existing.submittedAtUtc));
-          } catch (teamRetryError) {
-            logError_("TEAM_WRITE_FAILED", requestContext, teamRetryError);
-            return errorResponse_(
-              "TEAM_WRITE_FAILED",
-              "Your private application was received, but the team review copy still needs to be retried.",
-              { submissionId: existing.submissionId }
-            );
-          }
-        }
-        return successResponse_(existing.submissionId, existing.submittedAtUtc, true);
-      }
-
-      requestContext.stage = "generate_id";
-      var submissionId = generateSubmissionId_();
-      var submittedAtUtc = new Date().toISOString();
-      requestContext.submissionId = submissionId;
-
-      requestContext.stage = "private_write";
-      try {
-        appendPrivateApplication_(privateSheet, buildPrivateRow_(normalized, submissionId, submittedAtUtc));
-      } catch (privateError) {
-        logError_("PRIVATE_WRITE_FAILED", requestContext, privateError);
-        return errorResponse_(
-          "PRIVATE_WRITE_FAILED",
-          "The application could not be saved. Please try again."
-        );
-      }
-
-      requestContext.stage = "team_write";
-      try {
-        appendTeamReviewRow_(teamSheet, buildTeamReviewRow_(normalized, submissionId, submittedAtUtc));
-      } catch (teamError) {
-        logError_("TEAM_WRITE_FAILED", requestContext, teamError);
-        return errorResponse_(
-          "TEAM_WRITE_FAILED",
-          "Your private application was received, but the team review copy needs to be retried.",
-          { submissionId: submissionId }
-        );
-      }
-
-      return successResponse_(submissionId, submittedAtUtc, false);
-    } finally {
-      lock.releaseLock();
-    }
+    return handleApplicationSubmission_(payload, context);
   } catch (error) {
-    var code = error && error.publicCode ? error.publicCode : "INTERNAL_ERROR";
-    var message = error && error.publicMessage
-      ? error.publicMessage
-      : "The application could not be submitted. Please try again.";
-    logError_(code, requestContext, error);
-    return errorResponse_(code, message, requestContext.submissionId ? { submissionId: requestContext.submissionId } : null);
+    logSafeError_(error, context);
+    return errorResponse_("SERVER_ERROR", "The application service could not complete the request.", {
+      stage: context.stage,
+      submissionId: context.submissionId,
+      retryable: true
+    });
   }
 }
 
-function parseRequest_(e) {
-  if (!e || !e.postData || typeof e.postData.contents !== "string" || !e.postData.contents.trim()) {
-    throw publicError_("INVALID_JSON", "The application request was empty.");
-  }
-
-  try {
-    return JSON.parse(e.postData.contents);
-  } catch (error) {
-    throw publicError_("INVALID_JSON", "The application data could not be read.");
-  }
-}
-
-function validatePayload_(payload) {
-  var errors = {};
-  var applicant = payload && payload.applicant ? payload.applicant : {};
-  var application = payload && payload.application ? payload.application : {};
-  var acknowledgements = payload && payload.acknowledgements ? payload.acknowledgements : {};
-  var links = normalizeStringArray_(application.supportingLinks);
-  var rewards = normalizeStringArray_(application.rewardPreferences);
-
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return { valid: false, fieldErrors: { form: "Application data is missing." } };
-  }
-  if (cleanString_(payload.schemaVersion) !== SCHEMA_VERSION) errors.schemaVersion = "This application version is no longer supported.";
-  validateRequiredText_(errors, "clientRequestId", payload.clientRequestId, MAX_LENGTHS.clientRequestId);
-  validateRequiredText_(errors, "withdrawalToken", payload.withdrawalToken, MAX_LENGTHS.withdrawalToken);
-  validateRequiredText_(errors, "fullName", applicant.fullName, MAX_LENGTHS.fullName);
-  validateRequiredText_(errors, "email", applicant.email, MAX_LENGTHS.email);
-  validateRequiredText_(errors, "phone", applicant.phone, MAX_LENGTHS.phone);
-  validateRequiredText_(errors, "zipCode", applicant.zipCode, MAX_LENGTHS.zipCode);
-  validateRequiredText_(errors, "referralSource", applicant.referralSource, MAX_LENGTHS.referralSource);
-  validateOptionalText_(errors, "accessibilityHealthNeeds", applicant.accessibilityHealthNeeds, MAX_LENGTHS.accessibilityHealthNeeds);
-  validateRequiredText_(errors, "skillsInterests", application.skillsInterests, MAX_LENGTHS.skillsInterests);
-  validateOptionalText_(errors, "proofDescription", application.proofDescription, MAX_LENGTHS.proofDescription);
-  validateOptionalText_(errors, "eventLeadExperience", application.eventLeadExperience, MAX_LENGTHS.eventLeadExperience);
-
-  if (cleanString_(payload.clientRequestId) && !/^[A-Za-z0-9._:-]{8,100}$/.test(cleanString_(payload.clientRequestId))) {
-    errors.clientRequestId = "The application request identifier is invalid.";
-  }
-  if (cleanString_(payload.withdrawalToken) && !/^[A-Za-z0-9._:-]{16,200}$/.test(cleanString_(payload.withdrawalToken))) {
-    errors.withdrawalToken = "The application withdrawal identifier is invalid.";
-  }
-
-  if (cleanString_(applicant.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanString_(applicant.email))) {
-    errors.email = "Enter a valid email address.";
-  }
-  if (ALLOWED_ROLES.indexOf(cleanString_(application.roleTarget)) === -1) errors.roleTarget = "Choose a valid Sunrise role.";
-  if (ALLOWED_SHIFTS.indexOf(cleanString_(application.availabilityShift)) === -1) errors.availabilityShift = "Choose a valid event shift.";
-  if (cleanString_(application.roleTarget).indexOf("Event Lead") === 0 && !cleanString_(application.eventLeadExperience)) {
-    errors.eventLeadExperience = "Event Lead applicants must describe their coordination experience.";
-  }
-  if (!rewards.length || rewards.some(function (reward) { return ALLOWED_REWARDS.indexOf(reward) === -1; })) {
-    errors.rewardPreferences = "Choose at least one valid reward preference.";
-  }
-  if (links.length > 10) errors.supportingLinks = "Add no more than 10 supporting links.";
-  links.forEach(function (link) {
-    if (link.length > MAX_LENGTHS.supportingLink || !isSafeHttpUrl_(link)) {
-      errors.supportingLinks = "Use complete http:// or https:// links, one per line.";
-    }
-  });
-  if (acknowledgements.trainingComic !== true) errors.ackTrainingComic = "Confirm that you reviewed the Sunrise guide.";
-  if (acknowledgements.commitment !== true) errors.ackCommitment = "Confirm your role and shift commitment.";
-  if (acknowledgements.accuracy !== true) errors.ackAccuracy = "Confirm that the application is accurate.";
-
-  return { valid: Object.keys(errors).length === 0, fieldErrors: errors };
-}
-
-function normalizePayload_(payload) {
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    clientRequestId: cleanString_(payload.clientRequestId),
-    withdrawalToken: cleanString_(payload.withdrawalToken),
-    applicant: {
-      fullName: cleanString_(payload.applicant.fullName),
-      email: cleanString_(payload.applicant.email).toLowerCase(),
-      phone: cleanString_(payload.applicant.phone),
-      zipCode: cleanString_(payload.applicant.zipCode),
-      referralSource: cleanString_(payload.applicant.referralSource),
-      accessibilityHealthNeeds: cleanString_(payload.applicant.accessibilityHealthNeeds)
-    },
-    application: {
-      roleTarget: cleanString_(payload.application.roleTarget),
-      availabilityShift: cleanString_(payload.application.availabilityShift),
-      eventLeadExperience: cleanString_(payload.application.eventLeadExperience),
-      skillsInterests: cleanString_(payload.application.skillsInterests),
-      proofDescription: cleanString_(payload.application.proofDescription),
-      supportingLinks: normalizeStringArray_(payload.application.supportingLinks),
-      rewardPreferences: normalizeStringArray_(payload.application.rewardPreferences)
-    },
-    acknowledgements: {
-      trainingComic: payload.acknowledgements.trainingComic === true,
-      commitment: payload.acknowledgements.commitment === true,
-      accuracy: payload.acknowledgements.accuracy === true
-    }
-  };
-}
-
-function generateSubmissionId_() {
-  var properties = PropertiesService.getScriptProperties();
-  var sequence = Number(properties.getProperty("SUBMISSION_SEQUENCE") || "0") + 1;
-  properties.setProperty("SUBMISSION_SEQUENCE", String(sequence));
-  return "SQ-20260926-" + String(sequence).padStart(6, "0");
-}
-
-function buildPrivateRow_(payload, submissionId, submittedAtUtc) {
-  return [
-    submissionId,
-    submittedAtUtc,
-    payload.schemaVersion,
-    payload.clientRequestId,
-    payload.applicant.fullName,
-    payload.applicant.email,
-    preserveTextCell_(payload.applicant.phone),
-    preserveTextCell_(payload.applicant.zipCode),
-    payload.applicant.referralSource,
-    payload.applicant.accessibilityHealthNeeds,
-    payload.application.roleTarget,
-    payload.application.availabilityShift,
-    payload.application.eventLeadExperience,
-    payload.application.skillsInterests,
-    payload.application.proofDescription,
-    payload.application.supportingLinks.join("\n"),
-    payload.application.rewardPreferences.join(", "),
-    payload.acknowledgements.trainingComic,
-    payload.acknowledgements.commitment,
-    payload.acknowledgements.accuracy,
-    "Submitted",
-    hashToken_(payload.withdrawalToken),
-    ""
-  ];
-}
-
-function buildTeamReviewRow_(payload, submissionId, submittedAtUtc) {
-  var hasSupportingMaterial = Boolean(
-    payload.application.proofDescription || payload.application.supportingLinks.length
-  );
-  return [
-    submissionId,
-    submittedAtUtc,
-    buildDisplayName_(payload.applicant.fullName),
-    payload.application.roleTarget,
-    payload.application.availabilityShift,
-    summarize_(redactTeamText_(payload.application.skillsInterests), 240),
-    hasSupportingMaterial ? "Yes" : "No",
-    payload.application.rewardPreferences.join(", "),
-    hasSupportingMaterial ? "Ready for Review" : "Needs Follow-Up",
-    "",
-    "Submitted",
-    ""
-  ];
-}
-
-function appendPrivateApplication_(sheet, row) {
-  appendSanitizedRow_(sheet, row, PRIVATE_HEADERS.length);
-}
-
-function appendTeamReviewRow_(sheet, row) {
-  appendSanitizedRow_(sheet, row, TEAM_HEADERS.length);
-}
-
-function handleWithdrawal_(payload, requestContext) {
-  var validation = validateWithdrawalPayload_(payload);
+function handleApplicationSubmission_(payload, context) {
+  context.stage = "validate";
+  var validation = validateApplication_(payload);
   if (!validation.valid) {
-    return errorResponse_("VALIDATION_ERROR", "The withdrawal request is incomplete.", {
-      fieldErrors: validation.fieldErrors
+    return errorResponse_("VALIDATION_ERROR", "Please review the highlighted application fields.", {
+      fieldErrors: validation.fieldErrors,
+      stage: context.stage
     });
   }
 
+  var normalized = normalizeApplication_(payload);
   var config = getConfig_();
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) {
-    return errorResponse_("SERVICE_BUSY", "The application service is busy. Please try again.");
+
+  if (!lock.tryLock(15000)) {
+    return errorResponse_("SERVICE_BUSY", "The application service is busy. Please try again.", {
+      retryable: true
+    });
   }
 
   try {
-    requestContext.stage = "withdrawal_lookup";
-    requestContext.submissionId = cleanString_(payload.submissionId);
-    var privateSheet = getSheet_(config.privateSpreadsheetId, config.privateSheetName, PRIVATE_HEADERS);
-    var teamSheet = getSheet_(config.teamSpreadsheetId, config.teamSheetName, TEAM_HEADERS);
-    var privateRowNumber = findRowByValue_(privateSheet, "submission_id", requestContext.submissionId);
+    context.stage = "load_sheets";
+    var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
+    var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
 
-    if (!privateRowNumber) {
-      throw publicError_("WITHDRAWAL_NOT_AUTHORIZED", "This application could not be withdrawn from this browser.");
+    context.stage = "duplicate_check";
+    var existing = findObjectByValue_(privateSheet, "client_request_id", normalized.clientRequestId);
+    if (existing) {
+      context.submissionId = cleanString_(existing.record.submission_id);
+      context.stage = "team_review_write";
+      repairTeamReviewRecord_(teamSheet, existing.record);
+      return successResponse_({
+        submissionId: context.submissionId,
+        submittedAt: isoString_(existing.record.created_at),
+        reviewStatus: cleanString_(existing.record.review_status) || DEFAULT_REVIEW_STATUS,
+        withdrawalToken: normalized.withdrawalToken,
+        duplicate: true
+      });
     }
 
-    var privateMap = headerIndexMap_(PRIVATE_HEADERS);
-    var privateValues = privateSheet.getRange(privateRowNumber, 1, 1, PRIVATE_HEADERS.length).getDisplayValues()[0];
-    var expectedHash = privateValues[privateMap.withdrawal_token_hash];
-    var providedHash = hashToken_(cleanString_(payload.withdrawalToken));
-    if (!expectedHash || !secureEquals_(expectedHash, providedHash)) {
-      throw publicError_("WITHDRAWAL_NOT_AUTHORIZED", "This application could not be withdrawn from this browser.");
+    context.stage = "prepare";
+    var submissionId = generateSubmissionId_();
+    var now = nowIso_();
+    context.submissionId = submissionId;
+    var createdFiles = [];
+
+    try {
+      context.stage = "file_upload";
+      var uploaded = uploadApplicationFiles_(normalized.files, submissionId, config, createdFiles);
+      var privateRecord = buildPrivateRecord_(normalized, submissionId, now, uploaded);
+
+      context.stage = "private_write";
+      appendObject_(privateSheet, privateRecord);
+
+      context.stage = "team_review_write";
+      upsertTeamReview_(teamSheet, privateRecord);
+    } catch (writeError) {
+      // Uploaded files are removed only if the private historical row was not saved.
+      if (context.stage === "file_upload" || context.stage === "private_write") {
+        trashFiles_(createdFiles);
+      }
+      throw writeError;
     }
 
-    var withdrawnAtUtc = privateValues[privateMap.withdrawn_at_utc] || new Date().toISOString();
-    requestContext.stage = "private_withdrawal_write";
-    updateRowStatus_(privateSheet, privateRowNumber, PRIVATE_HEADERS, "Withdrawn", withdrawnAtUtc);
-
-    requestContext.stage = "team_withdrawal_write";
-    var teamRowNumber = findRowByValue_(teamSheet, "submission_id", requestContext.submissionId);
-    if (teamRowNumber) {
-      updateRowStatus_(teamSheet, teamRowNumber, TEAM_HEADERS, "Withdrawn", withdrawnAtUtc);
-    }
-
-    return jsonResponse_({
-      ok: true,
-      action: "withdrawn",
-      submissionId: requestContext.submissionId,
-      withdrawnAtUtc: withdrawnAtUtc
+    return successResponse_({
+      submissionId: submissionId,
+      submittedAt: now,
+      reviewStatus: DEFAULT_REVIEW_STATUS,
+      withdrawalToken: normalized.withdrawalToken,
+      duplicate: false
+    });
+  } catch (error) {
+    logSafeError_(error, context);
+    var message = context.stage === "team_review_write"
+      ? "Your private application was saved, but the review copy needs repair. Retry with the same request."
+      : "The application could not be saved. Please try again.";
+    return errorResponse_("SUBMISSION_FAILED", message, {
+      stage: context.stage,
+      submissionId: context.submissionId,
+      retryable: true
     });
   } finally {
     lock.releaseLock();
   }
 }
 
-function validateWithdrawalPayload_(payload) {
-  var errors = {};
-  if (cleanString_(payload.schemaVersion) !== SCHEMA_VERSION) {
-    errors.schemaVersion = "This application version is no longer supported.";
+function handleWithdrawal_(payload, context) {
+  context.stage = "withdraw_validate";
+  var submissionId = cleanString_(payload.submissionId);
+  var withdrawalToken = cleanString_(payload.withdrawalToken);
+  var fieldErrors = {};
+
+  if (!/^SQ-\d{8}-[A-F0-9]{8}$/.test(submissionId)) {
+    fieldErrors.submissionId = "A valid submission ID is required.";
   }
-  validateRequiredText_(errors, "submissionId", payload.submissionId, 80);
-  validateRequiredText_(errors, "withdrawalToken", payload.withdrawalToken, MAX_LENGTHS.withdrawalToken);
-  if (cleanString_(payload.submissionId) && !/^SQ-\d{8}-\d{6}$/.test(cleanString_(payload.submissionId))) {
-    errors.submissionId = "The Submission ID is invalid.";
+  if (!/^[A-Za-z0-9._-]{32,200}$/.test(withdrawalToken)) {
+    fieldErrors.withdrawalToken = "A valid withdrawal token is required.";
   }
-  if (cleanString_(payload.withdrawalToken) && !/^[A-Za-z0-9._:-]{16,200}$/.test(cleanString_(payload.withdrawalToken))) {
-    errors.withdrawalToken = "The withdrawal identifier is invalid.";
+  if (Object.keys(fieldErrors).length) {
+    return errorResponse_("VALIDATION_ERROR", "The withdrawal request is incomplete.", {
+      fieldErrors: fieldErrors,
+      stage: context.stage
+    });
   }
-  return { valid: Object.keys(errors).length === 0, fieldErrors: errors };
+
+  var config = getConfig_();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) {
+    return errorResponse_("SERVICE_BUSY", "The application service is busy. Please try again.", {
+      retryable: true
+    });
+  }
+
+  try {
+    context.stage = "withdraw_lookup";
+    context.submissionId = submissionId;
+    var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
+    var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
+    var match = findObjectByValue_(privateSheet, "submission_id", submissionId);
+
+    if (!match || !constantTimeEqual_(cleanString_(match.record.withdrawal_token_hash), hashToken_(withdrawalToken))) {
+      return errorResponse_("WITHDRAWAL_NOT_AUTHORIZED", "The withdrawal link is invalid or expired.", {
+        stage: context.stage
+      });
+    }
+
+    var wasAlreadyWithdrawn = isTrue_(match.record.is_withdrawn);
+    context.stage = "withdraw_update";
+    var now = nowIso_();
+    var withdrawnAt = wasAlreadyWithdrawn ? (isoString_(match.record.withdrawn_at) || now) : now;
+    if (!wasAlreadyWithdrawn) {
+      updateObjectFields_(privateSheet, match.rowNumber, {
+        is_withdrawn: true,
+        withdrawn_at: withdrawnAt,
+        updated_at: now
+      });
+      match.record.is_withdrawn = true;
+      match.record.withdrawn_at = withdrawnAt;
+      match.record.updated_at = now;
+    }
+
+    // Always repair dependent records, including on an idempotent retry.
+    upsertTeamReview_(teamSheet, match.record);
+
+    // A pre-existing card remains an internal historical record and is made non-public.
+    var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+    var playerMatch = findObjectByValue_(playerSheet, "submission_id", submissionId);
+    if (playerMatch) {
+      updateObjectFields_(playerSheet, playerMatch.rowNumber, {
+        member_status: "Withdrawn",
+        public_profile_consent: false,
+        updated_at: now
+      });
+    }
+
+    return successResponse_({
+      submissionId: submissionId,
+      withdrawn: true,
+      withdrawnAt: withdrawnAt,
+      duplicate: wasAlreadyWithdrawn
+    });
+  } catch (error) {
+    logSafeError_(error, context);
+    return errorResponse_("WITHDRAWAL_FAILED", "The application could not be withdrawn. Please try again.", {
+      stage: context.stage,
+      retryable: true
+    });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
-function updateRowStatus_(sheet, rowNumber, headers, status, timestamp) {
-  var headerMap = headerIndexMap_(headers);
-  sheet.getRange(rowNumber, headerMap.submission_status + 1).setValue(sanitizeCellValue_(status));
-  sheet.getRange(rowNumber, headerMap.withdrawn_at_utc + 1).setValue(sanitizeCellValue_(timestamp));
+/**
+ * Run once after deploying, while signed in as han@keytechlabs.org.
+ * It appends only missing internal Private Applications columns and verifies
+ * all required resource headers. It does not change sharing permissions.
+ */
+function setupBackend() {
+  var config = getConfig_();
+  var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
+  var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
+  var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+  DriveApp.getFolderById(config.resumeFolderId).getName();
+  DriveApp.getFolderById(config.certificationFolderId).getName();
+
+  return {
+    ok: true,
+    schemaVersion: SCHEMA_VERSION,
+    privateSheet: privateSheet.getName(),
+    teamReviewSheet: teamSheet.getName(),
+    playerCardsSheet: playerSheet.getName()
+  };
 }
 
-function appendSanitizedRow_(sheet, row, expectedLength) {
-  if (!Array.isArray(row) || row.length !== expectedLength) {
-    throw new Error("Row does not match the configured schema.");
+/**
+ * Installs the admin-only edit trigger. Run interactively as han@keytechlabs.org.
+ * The trigger watches Team Review edits without exposing admin actions publicly.
+ */
+function installAdminReviewTrigger() {
+  var config = getConfig_();
+  var triggers = ScriptApp.getProjectTriggers();
+  var exists = triggers.some(function (trigger) {
+    return trigger.getHandlerFunction() === "onTeamReviewEdit";
+  });
+
+  if (!exists) {
+    ScriptApp.newTrigger("onTeamReviewEdit")
+      .forSpreadsheet(config.teamReviewSheetId)
+      .onEdit()
+      .create();
   }
-  sheet.appendRow(row.map(sanitizeCellValue_));
+
+  return { ok: true, created: !exists };
+}
+
+/** Installable trigger handler. Do not rename without reinstalling the trigger. */
+function onTeamReviewEdit(e) {
+  if (!e || !e.range) {
+    throw new Error("onTeamReviewEdit must run from an installable spreadsheet edit trigger.");
+  }
+
+  var config = getConfig_();
+  if (String(e.source.getId()) !== String(config.teamReviewSheetId)) {
+    return;
+  }
+
+  var sheet = e.range.getSheet();
+  var headers = getHeaders_(sheet);
+  var reviewColumn = headerIndex_(headers, "review_status") + 1;
+  var notesColumn = headerIndex_(headers, "admin_notes") + 1;
+
+  if (e.range.getRow() < 2 || (e.range.getColumn() !== reviewColumn && e.range.getColumn() !== notesColumn)) {
+    return;
+  }
+
+  processAdminReviewRow_(sheet, e.range.getRow(), config);
+}
+
+/** Manual repair/backfill helper for rows edited before the trigger was installed. */
+function processAllTeamReviewRows() {
+  var config = getConfig_();
+  var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
+  var lastRow = teamSheet.getLastRow();
+  var results = [];
+
+  for (var rowNumber = 2; rowNumber <= lastRow; rowNumber += 1) {
+    try {
+      results.push(processAdminReviewRow_(teamSheet, rowNumber, config));
+    } catch (error) {
+      results.push({ rowNumber: rowNumber, ok: false, error: cleanString_(error.message) });
+    }
+  }
+
+  return results;
+}
+
+function processAdminReviewRow_(teamSheet, rowNumber, config) {
+  var teamRecord = objectFromRow_(teamSheet, rowNumber);
+  var submissionId = cleanString_(teamRecord.submission_id);
+  var requestedStatus = cleanString_(teamRecord.review_status);
+  var adminNotes = truncate_(redactTeamText_(teamRecord.admin_notes), MAX_LENGTHS.adminNotes);
+
+  if (!submissionId) {
+    return { rowNumber: rowNumber, ok: false, skipped: true };
+  }
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) {
+    throw new Error("The backend is busy. Retry the review update.");
+  }
+
+  try {
+    var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
+    var privateMatch = findObjectByValue_(privateSheet, "submission_id", submissionId);
+    if (!privateMatch) {
+      throw new Error("No Private Applications record matches " + submissionId + ".");
+    }
+
+    if (REVIEW_STATUSES.indexOf(requestedStatus) === -1) {
+      updateObjectFields_(teamSheet, rowNumber, {
+        review_status: cleanString_(privateMatch.record.review_status) || DEFAULT_REVIEW_STATUS,
+        last_updated: nowIso_()
+      });
+      throw new Error("Unsupported review status: " + requestedStatus);
+    }
+
+    var currentStatus = cleanString_(privateMatch.record.review_status) || DEFAULT_REVIEW_STATUS;
+    if (currentStatus === "Approved" && requestedStatus !== "Approved") {
+      updateObjectFields_(teamSheet, rowNumber, {
+        review_status: currentStatus,
+        last_updated: nowIso_()
+      });
+      throw new Error("Approved status cannot be reversed automatically. Resolve the Player Card manually first.");
+    }
+
+    if (isTrue_(privateMatch.record.is_withdrawn) && requestedStatus === "Approved") {
+      updateObjectFields_(teamSheet, rowNumber, {
+        review_status: cleanString_(privateMatch.record.review_status) || DEFAULT_REVIEW_STATUS,
+        player_card_status: WITHDRAWN_PLAYER_CARD_STATUS,
+        last_updated: nowIso_()
+      });
+      throw new Error("A withdrawn application cannot be approved or create a Player Card.");
+    }
+
+    var now = nowIso_();
+    updateObjectFields_(privateSheet, privateMatch.rowNumber, {
+      review_status: requestedStatus,
+      admin_notes: adminNotes,
+      updated_at: now
+    });
+    privateMatch.record.review_status = requestedStatus;
+    privateMatch.record.admin_notes = adminNotes;
+    privateMatch.record.updated_at = now;
+
+    var cardResult = null;
+    if (requestedStatus === "Approved") {
+      var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+      cardResult = createOrUpdatePlayerCard_(playerSheet, privateMatch.record, now);
+      updateObjectFields_(privateSheet, privateMatch.rowNumber, {
+        player_card_created: true,
+        updated_at: now
+      });
+      privateMatch.record.player_card_created = true;
+    }
+
+    updateObjectFields_(teamSheet, rowNumber, {
+      review_status: requestedStatus,
+      admin_notes: adminNotes,
+      player_card_status: isTrue_(privateMatch.record.player_card_created) ? "Created" : DEFAULT_PLAYER_CARD_STATUS,
+      last_updated: now
+    });
+
+    return {
+      rowNumber: rowNumber,
+      submissionId: submissionId,
+      reviewStatus: requestedStatus,
+      playerCard: cardResult,
+      ok: true
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function createOrUpdatePlayerCard_(playerSheet, privateRecord, now) {
+  if (isTrue_(privateRecord.is_withdrawn)) {
+    throw new Error("Withdrawn applications cannot create Player Cards.");
+  }
+
+  var submissionId = cleanString_(privateRecord.submission_id);
+  var existing = findObjectByValue_(playerSheet, "submission_id", submissionId);
+  var sharedFields = {
+    submission_id: submissionId,
+    name: fullName_(privateRecord.first_name, privateRecord.last_name),
+    primary_role: cleanString_(privateRecord.primary_role),
+    secondary_role: cleanString_(privateRecord.secondary_role),
+    skills: cleanString_(privateRecord.skills),
+    stipend_eligibility: rewardIncludes_(privateRecord.reward_preferences, "Stipend eligible review")
+      ? "Eligible for Review"
+      : "Not Requested",
+    member_status: "Active",
+    updated_at: now
+  };
+
+  if (existing) {
+    updateObjectFields_(playerSheet, existing.rowNumber, sharedFields);
+    return {
+      created: false,
+      playerId: cleanString_(existing.record.player_id)
+    };
+  }
+
+  var record = {
+    player_id: generatePlayerId_(),
+    submission_id: submissionId,
+    name: sharedFields.name,
+    primary_role: sharedFields.primary_role,
+    secondary_role: sharedFields.secondary_role,
+    skills: sharedFields.skills,
+    verified_qualifications: "",
+    badges: "[]",
+    quest_credits: 0,
+    completed_quests: "[]",
+    stipend_eligibility: sharedFields.stipend_eligibility,
+    member_status: "Active",
+    public_profile_consent: false,
+    created_at: now,
+    updated_at: now
+  };
+  appendObject_(playerSheet, record);
+  return { created: true, playerId: record.player_id };
+}
+
+function validateApplication_(payload) {
+  var fieldErrors = {};
+  var applicant = payload && payload.applicant ? payload.applicant : {};
+  var application = payload && payload.application ? payload.application : {};
+  var acknowledgements = payload && payload.acknowledgements ? payload.acknowledgements : {};
+  var files = payload && payload.files ? payload.files : {};
+  var clientRequestId = cleanString_(payload && payload.clientRequestId);
+  var withdrawalToken = cleanString_(payload && payload.withdrawalToken);
+
+  if (cleanString_(payload && payload.schemaVersion) !== SCHEMA_VERSION) {
+    fieldErrors.schemaVersion = "This application form version is no longer supported. Refresh and try again.";
+  }
+
+  validateRequiredText_(fieldErrors, "firstName", applicant.firstName, MAX_LENGTHS.firstName);
+  validateRequiredText_(fieldErrors, "lastName", applicant.lastName, MAX_LENGTHS.lastName);
+  validateRequiredText_(fieldErrors, "email", applicant.email, MAX_LENGTHS.email);
+  validateRequiredText_(fieldErrors, "phone", applicant.phone, MAX_LENGTHS.phone);
+  validateRequiredText_(fieldErrors, "zipCode", applicant.zipCode, MAX_LENGTHS.zipCode);
+  validateRequiredText_(fieldErrors, "heardAboutUs", applicant.heardAboutUs, MAX_LENGTHS.heardAboutUs);
+  validateRequiredText_(fieldErrors, "skills", application.skills, MAX_LENGTHS.skills);
+  validateRequiredText_(fieldErrors, "availability", application.availability, MAX_LENGTHS.availability);
+
+  var email = cleanString_(applicant.email).toLowerCase();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    fieldErrors.email = "Enter a valid email address.";
+  }
+  if (cleanString_(applicant.accessibilityNotes).length > MAX_LENGTHS.accessibilityNotes) {
+    fieldErrors.accessibilityNotes = "Keep accessibility notes under " + MAX_LENGTHS.accessibilityNotes + " characters.";
+  }
+  var primaryRole = cleanString_(application.primaryRole);
+  var secondaryRole = cleanString_(application.secondaryRole);
+  if (ALLOWED_ROLES.indexOf(primaryRole) === -1) {
+    fieldErrors.primaryRole = "Choose a valid primary role.";
+  }
+  if (secondaryRole && ALLOWED_ROLES.indexOf(secondaryRole) === -1) {
+    fieldErrors.secondaryRole = "Choose a valid secondary role.";
+  }
+  if (secondaryRole && secondaryRole === primaryRole) {
+    fieldErrors.secondaryRole = "Choose a different secondary role or leave it blank.";
+  }
+
+  var availability = cleanString_(application.availability);
+  if (availability && ALLOWED_SHIFTS.indexOf(availability) === -1) {
+    fieldErrors.availability = "Choose a valid availability window.";
+  }
+
+  var rewards = normalizeStringArray_(application.rewardPreferences);
+  if (!rewards.length || rewards.some(function (reward) { return ALLOWED_REWARDS.indexOf(reward) === -1; })) {
+    fieldErrors.rewardPreferences = "Choose at least one valid reward preference.";
+  }
+
+  if (!isTrue_(acknowledgements.trainingComic)) {
+    fieldErrors.trainingComic = "Confirm the training/comic acknowledgement.";
+  }
+  if (!isTrue_(acknowledgements.commitment)) {
+    fieldErrors.commitment = "Confirm your event commitment.";
+  }
+  if (!isTrue_(acknowledgements.accuracy)) {
+    fieldErrors.accuracy = "Confirm that the application is accurate.";
+  }
+  if (!/^[A-Za-z0-9_-]{16,100}$/.test(clientRequestId)) {
+    fieldErrors.clientRequestId = "A valid client request ID is required.";
+  }
+  if (!/^[A-Za-z0-9._-]{32,200}$/.test(withdrawalToken)) {
+    fieldErrors.withdrawalToken = "A valid withdrawal token is required.";
+  }
+
+  validateFiles_(files, fieldErrors);
+  return { valid: Object.keys(fieldErrors).length === 0, fieldErrors: fieldErrors };
+}
+
+function validateFiles_(files, fieldErrors) {
+  var resume = files && files.resume ? files.resume : null;
+  var certifications = files && Array.isArray(files.certifications) ? files.certifications : [];
+  var combined = 0;
+
+  if (resume) {
+    var resumeSize = validateFileDescriptor_(resume, "resume", FILE_RULES.resumeMimeTypes, FILE_RULES.maxResumeBytes, fieldErrors);
+    combined += resumeSize;
+  }
+  if (certifications.length > FILE_RULES.maxCertificationCount) {
+    fieldErrors.certifications = "Upload no more than " + FILE_RULES.maxCertificationCount + " certification files.";
+  }
+  certifications.forEach(function (file, index) {
+    combined += validateFileDescriptor_(
+      file,
+      "certifications",
+      FILE_RULES.certificationMimeTypes,
+      FILE_RULES.maxCertificationBytes,
+      fieldErrors,
+      index
+    );
+  });
+  if (combined > FILE_RULES.maxCombinedBytes) {
+    fieldErrors.files = "Combined uploads must be 12 MB or less.";
+  }
+}
+
+function validateFileDescriptor_(file, fieldName, allowedTypes, maxBytes, fieldErrors, index) {
+  var suffix = typeof index === "number" ? " #" + (index + 1) : "";
+  var name = sanitizeFileName_(file && file.name);
+  var mimeType = cleanString_(file && file.mimeType).toLowerCase();
+  var size = Number(file && file.size);
+  var base64 = cleanBase64_(file && file.base64);
+
+  if (!name || !base64) {
+    fieldErrors[fieldName] = "File" + suffix + " is incomplete.";
+    return 0;
+  }
+  if (allowedTypes.indexOf(mimeType) === -1) {
+    fieldErrors[fieldName] = "File" + suffix + " has an unsupported type.";
+  }
+  if (!isFinite(size) || size <= 0 || size > maxBytes) {
+    fieldErrors[fieldName] = "File" + suffix + " exceeds the 5 MB limit or has an invalid size.";
+    return 0;
+  }
+  if (base64.length > Math.ceil(maxBytes / 3) * 4 + 8) {
+    fieldErrors[fieldName] = "File" + suffix + " exceeds the 5 MB limit.";
+  }
+  return size;
+}
+
+function normalizeApplication_(payload) {
+  var applicant = payload.applicant || {};
+  var application = payload.application || {};
+  var acknowledgements = payload.acknowledgements || {};
+  var files = payload.files || {};
+
+  return {
+    clientRequestId: cleanString_(payload.clientRequestId),
+    withdrawalToken: cleanString_(payload.withdrawalToken),
+    applicant: {
+      firstName: cleanString_(applicant.firstName),
+      lastName: cleanString_(applicant.lastName),
+      email: cleanString_(applicant.email).toLowerCase(),
+      phone: cleanString_(applicant.phone),
+      zipCode: cleanString_(applicant.zipCode),
+      accessibilityNotes: cleanString_(applicant.accessibilityNotes),
+      heardAboutUs: cleanString_(applicant.heardAboutUs)
+    },
+    application: {
+      primaryRole: cleanString_(application.primaryRole),
+      secondaryRole: cleanString_(application.secondaryRole),
+      skills: cleanString_(application.skills),
+      availability: cleanString_(application.availability),
+      rewardPreferences: normalizeStringArray_(application.rewardPreferences)
+    },
+    acknowledgements: {
+      trainingComic: isTrue_(acknowledgements.trainingComic),
+      commitment: isTrue_(acknowledgements.commitment),
+      accuracy: isTrue_(acknowledgements.accuracy)
+    },
+    files: {
+      resume: files.resume ? normalizeFileDescriptor_(files.resume) : null,
+      certifications: Array.isArray(files.certifications)
+        ? files.certifications.map(normalizeFileDescriptor_)
+        : []
+    }
+  };
+}
+
+function uploadApplicationFiles_(files, submissionId, config, createdFiles) {
+  var resumeId = "";
+  var certificationIds = [];
+
+  if (files.resume) {
+    var resumeFolder = DriveApp.getFolderById(config.resumeFolderId);
+    var resumeFile = createDriveFile_(resumeFolder, files.resume, submissionId, "resume");
+    createdFiles.push(resumeFile);
+    resumeId = resumeFile.getId();
+  }
+
+  if (files.certifications.length) {
+    var certificationFolder = DriveApp.getFolderById(config.certificationFolderId);
+    files.certifications.forEach(function (file, index) {
+      var created = createDriveFile_(certificationFolder, file, submissionId, "cert-" + (index + 1));
+      createdFiles.push(created);
+      certificationIds.push(created.getId());
+    });
+  }
+
+  return { resumeFileId: resumeId, certificationFileIds: certificationIds };
+}
+
+function createDriveFile_(folder, descriptor, submissionId, label) {
+  var bytes;
+  try {
+    bytes = Utilities.base64Decode(descriptor.base64);
+  } catch (error) {
+    throw new Error("An uploaded file could not be decoded.");
+  }
+  if (bytes.length !== Number(descriptor.size)) {
+    throw new Error("An uploaded file did not match its declared size.");
+  }
+
+  var storedName = submissionId + "_" + label + "_" + sanitizeFileName_(descriptor.name);
+  var blob = Utilities.newBlob(bytes, descriptor.mimeType, storedName);
+  // The configured destination folder must already be Restricted; permissions are never changed here.
+  return folder.createFile(blob);
+}
+
+function buildPrivateRecord_(normalized, submissionId, now, uploaded) {
+  return {
+    submission_id: submissionId,
+    first_name: normalized.applicant.firstName,
+    last_name: normalized.applicant.lastName,
+    email: normalized.applicant.email,
+    phone: normalized.applicant.phone,
+    zip_code: normalized.applicant.zipCode,
+    primary_role: normalized.application.primaryRole,
+    secondary_role: normalized.application.secondaryRole,
+    skills: normalized.application.skills,
+    availability: normalized.application.availability,
+    reward_preferences: JSON.stringify(normalized.application.rewardPreferences),
+    resume_file_id: uploaded.resumeFileId,
+    certification_file_ids: JSON.stringify(uploaded.certificationFileIds),
+    accessibility_notes: normalized.applicant.accessibilityNotes,
+    heard_about_us: normalized.applicant.heardAboutUs,
+    review_status: DEFAULT_REVIEW_STATUS,
+    admin_notes: "",
+    player_card_created: false,
+    created_at: now,
+    updated_at: now,
+    client_request_id: normalized.clientRequestId,
+    withdrawal_token_hash: hashToken_(normalized.withdrawalToken),
+    is_withdrawn: false,
+    withdrawn_at: ""
+  };
+}
+
+function buildTeamReviewRecord_(privateRecord) {
+  var isWithdrawn = isTrue_(privateRecord.is_withdrawn);
+  var certificationIds = parseStoredArray_(privateRecord.certification_file_ids);
+  var qualificationParts = [];
+  if (cleanString_(privateRecord.resume_file_id)) {
+    qualificationParts.push("Resume on file");
+  }
+  if (certificationIds.length) {
+    qualificationParts.push(certificationIds.length + " certification file(s) on file");
+  }
+  if (!qualificationParts.length) {
+    qualificationParts.push("No uploaded qualifications");
+  }
+
+  return {
+    submission_id: cleanString_(privateRecord.submission_id),
+    name: truncate_(redactTeamText_(fullName_(privateRecord.first_name, privateRecord.last_name)), 160),
+    primary_role: cleanString_(privateRecord.primary_role),
+    skills_summary: truncate_(redactTeamText_(privateRecord.skills), 1000),
+    availability_summary: truncate_(cleanString_(privateRecord.availability), 500),
+    qualification_summary: qualificationParts.join("; "),
+    review_status: cleanString_(privateRecord.review_status) || DEFAULT_REVIEW_STATUS,
+    admin_notes: truncate_(redactTeamText_(privateRecord.admin_notes), MAX_LENGTHS.adminNotes),
+    player_card_status: isWithdrawn
+      ? WITHDRAWN_PLAYER_CARD_STATUS
+      : (isTrue_(privateRecord.player_card_created) ? "Created" : DEFAULT_PLAYER_CARD_STATUS),
+    last_updated: isoString_(privateRecord.updated_at) || nowIso_()
+  };
+}
+
+function upsertTeamReview_(teamSheet, privateRecord) {
+  var record = buildTeamReviewRecord_(privateRecord);
+  var existing = findObjectByValue_(teamSheet, "submission_id", record.submission_id);
+  if (existing) {
+    if (cleanString_(existing.record.admin_notes)) {
+      record.admin_notes = truncate_(redactTeamText_(existing.record.admin_notes), MAX_LENGTHS.adminNotes);
+    }
+    updateObjectFields_(teamSheet, existing.rowNumber, record);
+    return { created: false, rowNumber: existing.rowNumber };
+  }
+  appendObject_(teamSheet, record);
+  return { created: true, rowNumber: teamSheet.getLastRow() };
+}
+
+function repairTeamReviewRecord_(teamSheet, privateRecord) {
+  if (!findObjectByValue_(teamSheet, "submission_id", cleanString_(privateRecord.submission_id))) {
+    upsertTeamReview_(teamSheet, privateRecord);
+  }
 }
 
 function getConfig_() {
   var properties = PropertiesService.getScriptProperties();
   var config = {
-    privateSpreadsheetId: properties.getProperty("PRIVATE_SPREADSHEET_ID"),
-    teamSpreadsheetId: properties.getProperty("TEAM_SPREADSHEET_ID"),
-    privateSheetName: properties.getProperty("PRIVATE_SHEET_NAME") || "Applications_Private",
-    teamSheetName: properties.getProperty("TEAM_SHEET_NAME") || "Team_Review"
+    privateSheetId: cleanString_(properties.getProperty("PRIVATE_SHEET_ID")),
+    teamReviewSheetId: cleanString_(properties.getProperty("TEAM_REVIEW_SHEET_ID")),
+    playerCardsSheetId: cleanString_(properties.getProperty("PLAYER_CARDS_SHEET_ID")),
+    resumeFolderId: cleanString_(properties.getProperty("RESUME_FOLDER_ID")),
+    certificationFolderId: cleanString_(properties.getProperty("CERTIFICATION_FOLDER_ID"))
   };
-
-  if (!config.privateSpreadsheetId || !config.teamSpreadsheetId) {
-    throw publicError_("CONFIG_ERROR", "The application service is not configured yet.");
-  }
-  if (config.privateSpreadsheetId === config.teamSpreadsheetId) {
-    throw publicError_("CONFIG_ERROR", "Private and team review data must use separate spreadsheet files.");
+  var missing = [];
+  Object.keys(config).forEach(function (key) {
+    if (!config[key]) {
+      missing.push(key);
+    }
+  });
+  if (missing.length) {
+    throw new Error("Missing required Script Properties: " + missing.join(", "));
   }
   return config;
 }
 
-function getSheet_(spreadsheetId, sheetName, expectedHeaders) {
+function getConfiguredSheet_(spreadsheetId, requiredHeaders, appendHeaders) {
   var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-  var sheet = spreadsheet.getSheetByName(sheetName);
-  if (!sheet) throw publicError_("CONFIG_ERROR", "A required application sheet is missing.");
-  assertHeaders_(sheet, expectedHeaders);
+  var sheets = spreadsheet.getSheets();
+  if (!sheets.length) {
+    throw new Error("The configured spreadsheet has no sheets.");
+  }
+  var sheet = sheets[0];
+  ensureSheetHeaders_(sheet, requiredHeaders, appendHeaders || []);
   return sheet;
 }
 
-function assertHeaders_(sheet, expectedHeaders) {
-  var actual = sheet.getRange(1, 1, 1, expectedHeaders.length).getDisplayValues()[0];
-  if (actual.join("|") !== expectedHeaders.join("|")) {
-    throw publicError_("CONFIG_ERROR", "A required application sheet has the wrong columns.");
+function ensureSheetHeaders_(sheet, requiredHeaders, appendHeaders) {
+  var headers = getHeaders_(sheet);
+  if (!headers.length) {
+    throw new Error("The configured sheet is missing its header row.");
   }
-}
-
-function setupSheets() {
-  var config = getConfig_();
-  setHeaders_(SpreadsheetApp.openById(config.privateSpreadsheetId), config.privateSheetName, PRIVATE_HEADERS);
-  setHeaders_(SpreadsheetApp.openById(config.teamSpreadsheetId), config.teamSheetName, TEAM_HEADERS);
-}
-
-function setHeaders_(spreadsheet, sheetName, headers) {
-  var sheet = spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
-  if (sheet.getLastRow() > 0 && sheet.getLastColumn() > 0 && sheet.getRange(1, 1).getDisplayValue()) {
-    assertHeaders_(sheet, headers);
-    return;
-  }
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.setFrozenRows(1);
-}
-
-function findSubmissionByClientRequest_(sheet, clientRequestId) {
-  var rowNumber = findRowByValue_(sheet, "client_request_id", clientRequestId);
-  if (!rowNumber) return null;
-  var headerMap = headerIndexMap_(PRIVATE_HEADERS);
-  var values = sheet.getRange(rowNumber, 1, 1, PRIVATE_HEADERS.length).getDisplayValues()[0];
-  return {
-    submissionId: values[headerMap.submission_id],
-    submittedAtUtc: values[headerMap.submitted_at_utc]
-  };
-}
-
-function sheetContainsValue_(sheet, headerName, value) {
-  return Boolean(findRowByValue_(sheet, headerName, value));
-}
-
-function findRowByValue_(sheet, headerName, value) {
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
-  var columnIndex = headers.indexOf(headerName) + 1;
-  if (!columnIndex || sheet.getLastRow() < 2) return 0;
-  var match = sheet.getRange(2, columnIndex, sheet.getLastRow() - 1, 1)
-    .createTextFinder(String(value))
-    .matchEntireCell(true)
-    .findNext();
-  return match ? match.getRow() : 0;
-}
-
-function headerIndexMap_(headers) {
-  return headers.reduce(function (map, header, index) {
-    map[header] = index;
-    return map;
-  }, {});
-}
-
-function validateRequiredText_(errors, field, value, maxLength) {
-  var text = cleanString_(value);
-  if (!text) errors[field] = "This field is required.";
-  else if (text.length > maxLength) errors[field] = "This field is too long.";
-}
-
-function validateOptionalText_(errors, field, value, maxLength) {
-  if (value !== undefined && value !== null && typeof value !== "string") {
-    errors[field] = "This field has an invalid value.";
-    return;
-  }
-  if (cleanString_(value).length > maxLength) errors[field] = "This field is too long.";
-}
-
-function normalizeStringArray_(value) {
-  if (Array.isArray(value)) {
-    return value.map(cleanString_).filter(Boolean);
-  }
-  if (typeof value === "string") {
-    return value.split(/\r?\n/).map(cleanString_).filter(Boolean);
-  }
-  return [];
-}
-
-function cleanString_(value) {
-  return typeof value === "string" ? value.trim().replace(/\r\n/g, "\n") : "";
-}
-
-function isSafeHttpUrl_(value) {
-  return /^https?:\/\/[^\s]+$/i.test(value);
-}
-
-function sanitizeCellValue_(value) {
-  if (typeof value !== "string") return value;
-  var normalized = value.replace(/\u0000/g, "");
-  return /^[=+\-@]/.test(normalized) ? "'" + normalized : normalized;
-}
-
-function preserveTextCell_(value) {
-  var text = cleanString_(value);
-  return text ? "'" + text : "";
-}
-
-function hashToken_(token) {
-  var digest = Utilities.computeDigest(
-    Utilities.DigestAlgorithm.SHA_256,
-    cleanString_(token),
-    Utilities.Charset.UTF_8
-  );
-  return digest.map(function (byte) {
-    return ("0" + ((byte + 256) % 256).toString(16)).slice(-2);
-  }).join("");
-}
-
-function secureEquals_(left, right) {
-  var a = String(left || "");
-  var b = String(right || "");
-  var mismatch = a.length ^ b.length;
-  var length = Math.max(a.length, b.length);
-  for (var index = 0; index < length; index += 1) {
-    mismatch |= (a.charCodeAt(index % Math.max(a.length, 1)) || 0)
-      ^ (b.charCodeAt(index % Math.max(b.length, 1)) || 0);
-  }
-  return mismatch === 0;
-}
-
-function buildDisplayName_(fullName) {
-  var parts = cleanString_(fullName).split(/\s+/).filter(Boolean);
-  if (!parts.length) return "Applicant";
-  if (/@|https?:\/\/|\d{3,}/i.test(fullName)) return "Applicant";
-  if (parts.length === 1) return parts[0];
-  return parts[0] + " " + parts[parts.length - 1].charAt(0).toUpperCase() + ".";
-}
-
-function redactTeamText_(value) {
-  return cleanString_(value)
-    .replace(/https?:\/\/\S+/gi, "[link removed]")
-    .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/gi, "[contact removed]")
-    .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[contact removed]");
-}
-
-function summarize_(value, maxLength) {
-  var text = cleanString_(value).replace(/\s+/g, " ");
-  return text.length <= maxLength ? text : text.slice(0, maxLength - 1).trim() + "…";
-}
-
-function successResponse_(submissionId, submittedAtUtc, duplicate) {
-  return jsonResponse_({
-    ok: true,
-    submissionId: submissionId,
-    submittedAtUtc: submittedAtUtc,
-    duplicate: Boolean(duplicate)
+  requiredHeaders.forEach(function (header) {
+    if (headers.indexOf(header) === -1) {
+      throw new Error("Missing required sheet column: " + header);
+    }
+  });
+  appendHeaders.forEach(function (header) {
+    if (headers.indexOf(header) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
+      headers.push(header);
+    }
   });
 }
 
-function errorResponse_(code, message, extra) {
-  var body = { ok: false, code: code, message: message };
-  if (extra && extra.fieldErrors) body.fieldErrors = extra.fieldErrors;
-  if (extra && extra.submissionId) body.submissionId = extra.submissionId;
+function getHeaders_(sheet) {
+  var lastColumn = sheet.getLastColumn();
+  if (lastColumn < 1) {
+    return [];
+  }
+  return sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function (value) {
+    return cleanString_(value);
+  });
+}
+
+function appendObject_(sheet, record) {
+  var headers = getHeaders_(sheet);
+  var row = headers.map(function (header) {
+    return Object.prototype.hasOwnProperty.call(record, header) ? sanitizeSheetValue_(record[header]) : "";
+  });
+  sheet.appendRow(row);
+}
+
+function objectFromRow_(sheet, rowNumber) {
+  var headers = getHeaders_(sheet);
+  var values = sheet.getRange(rowNumber, 1, 1, headers.length).getValues()[0];
+  var record = {};
+  headers.forEach(function (header, index) {
+    record[header] = values[index];
+  });
+  return record;
+}
+
+function updateObjectFields_(sheet, rowNumber, fields) {
+  var headers = getHeaders_(sheet);
+  Object.keys(fields).forEach(function (field) {
+    var index = headerIndex_(headers, field);
+    if (index === -1) {
+      throw new Error("Cannot update missing sheet column: " + field);
+    }
+    sheet.getRange(rowNumber, index + 1).setValue(sanitizeSheetValue_(fields[field]));
+  });
+}
+
+function findObjectByValue_(sheet, header, value) {
+  var headers = getHeaders_(sheet);
+  var columnIndex = headerIndex_(headers, header);
+  if (columnIndex === -1) {
+    throw new Error("Missing lookup column: " + header);
+  }
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    return null;
+  }
+  var values = sheet.getRange(2, columnIndex + 1, lastRow - 1, 1).getValues();
+  var target = cleanString_(value);
+  for (var i = 0; i < values.length; i += 1) {
+    if (cleanString_(values[i][0]) === target) {
+      return { rowNumber: i + 2, record: objectFromRow_(sheet, i + 2) };
+    }
+  }
+  return null;
+}
+
+function headerIndex_(headers, header) {
+  return headers.indexOf(header);
+}
+
+function parseRequest_(e) {
+  if (!e || !e.postData || !e.postData.contents) {
+    throw new Error("Missing request body.");
+  }
+  try {
+    return JSON.parse(e.postData.contents);
+  } catch (error) {
+    throw new Error("Request body must be valid JSON.");
+  }
+}
+
+function successResponse_(data) {
+  var body = { ok: true, schemaVersion: SCHEMA_VERSION };
+  Object.keys(data || {}).forEach(function (key) {
+    body[key] = data[key];
+  });
+  return jsonResponse_(body);
+}
+
+function errorResponse_(code, message, details) {
+  var body = {
+    ok: false,
+    schemaVersion: SCHEMA_VERSION,
+    error: { code: code, message: message }
+  };
+  Object.keys(details || {}).forEach(function (key) {
+    body.error[key] = details[key];
+  });
   return jsonResponse_(body);
 }
 
 function jsonResponse_(body) {
-  return ContentService
-    .createTextOutput(JSON.stringify(body))
+  return ContentService.createTextOutput(JSON.stringify(body))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function publicError_(code, message) {
-  var error = new Error(message);
-  error.publicCode = code;
-  error.publicMessage = message;
-  return error;
+function generateSubmissionId_() {
+  var stamp = Utilities.formatDate(new Date(), "UTC", "yyyyMMdd");
+  return "SQ-" + stamp + "-" + uuidCompact_().slice(0, 8);
 }
 
-function logError_(code, context, error) {
+function generatePlayerId_() {
+  return "SQP-" + uuidCompact_().slice(0, 12);
+}
+
+function uuidCompact_() {
+  return Utilities.getUuid().replace(/-/g, "").toUpperCase();
+}
+
+function hashToken_(token) {
+  var bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    cleanString_(token),
+    Utilities.Charset.UTF_8
+  );
+  return bytes.map(function (byte) {
+    var value = byte < 0 ? byte + 256 : byte;
+    return ("0" + value.toString(16)).slice(-2);
+  }).join("");
+}
+
+function constantTimeEqual_(left, right) {
+  left = String(left || "");
+  right = String(right || "");
+  var mismatch = left.length ^ right.length;
+  var length = Math.max(left.length, right.length);
+  for (var i = 0; i < length; i += 1) {
+    mismatch |= (left.charCodeAt(i % (left.length || 1)) || 0) ^ (right.charCodeAt(i % (right.length || 1)) || 0);
+  }
+  return mismatch === 0;
+}
+
+function normalizeFileDescriptor_(file) {
+  return {
+    name: sanitizeFileName_(file.name),
+    mimeType: cleanString_(file.mimeType).toLowerCase(),
+    size: Number(file.size),
+    base64: cleanBase64_(file.base64)
+  };
+}
+
+function cleanBase64_(value) {
+  return String(value || "").replace(/^data:[^;]+;base64,/, "").replace(/\s/g, "");
+}
+
+function sanitizeFileName_(value) {
+  var name = cleanString_(value).replace(/[^A-Za-z0-9._-]+/g, "-");
+  name = name.replace(/^-+|-+$/g, "");
+  return truncate_(name || "upload", 120);
+}
+
+function trashFiles_(files) {
+  files.forEach(function (file) {
+    try {
+      file.setTrashed(true);
+    } catch (ignored) {
+      // Best-effort cleanup only. Do not log file names or IDs.
+    }
+  });
+}
+
+function validateRequiredText_(fieldErrors, fieldName, value, maxLength) {
+  var text = cleanString_(value);
+  if (!text) {
+    fieldErrors[fieldName] = "This field is required.";
+  } else if (text.length > maxLength) {
+    fieldErrors[fieldName] = "Keep this field under " + maxLength + " characters.";
+  }
+}
+
+function normalizeStringArray_(value) {
+  var array = Array.isArray(value) ? value : [];
+  var unique = [];
+  array.forEach(function (item) {
+    var text = cleanString_(item);
+    if (text && unique.indexOf(text) === -1) {
+      unique.push(text);
+    }
+  });
+  return unique;
+}
+
+function parseStoredArray_(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  try {
+    var parsed = JSON.parse(cleanString_(value) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function rewardIncludes_(storedRewards, target) {
+  return parseStoredArray_(storedRewards).indexOf(target) !== -1;
+}
+
+function fullName_(firstName, lastName) {
+  return [cleanString_(firstName), cleanString_(lastName)].filter(Boolean).join(" ");
+}
+
+/** Removes contact details and private links from fields allowed into Team Review. */
+function redactTeamText_(value) {
+  return cleanString_(value)
+    .replace(/(?:https?:\/\/|www\.|(?:docs|drive)\.google\.com\/)\S+/gi, "[link removed]")
+    .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/gi, "[contact removed]")
+    .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[contact removed]");
+}
+
+/** Prevents user-provided text from being interpreted as a Sheets formula. */
+function sanitizeSheetValue_(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  var normalized = value.replace(/\u0000/g, "");
+  return /^[=+\-@]/.test(normalized) ? "'" + normalized : normalized;
+}
+
+function cleanString_(value) {
+  return value === null || typeof value === "undefined" ? "" : String(value).trim();
+}
+
+function truncate_(value, maximum) {
+  var text = cleanString_(value);
+  return text.length > maximum ? text.slice(0, maximum) : text;
+}
+
+function isTrue_(value) {
+  return value === true || cleanString_(value).toLowerCase() === "true" || cleanString_(value) === "1";
+}
+
+function isoString_(value) {
+  if (!value) {
+    return "";
+  }
+  if (Object.prototype.toString.call(value) === "[object Date]") {
+    return value.toISOString();
+  }
+  return cleanString_(value);
+}
+
+function nowIso_() {
+  return new Date().toISOString();
+}
+
+function logSafeError_(error, context) {
   console.error(JSON.stringify({
-    code: code,
+    code: "BACKEND_ERROR",
     stage: context && context.stage ? context.stage : "unknown",
     submissionId: context && context.submissionId ? context.submissionId : "",
-    technicalMessage: error && error.message ? String(error.message).slice(0, 500) : "Unknown error"
+    errorType: error && error.name ? cleanString_(error.name) : "Error"
   }));
 }

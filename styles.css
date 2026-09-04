@@ -3479,6 +3479,51 @@ body.application-open {
   padding: 10px 12px;
 }
 
+.certification-upload-field > label > span {
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.certification-upload-field input[type="file"] {
+  background: #fffdf8;
+}
+
+.certification-file-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.certification-file-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--green);
+  background: rgba(65, 98, 61, 0.08);
+  padding: 12px 14px;
+}
+
+.certification-file-list span,
+.certification-file-list strong,
+.certification-file-list small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.certification-file-list small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .acknowledgement-list {
   display: grid;
   gap: 10px;
