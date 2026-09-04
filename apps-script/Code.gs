@@ -6,7 +6,8 @@
  * Drive or spreadsheet sharing; all production resources must remain Restricted.
  */
 
-var SCHEMA_VERSION = "3.0";
+var SCHEMA_VERSION = "3.1";
+var SUPPORTED_SUBMISSION_SCHEMA_VERSIONS = ["3.0", "3.1"];
 
 var PRIVATE_BASE_HEADERS = [
   "submission_id",
@@ -36,7 +37,12 @@ var PRIVATE_INTERNAL_HEADERS = [
   "client_request_id",
   "withdrawal_token_hash",
   "is_withdrawn",
-  "withdrawn_at"
+  "withdrawn_at",
+  "additional_roles",
+  "onboarding_acknowledged",
+  "onboarding_acknowledged_at",
+  "onboarding_email_status",
+  "onboarding_email_sent_at"
 ];
 
 var TEAM_REVIEW_HEADERS = [
@@ -70,6 +76,14 @@ var PLAYER_CARD_HEADERS = [
   "updated_at"
 ];
 
+// Player Card extensions preserve multi-path participation without replacing the MVP columns.
+var PLAYER_CARD_INTERNAL_HEADERS = [
+  "additional_roles",
+  "role_history",
+  "onboarding_acknowledged",
+  "onboarding_acknowledged_at"
+];
+
 var REVIEW_STATUSES = [
   "Pending Review",
   "Approved",
@@ -80,6 +94,12 @@ var REVIEW_STATUSES = [
 var DEFAULT_REVIEW_STATUS = "Pending Review";
 var DEFAULT_PLAYER_CARD_STATUS = "Not Created";
 var WITHDRAWN_PLAYER_CARD_STATUS = "Not Created — Applicant Withdrawn";
+var ONBOARDING_EMAIL_NOT_SENT = "Not Sent";
+var ONBOARDING_EMAIL_SENDING = "Sending";
+var ONBOARDING_EMAIL_SENT = "Sent";
+var ONBOARDING_EMAIL_FAILED = "Failed";
+var ONBOARDING_EMAIL_MISSING = "Missing Email";
+var APPROVAL_EMAIL_SUBJECT = "Your Sunrise Quest application is approved";
 
 var ALLOWED_ROLES = [
   "Power Runner · solar / technical",
@@ -308,7 +328,7 @@ function handleWithdrawal_(payload, context) {
     upsertTeamReview_(teamSheet, match.record);
 
     // A pre-existing card remains an internal historical record and is made non-public.
-    var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+    var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, PLAYER_CARD_INTERNAL_HEADERS);
     var playerMatch = findObjectByValue_(playerSheet, "submission_id", submissionId);
     if (playerMatch) {
       updateObjectFields_(playerSheet, playerMatch.rowNumber, {
@@ -344,7 +364,7 @@ function setupBackend() {
   var config = getConfig_();
   var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
   var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
-  var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+  var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, PLAYER_CARD_INTERNAL_HEADERS);
   DriveApp.getFolderById(config.resumeFolderId).getName();
   DriveApp.getFolderById(config.certificationFolderId).getName();
 
@@ -477,8 +497,9 @@ function processAdminReviewRow_(teamSheet, rowNumber, config) {
     privateMatch.record.updated_at = now;
 
     var cardResult = null;
+    var onboardingEmailResult = null;
     if (requestedStatus === "Approved") {
-      var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, []);
+      var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, PLAYER_CARD_INTERNAL_HEADERS);
       cardResult = createOrUpdatePlayerCard_(playerSheet, privateMatch.record, now);
       updateObjectFields_(privateSheet, privateMatch.rowNumber, {
         player_card_created: true,
@@ -494,11 +515,20 @@ function processAdminReviewRow_(teamSheet, rowNumber, config) {
       last_updated: now
     });
 
+    if (requestedStatus === "Approved") {
+      onboardingEmailResult = sendApprovalOnboardingEmail_(
+        privateSheet,
+        privateMatch.rowNumber,
+        privateMatch.record
+      );
+    }
+
     return {
       rowNumber: rowNumber,
       submissionId: submissionId,
       reviewStatus: requestedStatus,
       playerCard: cardResult,
+      onboardingEmail: onboardingEmailResult,
       ok: true
     };
   } finally {
@@ -513,16 +543,26 @@ function createOrUpdatePlayerCard_(playerSheet, privateRecord, now) {
 
   var submissionId = cleanString_(privateRecord.submission_id);
   var existing = findObjectByValue_(playerSheet, "submission_id", submissionId);
+  var additionalRoles = additionalRolesFromPrivateRecord_(privateRecord);
+  var onboardingAcknowledged = isTrue_(privateRecord.onboarding_acknowledged);
+  var onboardingAcknowledgedAt = onboardingAcknowledged
+    ? (isoString_(privateRecord.onboarding_acknowledged_at) || isoString_(privateRecord.created_at) || now)
+    : "";
+  var roleHistory = updatedRoleHistory_(existing ? existing.record : null, privateRecord, now);
   var sharedFields = {
     submission_id: submissionId,
     name: fullName_(privateRecord.first_name, privateRecord.last_name),
     primary_role: cleanString_(privateRecord.primary_role),
-    secondary_role: cleanString_(privateRecord.secondary_role),
+    secondary_role: additionalRoles[0] || "",
+    additional_roles: JSON.stringify(additionalRoles),
+    role_history: JSON.stringify(roleHistory),
     skills: cleanString_(privateRecord.skills),
     stipend_eligibility: rewardIncludes_(privateRecord.reward_preferences, "Stipend eligible review")
       ? "Eligible for Review"
       : "Not Requested",
     member_status: "Active",
+    onboarding_acknowledged: onboardingAcknowledged,
+    onboarding_acknowledged_at: onboardingAcknowledgedAt,
     updated_at: now
   };
 
@@ -540,6 +580,8 @@ function createOrUpdatePlayerCard_(playerSheet, privateRecord, now) {
     name: sharedFields.name,
     primary_role: sharedFields.primary_role,
     secondary_role: sharedFields.secondary_role,
+    additional_roles: sharedFields.additional_roles,
+    role_history: sharedFields.role_history,
     skills: sharedFields.skills,
     verified_qualifications: "",
     badges: "[]",
@@ -548,11 +590,99 @@ function createOrUpdatePlayerCard_(playerSheet, privateRecord, now) {
     stipend_eligibility: sharedFields.stipend_eligibility,
     member_status: "Active",
     public_profile_consent: false,
+    onboarding_acknowledged: sharedFields.onboarding_acknowledged,
+    onboarding_acknowledged_at: sharedFields.onboarding_acknowledged_at,
     created_at: now,
     updated_at: now
   };
   appendObject_(playerSheet, record);
   return { created: true, playerId: record.player_id };
+}
+
+/**
+ * Sends approval onboarding from the account that owns the installable trigger.
+ * Production trigger ownership and authorization must remain han@keytechlabs.org.
+ * The private claim prevents repeat Approved processing from sending twice.
+ */
+function sendApprovalOnboardingEmail_(privateSheet, rowNumber, privateRecord) {
+  if (isTrue_(privateRecord.is_withdrawn)) {
+    return { sent: false, skipped: true, reason: "withdrawn" };
+  }
+
+  var status = cleanString_(privateRecord.onboarding_email_status) || ONBOARDING_EMAIL_NOT_SENT;
+  var sentAt = isoString_(privateRecord.onboarding_email_sent_at);
+  if (status === ONBOARDING_EMAIL_SENT || sentAt) {
+    return { sent: false, skipped: true, duplicate: true, sentAt: sentAt };
+  }
+  if (status === ONBOARDING_EMAIL_SENDING) {
+    return { sent: false, skipped: true, duplicate: true, reason: "send_already_claimed" };
+  }
+
+  var email = cleanString_(privateRecord.email).toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    updateObjectFields_(privateSheet, rowNumber, {
+      onboarding_email_status: ONBOARDING_EMAIL_MISSING,
+      updated_at: nowIso_()
+    });
+    privateRecord.onboarding_email_status = ONBOARDING_EMAIL_MISSING;
+    return { sent: false, skipped: true, reason: "missing_email" };
+  }
+
+  var message = buildApprovalOnboardingEmail_(privateRecord);
+  updateObjectFields_(privateSheet, rowNumber, {
+    onboarding_email_status: ONBOARDING_EMAIL_SENDING,
+    updated_at: nowIso_()
+  });
+  privateRecord.onboarding_email_status = ONBOARDING_EMAIL_SENDING;
+
+  try {
+    MailApp.sendEmail({
+      to: email,
+      subject: APPROVAL_EMAIL_SUBJECT,
+      body: message.body,
+      name: "Sunrise Quest Board"
+    });
+  } catch (error) {
+    updateObjectFields_(privateSheet, rowNumber, {
+      onboarding_email_status: ONBOARDING_EMAIL_FAILED,
+      updated_at: nowIso_()
+    });
+    privateRecord.onboarding_email_status = ONBOARDING_EMAIL_FAILED;
+    // Do not include an address, name, message body, or provider response in logs/errors.
+    throw new Error("Approval and Player Card were saved, but the onboarding email could not be sent. Reprocess the Approved row to retry.");
+  }
+
+  sentAt = nowIso_();
+  updateObjectFields_(privateSheet, rowNumber, {
+    onboarding_email_status: ONBOARDING_EMAIL_SENT,
+    onboarding_email_sent_at: sentAt,
+    updated_at: sentAt
+  });
+  privateRecord.onboarding_email_status = ONBOARDING_EMAIL_SENT;
+  privateRecord.onboarding_email_sent_at = sentAt;
+  return { sent: true, sentAt: sentAt };
+}
+
+function buildApprovalOnboardingEmail_(privateRecord) {
+  var firstName = cleanString_(privateRecord.first_name) || "there";
+  var primaryRole = cleanString_(privateRecord.primary_role) || "To be confirmed";
+  return {
+    subject: APPROVAL_EMAIL_SUBJECT,
+    body: [
+      "Hi " + firstName + ",",
+      "",
+      "Your Sunrise Quest application has been approved.",
+      "",
+      "Primary role: " + primaryRole,
+      "",
+      "Please review the onboarding materials before participating in the event.",
+      "",
+      "We’ll share the next steps and event details with you shortly.",
+      "",
+      "Sunrise Quest Board",
+      "KeyTech Labs"
+    ].join("\n")
+  };
 }
 
 function validateApplication_(payload) {
@@ -564,7 +694,7 @@ function validateApplication_(payload) {
   var clientRequestId = cleanString_(payload && payload.clientRequestId);
   var withdrawalToken = cleanString_(payload && payload.withdrawalToken);
 
-  if (cleanString_(payload && payload.schemaVersion) !== SCHEMA_VERSION) {
+  if (SUPPORTED_SUBMISSION_SCHEMA_VERSIONS.indexOf(cleanString_(payload && payload.schemaVersion)) === -1) {
     fieldErrors.schemaVersion = "This application form version is no longer supported. Refresh and try again.";
   }
 
@@ -584,16 +714,11 @@ function validateApplication_(payload) {
   if (cleanString_(applicant.accessibilityNotes).length > MAX_LENGTHS.accessibilityNotes) {
     fieldErrors.accessibilityNotes = "Keep accessibility notes under " + MAX_LENGTHS.accessibilityNotes + " characters.";
   }
-  var primaryRole = cleanString_(application.primaryRole);
-  var secondaryRole = cleanString_(application.secondaryRole);
-  if (ALLOWED_ROLES.indexOf(primaryRole) === -1) {
-    fieldErrors.primaryRole = "Choose a valid primary role.";
-  }
-  if (secondaryRole && ALLOWED_ROLES.indexOf(secondaryRole) === -1) {
-    fieldErrors.secondaryRole = "Choose a valid secondary role.";
-  }
-  if (secondaryRole && secondaryRole === primaryRole) {
-    fieldErrors.secondaryRole = "Choose a different secondary role or leave it blank.";
+  var selectedRoles = selectedRolesFromApplication_(application);
+  if (!selectedRoles.length) {
+    fieldErrors.selectedRoles = "Select one or more participation paths.";
+  } else if (selectedRoles.some(function (role) { return ALLOWED_ROLES.indexOf(role) === -1; })) {
+    fieldErrors.selectedRoles = "Choose only valid participation paths.";
   }
 
   var availability = cleanString_(application.availability);
@@ -606,8 +731,8 @@ function validateApplication_(payload) {
     fieldErrors.rewardPreferences = "Choose at least one valid reward preference.";
   }
 
-  if (!isTrue_(acknowledgements.trainingComic)) {
-    fieldErrors.trainingComic = "Confirm the training/comic acknowledgement.";
+  if (!isTrue_(acknowledgements.onboardingMaterials) && !isTrue_(acknowledgements.trainingComic)) {
+    fieldErrors.onboardingMaterials = "Confirm that you reviewed the onboarding materials.";
   }
   if (!isTrue_(acknowledgements.commitment)) {
     fieldErrors.commitment = "Confirm your event commitment.";
@@ -682,6 +807,7 @@ function normalizeApplication_(payload) {
   var application = payload.application || {};
   var acknowledgements = payload.acknowledgements || {};
   var files = payload.files || {};
+  var selectedRoles = selectedRolesFromApplication_(application);
 
   return {
     clientRequestId: cleanString_(payload.clientRequestId),
@@ -696,14 +822,17 @@ function normalizeApplication_(payload) {
       heardAboutUs: cleanString_(applicant.heardAboutUs)
     },
     application: {
-      primaryRole: cleanString_(application.primaryRole),
-      secondaryRole: cleanString_(application.secondaryRole),
+      selectedRoles: selectedRoles,
+      primaryRole: selectedRoles[0] || "",
+      additionalRoles: selectedRoles.slice(1),
+      secondaryRole: selectedRoles[1] || "",
       skills: cleanString_(application.skills),
       availability: cleanString_(application.availability),
       rewardPreferences: normalizeStringArray_(application.rewardPreferences)
     },
     acknowledgements: {
-      trainingComic: isTrue_(acknowledgements.trainingComic),
+      onboardingMaterials: isTrue_(acknowledgements.onboardingMaterials) || isTrue_(acknowledgements.trainingComic),
+      trainingComic: isTrue_(acknowledgements.onboardingMaterials) || isTrue_(acknowledgements.trainingComic),
       commitment: isTrue_(acknowledgements.commitment),
       accuracy: isTrue_(acknowledgements.accuracy)
     },
@@ -766,6 +895,7 @@ function buildPrivateRecord_(normalized, submissionId, now, uploaded) {
     zip_code: normalized.applicant.zipCode,
     primary_role: normalized.application.primaryRole,
     secondary_role: normalized.application.secondaryRole,
+    additional_roles: JSON.stringify(normalized.application.additionalRoles),
     skills: normalized.application.skills,
     availability: normalized.application.availability,
     reward_preferences: JSON.stringify(normalized.application.rewardPreferences),
@@ -781,7 +911,11 @@ function buildPrivateRecord_(normalized, submissionId, now, uploaded) {
     client_request_id: normalized.clientRequestId,
     withdrawal_token_hash: hashToken_(normalized.withdrawalToken),
     is_withdrawn: false,
-    withdrawn_at: ""
+    withdrawn_at: "",
+    onboarding_acknowledged: normalized.acknowledgements.onboardingMaterials,
+    onboarding_acknowledged_at: normalized.acknowledgements.onboardingMaterials ? now : "",
+    onboarding_email_status: ONBOARDING_EMAIL_NOT_SENT,
+    onboarding_email_sent_at: ""
   };
 }
 
@@ -802,7 +936,7 @@ function buildTeamReviewRecord_(privateRecord) {
   return {
     submission_id: cleanString_(privateRecord.submission_id),
     name: truncate_(redactTeamText_(fullName_(privateRecord.first_name, privateRecord.last_name)), 160),
-    primary_role: cleanString_(privateRecord.primary_role),
+    primary_role: summarizeRoles_(privateRecord),
     skills_summary: truncate_(redactTeamText_(privateRecord.skills), 1000),
     availability_summary: truncate_(cleanString_(privateRecord.availability), 500),
     qualification_summary: qualificationParts.join("; "),
@@ -1068,6 +1202,73 @@ function normalizeStringArray_(value) {
     }
   });
   return unique;
+}
+
+/** Accepts schema 3.1 multi-path input and the schema 3.0 primary/secondary shape. */
+function selectedRolesFromApplication_(application) {
+  application = application || {};
+  var selected = normalizeStringArray_(application.selectedRoles);
+  if (selected.length) {
+    return selected;
+  }
+
+  var legacy = [application.primaryRole]
+    .concat(normalizeStringArray_(application.secondaryRoles))
+    .concat([application.secondaryRole]);
+  return normalizeStringArray_(legacy);
+}
+
+function additionalRolesFromPrivateRecord_(privateRecord) {
+  var primaryRole = cleanString_(privateRecord.primary_role);
+  var additional = normalizeStringArray_(parseStoredArray_(privateRecord.additional_roles));
+  var legacySecondaryRole = cleanString_(privateRecord.secondary_role);
+  if (legacySecondaryRole && additional.indexOf(legacySecondaryRole) === -1) {
+    additional.unshift(legacySecondaryRole);
+  }
+  return additional.filter(function (role) {
+    return role && role !== primaryRole && ALLOWED_ROLES.indexOf(role) !== -1;
+  });
+}
+
+function allRolesFromPrivateRecord_(privateRecord) {
+  return normalizeStringArray_([cleanString_(privateRecord.primary_role)]
+    .concat(additionalRolesFromPrivateRecord_(privateRecord)));
+}
+
+function summarizeRoles_(privateRecord) {
+  var roles = allRolesFromPrivateRecord_(privateRecord);
+  if (!roles.length) {
+    return "";
+  }
+  if (roles.length === 1) {
+    return roles[0];
+  }
+  return roles.map(function (role, index) {
+    return (index === 0 ? "Primary: " : "Additional: ") + role;
+  }).join(" · ");
+}
+
+function updatedRoleHistory_(existingCard, privateRecord, now) {
+  var history = parseStoredArray_(existingCard && existingCard.role_history).filter(function (entry) {
+    return entry && typeof entry === "object" && !Array.isArray(entry);
+  });
+  var roles = allRolesFromPrivateRecord_(privateRecord);
+  var primaryRole = roles[0] || "";
+  var additionalRoles = roles.slice(1);
+  var signature = JSON.stringify(roles);
+  var alreadyRecorded = history.some(function (entry) {
+    return JSON.stringify(normalizeStringArray_([entry.primary_role].concat(entry.additional_roles || []))) === signature;
+  });
+
+  if (!alreadyRecorded) {
+    history.push({
+      primary_role: primaryRole,
+      additional_roles: additionalRoles,
+      effective_at: now,
+      source: "Approved application"
+    });
+  }
+  return history;
 }
 
 function parseStoredArray_(value) {

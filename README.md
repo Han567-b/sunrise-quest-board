@@ -56,7 +56,7 @@ The site adapts common service-marketplace patterns into a Sunrise-specific syst
 
 Production Google Workspace ownership, authorization, deployment, and future automation connections must use `han@keytechlabs.org`.
 
-The backend keeps full applications in Restricted Private Applications, sends only an allowlisted summary to Restricted Team Review, stores uploads in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards are non-public by default and require explicit applicant opt-in before public visibility. Google resource IDs stay in Apps Script Script Properties and must never be committed.
+The backend keeps full applications in Restricted Private Applications, preserves one or more selected paths with a primary matching role, sends only an allowlisted summary to Restricted Team Review, stores uploads in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards retain additional paths and lightweight role history, remain non-public by default, and require explicit applicant opt-in before public visibility. Approval onboarding email is sent privately by the KTL-owned Apps Script trigger with duplicate-safe private delivery tracking; Zapier Free is limited to the two-step new-Team-Review-row admin alert. Google resource IDs stay in Apps Script Script Properties and must never be committed.
 
 See [`apps-script/README.md`](apps-script/README.md) for schemas, setup, deployment, admin workflow, tests, and the manual access-control checklist.
 

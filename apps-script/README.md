@@ -1,6 +1,6 @@
 # Sunrise Quest Board Backend MVP
 
-This folder contains the Google Apps Script backend for applications, privacy-safe team review, restricted uploads, admin decisions, applicant withdrawal, and internal Player Cards.
+This folder contains the Google Apps Script backend for multi-path applications, privacy-safe team review, restricted uploads, admin decisions, applicant withdrawal, onboarding acknowledgement/email, and internal Player Cards.
 
 Production owner and authorization account: **Han Lin — `han@keytechlabs.org`**.
 
@@ -10,8 +10,8 @@ Do not authorize, deploy, own production resources, or connect Zapier with `hanl
 
 - `Code.gs` — public submission/withdrawal endpoint and internal admin workflow.
 - `Tests.gs` — pure Apps Script smoke tests; it uses fake data and performs no Google writes.
-- `appsscript.json` — V8 runtime plus Sheets, Drive, and trigger scopes.
-- `ZAPIER_PLAN.md` — optional automation ideas after the core backend is deployed.
+- `appsscript.json` — V8 runtime plus Sheets, Drive, trigger, and send-email scopes.
+- `ZAPIER_PLAN.md` — free two-step admin alert boundary and paid-Zap retirement steps.
 
 ## Architecture and responsibilities
 
@@ -23,6 +23,7 @@ Public Quest Board
       → admin status edit trigger
         → Private Applications status sync
         → Player Cards after approval only
+        → private approval/onboarding email after approval
 
 Resume/certification upload
   → restricted Drive folders
@@ -60,7 +61,7 @@ submission_id,first_name,last_name,email,phone,primary_role,secondary_role,skill
 `setupBackend()` appends these private-only extension columns when missing:
 
 ```text
-zip_code,client_request_id,withdrawal_token_hash,is_withdrawn,withdrawn_at
+zip_code,client_request_id,withdrawal_token_hash,is_withdrawn,withdrawn_at,additional_roles,onboarding_acknowledged,onboarding_acknowledged_at,onboarding_email_status,onboarding_email_sent_at
 ```
 
 - `zip_code` preserves the existing intake field and never reaches Team Review.
@@ -68,6 +69,10 @@ zip_code,client_request_id,withdrawal_token_hash,is_withdrawn,withdrawn_at
 - `withdrawal_token_hash` stores only a SHA-256 hash, never the raw token.
 - `is_withdrawn` defaults to `false`.
 - `withdrawn_at` is blank until a verified withdrawal succeeds.
+- `additional_roles` stores every selected path after the primary path as a JSON array.
+- `secondary_role` remains populated with the first additional path for compatibility with existing records.
+- `onboarding_acknowledged` and `onboarding_acknowledged_at` record the required comic/video confirmation at submission time.
+- `onboarding_email_status` and `onboarding_email_sent_at` are private delivery controls; they never reach Team Review.
 
 ### Team Review
 
@@ -75,7 +80,7 @@ zip_code,client_request_id,withdrawal_token_hash,is_withdrawn,withdrawn_at
 submission_id,name,primary_role,skills_summary,availability_summary,qualification_summary,review_status,admin_notes,player_card_status,last_updated
 ```
 
-Team Review is created through an explicit allowlist. It must not contain email, phone, accessibility/health notes, resume IDs, certification IDs, document links, withdrawal tokens, or token hashes. Contact details and links accidentally entered into copied free-text summaries are redacted. A withdrawn application is indicated only through the non-sensitive `player_card_status` value `Not Created — Applicant Withdrawn`; `Withdrawn` is not an admin review status.
+Team Review is created through an explicit allowlist. Its existing `primary_role` column shows a privacy-safe primary/additional path summary for multi-path applications. It must not contain email, phone, accessibility/health notes, resume IDs, certification IDs, document links, withdrawal tokens, or token hashes. Contact details and links accidentally entered into copied free-text summaries are redacted. A withdrawn application is indicated only through the non-sensitive `player_card_status` value `Not Created — Applicant Withdrawn`; `Withdrawn` is not an admin review status.
 
 ### Player Cards
 
@@ -84,6 +89,14 @@ player_id,submission_id,name,primary_role,secondary_role,skills,verified_qualifi
 ```
 
 New cards start with internal-safe defaults: no verified qualifications, empty badge and quest lists, zero credits, `Active` member status, and `public_profile_consent = false`.
+
+`setupBackend()` also appends these Player Card extension columns when missing:
+
+```text
+additional_roles,role_history,onboarding_acknowledged,onboarding_acknowledged_at
+```
+
+`additional_roles` preserves the complete current multi-path selection. `role_history` is a JSON history of approved role sets so a Player Card is not permanently limited to one path. This is lightweight history readiness; a future admin advancement workflow will be required before coordinators can formally add verified promotions or completed role assignments.
 
 ## Access-control policy
 
@@ -104,14 +117,15 @@ The code deliberately does not call Drive sharing APIs. Web-app access allows th
 
 ## Application workflow
 
-1. Validate required fields, email, allowed roles/shifts/rewards, acknowledgements, and file limits.
-2. Reject stale form contracts that do not declare schema version `3.0`.
+1. Validate required fields, email, one or more allowed roles, shifts/rewards, onboarding acknowledgement, and file limits.
+2. Accept the current schema `3.1` and legacy schema `3.0` submissions; reject older stale form contracts.
 3. Reuse `client_request_id` for idempotent retry protection.
 4. Generate a unique submission ID and UTC timestamps.
 5. Upload optional files to the configured restricted folders.
-6. Save the full record to Private Applications with `Pending Review`.
-7. Create one privacy-safe Team Review row with `Not Created` Player Card status.
-8. Return a receipt and the browser-supplied raw withdrawal token. Only the token hash is stored server-side.
+6. Save the first selected path as `primary_role`, retain the first additional path in `secondary_role`, and preserve every additional path in `additional_roles`.
+7. Save the full record and onboarding acknowledgement to Private Applications with `Pending Review`.
+8. Create one privacy-safe Team Review row with the complete path summary and `Not Created` Player Card status.
+9. Return a receipt and the browser-supplied raw withdrawal token. Only the token hash is stored server-side.
 
 If a Team Review write fails after the private row succeeds, retry the same request. Its `client_request_id` repairs the review row without creating a duplicate private record or duplicate upload.
 
@@ -135,7 +149,17 @@ Supported `review_status` values are exactly:
 
 New applications default to `Pending Review`. New Team Review records default to `Not Created` for Player Card status.
 
-After `installAdminReviewTrigger()` is installed, an authorized admin edits `review_status` or `admin_notes` in Team Review. The trigger validates the status and synchronizes it to Private Applications. `Approved` creates or updates one Player Card by `submission_id`; retries cannot create a duplicate card. A withdrawn application cannot be approved or create a card.
+After `installAdminReviewTrigger()` is installed, an authorized admin edits `review_status` or `admin_notes` in Team Review. The trigger validates the status and synchronizes it to Private Applications. `Approved` creates or updates one Player Card by `submission_id`, copies the full approved path set and onboarding acknowledgement, and records the role set once in `role_history`; retries cannot create a duplicate card or history entry. It then privately looks up first name, email, and primary role and sends the approval/onboarding email through `MailApp` under the trigger owner's KTL Workspace authorization. A withdrawn application cannot be approved, create a card, or receive this email.
+
+Email delivery state stays only in Private Applications:
+
+- `Not Sent` — no approval email attempt has been claimed.
+- `Sending` — a send was claimed; automatic retries stop to avoid an uncertain duplicate.
+- `Sent` — Google accepted the send; `onboarding_email_sent_at` contains the timestamp.
+- `Failed` — Google returned a send error; approval and Player Card remain saved, and reprocessing the Approved row retries.
+- `Missing Email` — the private email is blank or invalid; Player Card remains saved and no message is attempted.
+
+Repeated processing of an Approved row with `Sent` does not send again. Do not add these delivery fields or the email address to Team Review. Disable the older paid `Approved → Filter → Lookup → Gmail` Zap after this Apps Script version is verified, or duplicate emails could occur.
 
 An `Approved` decision cannot be reversed automatically while its Player Card remains active. Resolve or deactivate the internal card first under an authorized KTL admin process, then correct the source records deliberately. This guard prevents a rejected applicant from retaining an accidentally active card.
 
@@ -161,9 +185,9 @@ Complete these steps while signed in as **`han@keytechlabs.org`**:
 1. Open the production Apps Script project.
 2. Replace its local source with `Code.gs`, `Tests.gs`, and `appsscript.json` from this folder.
 3. Confirm all five Script Properties are present. Do not paste their values into source code.
-4. Run `runBackendSelfTests()`; confirm every result has `passed: true`.
-5. Run `setupBackend()` once. Review and approve the requested Sheets and Drive scopes.
-6. Run `installAdminReviewTrigger()` once. Approve the trigger scope and confirm an installable `onTeamReviewEdit` trigger exists.
+4. Run `runBackendSelfTests()`; confirm every result has `passed: true`. The updated manifest requests permission to send email on behalf of the active KTL account.
+5. Run `setupBackend()` once. Review and approve the requested Sheets, Drive, trigger, and send-email scopes. Confirm the two private email columns were appended; existing rows and values are not overwritten.
+6. Confirm the existing installable `onTeamReviewEdit` trigger is owned by `han@keytechlabs.org`. Reinstallation is unnecessary if it already exists and is owned by that account.
 7. Run `processAllTeamReviewRows()` only if existing Team Review rows need synchronization.
 8. Deploy a **new Web app version** that executes as the deployment owner and accepts calls from the public Quest Board.
 9. Copy the resulting `/exec` URL into the `sunrise-submission-endpoint` meta tag in `index.html`.
@@ -179,7 +203,7 @@ Local automated tests use in-memory Sheets/Drive fakes and never touch Google:
 node --test tests/*.test.cjs
 ```
 
-Covered cases include valid submission, missing required fields, invalid email, Private Applications write, privacy-safe Team Review sync, duplicate submission protection, approval, Player Card creation, duplicate card protection, withdrawal, and upload failure handling.
+Covered cases include valid submission, legacy single-role compatibility, multi-path preservation, onboarding acknowledgement, missing required fields, invalid email, Private Applications write, privacy-safe Team Review sync, duplicate submission protection, approval, Player Card creation/history, duplicate card protection, approval-email copy, duplicate email protection, withdrawn and missing-email skips, send-failure retry, withdrawal, and upload failure handling.
 
 Apps Script pure smoke tests:
 
@@ -195,9 +219,14 @@ Google writes, Drive uploads, installable triggers, and web-app permissions stil
 - Team Review uses only the allowlisted review fields.
 - Uploaded documents stay in restricted KTL Drive folders.
 - Do not log request bodies, email, phone, health/accessibility notes, raw tokens, or file IDs.
+- Keep onboarding email status/timestamps in Private Applications only; Team Review never receives them.
 - Store user-provided strings as literal Sheet values so formula-like input cannot execute.
 - Redact contact details and links from free-text fields copied into Team Review.
 - Do not commit Google IDs, credentials, tokens, or secrets.
 - Player Cards remain internal unless an applicant explicitly opts in.
 - Approval is required before card creation.
 - Withdrawn applications remain historical and cannot create cards.
+
+## Free automation boundary
+
+Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, is live. Zap 2, `Approved → Onboarding Email`, was built and tested in Zapier but is being moved to the deployed Apps Script workflow so it does not depend on Zapier Filter, Lookup, or another paid multi-step feature. See `ZAPIER_PLAN.md` for the final handoff and deactivation checklist.

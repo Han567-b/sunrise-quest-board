@@ -149,6 +149,10 @@ function createHarness() {
     resumes: new MockFolder("resume"),
     certifications: new MockFolder("certification")
   };
+  const mail = {
+    messages: [],
+    fail: false
+  };
   let uuidCounter = 0;
 
   const sandbox = {
@@ -201,6 +205,12 @@ function createHarness() {
         return folders[id];
       }
     },
+    MailApp: {
+      sendEmail(message) {
+        if (mail.fail) throw new Error("Simulated mail provider failure with private details");
+        mail.messages.push(structuredClone(message));
+      }
+    },
     ScriptApp: {
       getProjectTriggers: () => [],
       newTrigger: () => ({
@@ -236,7 +246,7 @@ function createHarness() {
     return JSON.parse(response.getContent());
   }
 
-  return { sandbox, privateSheet, teamSheet, playerSheet, folders, request };
+  return { sandbox, privateSheet, teamSheet, playerSheet, folders, mail, request };
 }
 
 function validPayload(overrides = {}) {
@@ -298,6 +308,18 @@ test("valid application writes Private Applications and returns a receipt", () =
   assert.notEqual(record.withdrawal_token_hash, validPayload().withdrawalToken);
 });
 
+test("legacy schema 3.0 single-role submissions remain compatible", () => {
+  const harness = createHarness();
+  const result = harness.request(validPayload({ application: { secondaryRole: "" } }));
+
+  assert.equal(result.ok, true);
+  const record = harness.privateSheet.recordAt(2);
+  assert.equal(record.primary_role, "Cloud Support · remote digital desk");
+  assert.equal(record.secondary_role, "");
+  assert.deepEqual(JSON.parse(record.additional_roles), []);
+  assert.equal(record.onboarding_acknowledged, true);
+});
+
 test("missing required field is rejected without writing", () => {
   const harness = createHarness();
   const result = harness.request(validPayload({ applicant: { firstName: "" } }));
@@ -323,6 +345,51 @@ test("unsupported form schema is rejected before any write", () => {
   assert.equal(result.ok, false);
   assert.match(result.error.fieldErrors.schemaVersion, /no longer supported/);
   assert.equal(harness.privateSheet.getLastRow(), 1);
+});
+
+test("multi-path submission preserves primary, additional paths, Team Review summary, and Player Card history", () => {
+  const harness = createHarness();
+  const selectedRoles = [
+    "Power Runner · solar / technical",
+    "Cloud Support · remote digital desk",
+    "Event Lead · experienced coordination"
+  ];
+  const result = harness.request(validPayload({
+    schemaVersion: "3.1",
+    application: {
+      selectedRoles,
+      primaryRole: selectedRoles[0],
+      secondaryRoles: selectedRoles.slice(1),
+      secondaryRole: selectedRoles[1]
+    },
+    acknowledgements: { onboardingMaterials: true, trainingComic: true }
+  }));
+
+  assert.equal(result.ok, true);
+  const privateRecord = harness.privateSheet.recordAt(2);
+  assert.equal(privateRecord.primary_role, selectedRoles[0]);
+  assert.equal(privateRecord.secondary_role, selectedRoles[1]);
+  assert.deepEqual(JSON.parse(privateRecord.additional_roles), selectedRoles.slice(1));
+  assert.equal(privateRecord.onboarding_acknowledged, true);
+  assert.match(privateRecord.onboarding_acknowledged_at, /^\d{4}-/);
+
+  const teamRecord = harness.teamSheet.recordAt(2);
+  selectedRoles.forEach((role) => assert.match(teamRecord.primary_role, new RegExp(role.split(" · ")[0])));
+  assert.equal(Object.prototype.hasOwnProperty.call(teamRecord, "additional_roles"), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(teamRecord, "onboarding_acknowledged_at"), false);
+
+  const statusColumn = harness.teamSheet.data[0].indexOf("review_status") + 1;
+  harness.teamSheet.setValueAt(2, statusColumn, "Approved");
+  harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, harness.sandbox.getConfig_());
+  harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, harness.sandbox.getConfig_());
+
+  const card = harness.playerSheet.recordAt(2);
+  assert.equal(card.primary_role, selectedRoles[0]);
+  assert.deepEqual(JSON.parse(card.additional_roles), selectedRoles.slice(1));
+  assert.equal(JSON.parse(card.role_history).length, 1);
+  assert.deepEqual(JSON.parse(card.role_history)[0].additional_roles, selectedRoles.slice(1));
+  assert.equal(card.onboarding_acknowledged, true);
+  assert.equal(card.public_profile_consent, false);
 });
 
 test("Team Review sync contains only the privacy-safe schema", () => {
@@ -358,6 +425,8 @@ test("Team Review sync contains only the privacy-safe schema", () => {
   assert.match(teamRecord.skills_summary, /\[contact removed\]/);
   assert.match(teamRecord.skills_summary, /\[link removed\]/);
   assert.equal(serialized.includes("resume-1"), false);
+  assert.equal(serialized.includes("onboarding_email_status"), false);
+  assert.equal(serialized.includes("onboarding_email_sent_at"), false);
   assert.equal(teamRecord.qualification_summary, "Resume on file");
 });
 
@@ -483,6 +552,104 @@ test("Approved review creates one internal Player Card with safe defaults", () =
   assert.equal(card.quest_credits, 0);
   assert.equal(card.completed_quests, "[]");
   assert.equal(card.member_status, "Active");
+  assert.equal(harness.mail.messages.length, 1);
+});
+
+test("Approved review sends the required onboarding email from the private application", () => {
+  const harness = createHarness();
+  harness.request(validPayload());
+  const teamHeaders = harness.teamSheet.data[0];
+  harness.teamSheet.setValueAt(2, teamHeaders.indexOf("review_status") + 1, "Approved");
+
+  const result = harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, harness.sandbox.getConfig_());
+
+  assert.equal(result.ok, true);
+  assert.equal(result.onboardingEmail.sent, true);
+  assert.equal(harness.mail.messages.length, 1);
+  assert.deepEqual(harness.mail.messages[0], {
+    to: "test.applicant@example.test",
+    subject: "Your Sunrise Quest application is approved",
+    body: [
+      "Hi Test,",
+      "",
+      "Your Sunrise Quest application has been approved.",
+      "",
+      "Primary role: Cloud Support · remote digital desk",
+      "",
+      "Please review the onboarding materials before participating in the event.",
+      "",
+      "We’ll share the next steps and event details with you shortly.",
+      "",
+      "Sunrise Quest Board",
+      "KeyTech Labs"
+    ].join("\n"),
+    name: "Sunrise Quest Board"
+  });
+  const privateRecord = harness.privateSheet.recordAt(2);
+  assert.equal(privateRecord.onboarding_email_status, "Sent");
+  assert.match(privateRecord.onboarding_email_sent_at, /^\d{4}-/);
+});
+
+test("reprocessing Approved does not send a duplicate onboarding email", () => {
+  const harness = createHarness();
+  harness.request(validPayload());
+  const statusColumn = harness.teamSheet.data[0].indexOf("review_status") + 1;
+  harness.teamSheet.setValueAt(2, statusColumn, "Approved");
+  const config = harness.sandbox.getConfig_();
+
+  harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, config);
+  const repeated = harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, config);
+
+  assert.equal(harness.mail.messages.length, 1);
+  assert.equal(repeated.onboardingEmail.sent, false);
+  assert.equal(repeated.onboardingEmail.duplicate, true);
+  assert.equal(harness.playerSheet.getLastRow(), 2);
+});
+
+test("Approved with a missing private email creates the card but skips email safely", () => {
+  const harness = createHarness();
+  harness.request(validPayload());
+  const privateHeaders = harness.privateSheet.data[0];
+  harness.privateSheet.setValueAt(2, privateHeaders.indexOf("email") + 1, "");
+  const teamHeaders = harness.teamSheet.data[0];
+  harness.teamSheet.setValueAt(2, teamHeaders.indexOf("review_status") + 1, "Approved");
+
+  const result = harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, harness.sandbox.getConfig_());
+
+  assert.equal(result.ok, true);
+  assert.equal(result.onboardingEmail.reason, "missing_email");
+  assert.equal(harness.mail.messages.length, 0);
+  assert.equal(harness.privateSheet.recordAt(2).onboarding_email_status, "Missing Email");
+  assert.equal(harness.privateSheet.recordAt(2).onboarding_email_sent_at, "");
+  assert.equal(harness.playerSheet.getLastRow(), 2);
+});
+
+test("email send failure preserves approval and card, records failure, and retries safely", () => {
+  const harness = createHarness();
+  harness.request(validPayload());
+  const teamHeaders = harness.teamSheet.data[0];
+  harness.teamSheet.setValueAt(2, teamHeaders.indexOf("review_status") + 1, "Approved");
+  const config = harness.sandbox.getConfig_();
+  harness.mail.fail = true;
+
+  assert.throws(
+    () => harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, config),
+    /Approval and Player Card were saved/
+  );
+  assert.equal(harness.privateSheet.recordAt(2).review_status, "Approved");
+  assert.equal(harness.privateSheet.recordAt(2).player_card_created, true);
+  assert.equal(harness.privateSheet.recordAt(2).onboarding_email_status, "Failed");
+  assert.equal(harness.privateSheet.recordAt(2).onboarding_email_sent_at, "");
+  assert.equal(harness.teamSheet.recordAt(2).player_card_status, "Created");
+  assert.equal(harness.playerSheet.getLastRow(), 2);
+  assert.equal(harness.mail.messages.length, 0);
+
+  harness.mail.fail = false;
+  const retry = harness.sandbox.processAdminReviewRow_(harness.teamSheet, 2, config);
+  assert.equal(retry.onboardingEmail.sent, true);
+  assert.equal(harness.mail.messages.length, 1);
+  assert.equal(harness.playerSheet.getLastRow(), 2);
+  assert.equal(harness.privateSheet.recordAt(2).onboarding_email_status, "Sent");
 });
 
 test("Approved status cannot be reversed while its Player Card remains active", () => {
@@ -536,6 +703,7 @@ test("withdrawal preserves the private row and prevents Player Card creation", (
     /withdrawn application cannot be approved/i
   );
   assert.equal(harness.playerSheet.getLastRow(), 1);
+  assert.equal(harness.mail.messages.length, 0);
 });
 
 test("invalid withdrawal token does not change the historical application", () => {
@@ -584,6 +752,11 @@ test("Apps Script editor self-tests pass with the production backend source", ()
 
   const results = harness.sandbox.runBackendSelfTests();
 
-  assert.equal(results.length, 6);
+  assert.equal(results.length, 8);
   assert.equal(results.every((result) => result.passed), true);
+});
+
+test("Apps Script manifest declares the mail scope required by approval onboarding", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "apps-script", "appsscript.json"), "utf8"));
+  assert.equal(manifest.oauthScopes.includes("https://www.googleapis.com/auth/script.send_mail"), true);
 });

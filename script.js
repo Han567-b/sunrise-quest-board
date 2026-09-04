@@ -239,6 +239,8 @@ let applicationClientRequestId = "";
 let applicationWithdrawalToken = "";
 let lastSubmissionReceipt = null;
 let applicationSubmitting = false;
+const allowedApplicationRoles = new Set([...roleChoiceButtons].map((button) => button.dataset.roleChoice));
+let selectedApplicationRoles = roleInput?.value && allowedApplicationRoles.has(roleInput.value) ? [roleInput.value] : [];
 
 function selectedRewards() {
   if (!matcher) return [];
@@ -408,10 +410,7 @@ function updateApplicationReview() {
   const email = document.querySelector("#email")?.value.trim();
   const phone = document.querySelector("#phone")?.value.trim();
   const contact = [email, phone].filter(Boolean).join(" · ") || "Not added yet";
-  const secondaryRole = document.querySelector("#secondaryRole")?.value;
-  const role = [roleInput?.value || "Power Runner · solar / technical", secondaryRole ? `Secondary: ${secondaryRole}` : ""]
-    .filter(Boolean)
-    .join(" · ");
+  const role = formatSelectedRoleSummary();
   const availability = document.querySelector("#availability")?.value || "September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM";
   const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
   const resume = selectedResumeFile?.name || savedResumeMetadata?.name || "No resume attached";
@@ -434,15 +433,42 @@ function updateApplicationReview() {
 
 function updateLeadExperienceField() {
   if (!leadExperienceField) return;
-  leadExperienceField.hidden = !roleInput?.value.startsWith("Event Lead");
+  leadExperienceField.hidden = !selectedApplicationRoles.some((role) => role.startsWith("Event Lead"));
 }
 
 function updateRoleChoiceState() {
+  if (roleInput) roleInput.value = selectedApplicationRoles[0] || "";
   roleChoiceButtons.forEach((button) => {
-    const isActive = button.dataset.roleChoice === roleInput?.value;
+    const roleIndex = selectedApplicationRoles.indexOf(button.dataset.roleChoice);
+    const isActive = roleIndex !== -1;
     button.classList.toggle("active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
+    if (roleIndex === 0) button.dataset.primaryPath = "true";
+    else delete button.dataset.primaryPath;
   });
+  const summary = document.querySelector("#roleSelectionSummary");
+  if (summary) summary.textContent = formatSelectedRoleSummary();
+}
+
+function normalizeSelectedRoles(roles) {
+  return [...new Set((Array.isArray(roles) ? roles : [])
+    .filter((role) => typeof role === "string")
+    .map((role) => role.trim())
+    .filter((role) => allowedApplicationRoles.has(role)))];
+}
+
+function setSelectedApplicationRoles(roles) {
+  selectedApplicationRoles = normalizeSelectedRoles(roles);
+  updateLeadExperienceField();
+  updateRoleChoiceState();
+  updateApplicationReview();
+}
+
+function formatSelectedRoleSummary() {
+  if (!selectedApplicationRoles.length) return "No path selected yet.";
+  return selectedApplicationRoles
+    .map((role, index) => `${index === 0 ? "Primary" : "Additional"}: ${role}`)
+    .join(" · ");
 }
 
 function formatFileSize(bytes) {
@@ -499,15 +525,13 @@ function validateApplicationStep(step, revealErrors = true) {
     addRequired("#referral", "Choose how you heard about this opportunity.");
   }
   if (step === 2) {
-    addRequired("#role", "Choose a role target.");
-    addRequired("#availability", "Choose an event-day shift.");
-    const secondaryRoleInput = document.querySelector("#secondaryRole");
     checks.push({
-      input: secondaryRoleInput,
-      valid: !secondaryRoleInput?.value || secondaryRoleInput.value !== roleInput?.value,
-      message: "Choose a different secondary role or leave it blank."
+      input: roleInput,
+      valid: selectedApplicationRoles.length > 0,
+      message: "Select one or more participation paths."
     });
-    if (roleInput?.value.startsWith("Event Lead")) {
+    addRequired("#availability", "Choose an event-day shift.");
+    if (selectedApplicationRoles.some((role) => role.startsWith("Event Lead"))) {
       addRequired("#leadExperience", "Tell us about your coordination experience.");
     }
   }
@@ -561,7 +585,7 @@ function updateCompletedSteps() {
 function collectApplicationDraft() {
   const value = (selector) => document.querySelector(selector)?.value || "";
   return {
-    version: 3,
+    version: 4,
     clientRequestId: getOrCreateClientRequestId(),
     withdrawalToken: getOrCreateWithdrawalToken(),
     updatedAt: new Date().toISOString(),
@@ -576,13 +600,15 @@ function collectApplicationDraft() {
     zip: value("#zip"),
     referral: value("#referral"),
     // Accessibility notes are deliberately excluded from browser storage.
-    role: value("#role"),
-    secondaryRole: value("#secondaryRole"),
+    roles: selectedApplicationRoles.slice(),
+    role: selectedApplicationRoles[0] || "",
+    secondaryRole: selectedApplicationRoles[1] || "",
     availability: value("#availability"),
     leadExperience: value("#leadExperience"),
     interests: value("#interests"),
     rewards: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value),
     acknowledgements: {
+      onboardingMaterials: Boolean(document.querySelector("#ackGuide")?.checked),
       guide: Boolean(document.querySelector("#ackGuide")?.checked),
       commitment: Boolean(document.querySelector("#ackCommitment")?.checked),
       accuracy: Boolean(document.querySelector("#ackAccuracy")?.checked)
@@ -598,7 +624,10 @@ function collectApplicationDraft() {
 
 function populateSavedDraftCard(data = collectApplicationDraft()) {
   document.querySelector("#savedCardName").textContent = [data.firstName, data.lastName].filter(Boolean).join(" ") || "Draft contributor";
-  document.querySelector("#savedCardRole").textContent = data.role || "selected role";
+  const savedRoles = normalizeSelectedRoles(Array.isArray(data.roles) ? data.roles : [data.role, data.secondaryRole]);
+  document.querySelector("#savedCardRole").textContent = savedRoles.length
+    ? savedRoles.map((role, index) => `${index === 0 ? "Primary" : "Additional"}: ${role}`).join(" · ")
+    : "No path selected yet";
   document.querySelector("#savedCardAvailability").textContent = data.availability || "selected availability";
   document.querySelector("#savedCardSkills").textContent = data.interests.trim() || "No skills added yet";
   const qualificationCount = (data.resume ? 1 : 0) + (Array.isArray(data.certifications) ? data.certifications.length : 0);
@@ -639,21 +668,22 @@ function restoreApplicationDraft() {
   } catch (error) {
     data = null;
   }
-  if (!data || data.version !== 3 || !applicationForm) return false;
+  if (!data || ![3, 4].includes(data.version) || !applicationForm) return false;
 
   applicationClientRequestId = typeof data.clientRequestId === "string" ? data.clientRequestId : "";
   applicationWithdrawalToken = typeof data.withdrawalToken === "string" ? data.withdrawalToken : "";
 
-  ["firstName", "lastName", "email", "phone", "zip", "referral", "role", "secondaryRole", "availability", "leadExperience", "interests"]
+  ["firstName", "lastName", "email", "phone", "zip", "referral", "availability", "leadExperience", "interests"]
     .forEach((key) => {
       const input = document.querySelector(`#${key}`);
       if (input && typeof data[key] === "string") input.value = data[key];
     });
+  setSelectedApplicationRoles(Array.isArray(data.roles) ? data.roles : [data.role, data.secondaryRole]);
   document.querySelectorAll('input[name="applicationReward"]').forEach((input) => {
     input.checked = Array.isArray(data.rewards) && data.rewards.includes(input.value);
   });
   if (data.acknowledgements) {
-    document.querySelector("#ackGuide").checked = Boolean(data.acknowledgements.guide);
+    document.querySelector("#ackGuide").checked = Boolean(data.acknowledgements.onboardingMaterials || data.acknowledgements.guide);
     document.querySelector("#ackCommitment").checked = Boolean(data.acknowledgements.commitment);
     document.querySelector("#ackAccuracy").checked = Boolean(data.acknowledgements.accuracy);
   }
@@ -834,7 +864,7 @@ async function buildSubmissionPayload() {
   ].filter(Boolean).join("\n\n");
   return {
     action: "submit_application",
-    schemaVersion: "3.0",
+    schemaVersion: "3.1",
     clientRequestId: getOrCreateClientRequestId(),
     withdrawalToken: getOrCreateWithdrawalToken(),
     applicant: {
@@ -847,13 +877,16 @@ async function buildSubmissionPayload() {
       heardAboutUs: value("#referral")
     },
     application: {
-      primaryRole: value("#role"),
-      secondaryRole: value("#secondaryRole"),
+      selectedRoles: selectedApplicationRoles.slice(),
+      primaryRole: selectedApplicationRoles[0] || "",
+      secondaryRoles: selectedApplicationRoles.slice(1),
+      secondaryRole: selectedApplicationRoles[1] || "",
       skills,
       availability: value("#availability"),
       rewardPreferences: [...document.querySelectorAll('input[name="applicationReward"]:checked')].map((item) => item.value)
     },
     acknowledgements: {
+      onboardingMaterials: Boolean(document.querySelector("#ackGuide")?.checked),
       trainingComic: Boolean(document.querySelector("#ackGuide")?.checked),
       commitment: Boolean(document.querySelector("#ackCommitment")?.checked),
       accuracy: Boolean(document.querySelector("#ackAccuracy")?.checked)
@@ -910,13 +943,16 @@ function applyServerFieldErrors(fieldErrors = {}) {
     heardAboutUs: "#referral",
     accessibilityNotes: "#accessibility",
     primaryRole: "#role",
-    secondaryRole: "#secondaryRole",
+    selectedRoles: "#role",
+    secondaryRole: "#role",
+    secondaryRoles: "#role",
     availability: "#availability",
     skills: "#interests",
     resume: "#resumeFile",
     certifications: "#certificationFiles",
     files: "#certificationFiles",
     rewardPreferences: 'input[name="applicationReward"]',
+    onboardingMaterials: "#ackGuide",
     trainingComic: "#ackGuide",
     commitment: "#ackCommitment",
     accuracy: "#ackAccuracy"
@@ -936,7 +972,9 @@ function saveSubmissionReceipt(result, payload) {
     submissionId: result.submissionId,
     submittedAt: result.submittedAt,
     name: [payload.applicant.firstName, payload.applicant.lastName].filter(Boolean).join(" "),
-    role: payload.application.primaryRole,
+    role: payload.application.selectedRoles
+      .map((role, index) => `${index === 0 ? "Primary" : "Additional"}: ${role}`)
+      .join(" · "),
     availability: payload.application.availability,
     rewards: payload.application.rewardPreferences,
     status: "Submitted",
@@ -1109,17 +1147,18 @@ if (nextApplicationStep) {
 
 if (roleInput) {
   roleInput.addEventListener("change", () => {
-    updateLeadExperienceField();
-    updateRoleChoiceState();
+    setSelectedApplicationRoles(roleInput.value ? [roleInput.value] : []);
   });
 }
 
 roleChoiceButtons.forEach((button) => {
   button.addEventListener("click", () => {
     if (!roleInput) return;
-    roleInput.value = button.dataset.roleChoice;
-    updateLeadExperienceField();
-    updateRoleChoiceState();
+    const role = button.dataset.roleChoice;
+    const nextRoles = selectedApplicationRoles.includes(role)
+      ? selectedApplicationRoles.filter((selectedRole) => selectedRole !== role)
+      : [...selectedApplicationRoles, role];
+    setSelectedApplicationRoles(nextRoles);
     clearValidationError(roleInput);
     scheduleDraftSave();
   });
@@ -1206,6 +1245,7 @@ if (deleteApplication) {
     applicationCompletedLocally = false;
     applicationClientRequestId = "";
     applicationWithdrawalToken = "";
+    selectedApplicationRoles = [];
     selectedResumeFile = null;
     selectedCertificationFiles = [];
     savedResumeMetadata = null;
@@ -1216,8 +1256,7 @@ if (deleteApplication) {
     applicationWorkspace?.classList.remove("has-draft");
     applicationForm?.querySelectorAll(".has-error").forEach((item) => item.classList.remove("has-error"));
     applicationForm?.querySelectorAll("[data-validation-error]").forEach((item) => item.remove());
-    updateLeadExperienceField();
-    updateRoleChoiceState();
+    setSelectedApplicationRoles([]);
     updateResumeFileUi();
     updateCertificationFileUi();
     if (resumeRestoreNote) resumeRestoreNote.hidden = true;
@@ -1286,7 +1325,7 @@ if (withdrawApplication) {
     try {
       const result = await submitApplicationToEndpoint({
         action: "withdraw_application",
-        schemaVersion: "3.0",
+        schemaVersion: "3.1",
         submissionId: lastSubmissionReceipt.submissionId,
         withdrawalToken: lastSubmissionReceipt.withdrawalToken
       });
@@ -1325,6 +1364,7 @@ if (editCompletedApplication) {
     applicationCompletedLocally = false;
     applicationClientRequestId = "";
     applicationWithdrawalToken = "";
+    selectedApplicationRoles = [];
     currentApplicationStep = 1;
     draftWasExplicitlySaved = false;
     selectedResumeFile = null;
@@ -1335,8 +1375,7 @@ if (editCompletedApplication) {
     if (certificationFileInput) certificationFileInput.value = "";
     if (savedApplicationCard) savedApplicationCard.hidden = true;
     applicationWorkspace?.classList.remove("has-draft");
-    updateLeadExperienceField();
-    updateRoleChoiceState();
+    setSelectedApplicationRoles([]);
     updateResumeFileUi();
     updateCertificationFileUi();
     updateApplicationReview();

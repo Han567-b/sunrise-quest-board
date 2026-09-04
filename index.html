@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260829-3">
+    <link rel="stylesheet" href="styles.css?v=20260905-1">
   </head>
   <body>
     <header class="topbar">
@@ -1066,8 +1066,10 @@
               </div>
               <div class="form-grid two-column">
                 <div class="field full-width role-picker">
-                  <span>Role target <em>*</em></span>
+                  <span>Participation paths <em>*</em></span>
+                  <small>Select one or more paths that fit you. Your first selection becomes your primary path for matching; every additional path stays on your application and Player Card.</small>
                   <select class="visually-hidden" id="role" name="role" aria-hidden="true" tabindex="-1" required>
+                  <option value="">Choose at least one path</option>
                   <optgroup label="Operational paths · coordinated by Event Leads">
                     <option>Power Runner · solar / technical</option>
                     <option>Green Worker · operations / logistics</option>
@@ -1080,22 +1082,15 @@
                     <option>Event Lead · experienced coordination</option>
                   </optgroup>
                   </select>
-                  <div class="role-choice-grid" role="group" aria-label="Choose a role target">
-                    <button type="button" class="role-choice active solar-choice" data-role-choice="Power Runner · solar / technical" aria-pressed="true"><span>Power</span><strong>Power Runner</strong><small>Solar gear, batteries, and power flow.</small></button>
+                  <div class="role-choice-grid" role="group" aria-label="Select one or more participation paths">
+                    <button type="button" class="role-choice solar-choice" data-role-choice="Power Runner · solar / technical" aria-pressed="false"><span>Power</span><strong>Power Runner</strong><small>Solar gear, batteries, and power flow.</small></button>
                     <button type="button" class="role-choice green-choice" data-role-choice="Green Worker · operations / logistics" aria-pressed="false"><span>Green</span><strong>Green Worker</strong><small>Setup, logistics, and site reset.</small></button>
                     <button type="button" class="role-choice cloud-choice" data-role-choice="Cloud Support · remote digital desk" aria-pressed="false"><span>Cloud</span><strong>Cloud Support</strong><small>Live communications and reporting.</small></button>
                     <button type="button" class="role-choice vendor-choice" data-role-choice="CE Vendor · vendor / market" aria-pressed="false"><span>Market</span><strong>CE Vendor</strong><small>A separate vendor participation path.</small></button>
                     <button type="button" class="role-choice lead-choice" data-role-choice="Event Lead · experienced coordination" aria-pressed="false"><span>Lead</span><strong>Event Lead</strong><small>Experienced crew coordination.</small></button>
                   </div>
+                  <p class="role-selection-summary" id="roleSelectionSummary" aria-live="polite">No path selected yet.</p>
                 </div>
-                <label class="field full-width" for="secondaryRole"><span>Secondary role preference</span><select id="secondaryRole" name="secondaryRole">
-                  <option value="">No secondary role</option>
-                  <option>Power Runner · solar / technical</option>
-                  <option>Green Worker · operations / logistics</option>
-                  <option>Cloud Support · remote digital desk</option>
-                  <option>CE Vendor · vendor / market</option>
-                  <option>Event Lead · experienced coordination</option>
-                </select><small>Optional. Choose a different path the team may consider if your first choice is full.</small></label>
                 <label class="field full-width" for="availability"><span>Availability <em>*</em></span><select id="availability" name="availability" required>
                   <option>September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</option>
                   <option>September 26 · Shift 2 · 12:00 PM–3:00 PM</option>
@@ -1165,16 +1160,20 @@
               <dl class="application-review" id="applicationReview">
                 <div><dt>Name</dt><dd data-review="name">Draft contributor</dd></div>
                 <div><dt>Contact</dt><dd data-review="contact">Not added yet</dd></div>
-                <div><dt>Role</dt><dd data-review="role">Power Runner · solar / technical</dd></div>
+                <div><dt>Paths</dt><dd data-review="role">No path selected yet</dd></div>
                 <div><dt>Availability</dt><dd data-review="availability">September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</dd></div>
                 <div><dt>Skills</dt><dd data-review="skills">No skills added yet</dd></div>
                 <div><dt>Resume</dt><dd data-review="resume">No resume attached</dd></div>
                 <div><dt>Certifications</dt><dd data-review="certifications">No certifications attached</dd></div>
                 <div><dt>Rewards</dt><dd data-review="rewards">Quest credits, Badge progress</dd></div>
               </dl>
+              <div class="panel-note onboarding-materials">
+                <strong>Onboarding materials</strong>
+                <span>Review the <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Sunrise comic and role guide</a> and the <a href="https://www.youtube.com/watch?v=fnqctMfo0f4" target="_blank" rel="noopener">Key Tech Labs overview video</a> before submitting.</span>
+              </div>
               <fieldset class="acknowledgement-list" id="acknowledgementList">
                 <legend>Final confirmation <em>*</em></legend>
-                <label><input type="checkbox" id="ackGuide" name="ackGuide" required><span>I have reviewed the Sunrise comic/guide and understand the expectations for this role.</span></label>
+                <label><input type="checkbox" id="ackGuide" name="ackGuide" required><span>I reviewed the onboarding materials and understand the expectations for my selected paths.</span></label>
                 <label><input type="checkbox" id="ackCommitment" name="ackCommitment" required><span>I can commit to the role, selected shift, and event expectations shown in this application.</span></label>
                 <label><input type="checkbox" id="ackAccuracy" name="ackAccuracy" required><span>The information in this application is accurate, and I am ready to submit.</span></label>
               </fieldset>
@@ -1251,6 +1250,6 @@
     </section>
 
     <div class="scrim" data-close-panel></div>
-    <script src="script.js?v=20260829-3"></script>
+    <script src="script.js?v=20260905-1"></script>
   </body>
 </html>

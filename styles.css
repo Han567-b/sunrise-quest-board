@@ -3176,6 +3176,25 @@ body.application-open {
 .role-choice.vendor-choice { border-top-color: #78a844; }
 .role-choice.lead-choice { border-top-color: #dc7a3d; }
 
+.role-choice[data-primary-path="true"]::after {
+  content: "Primary path";
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--rust);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.role-selection-summary {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .application-main .reward-choice-grid label,
 .application-main .application-review div,
 .application-main .panel-note {

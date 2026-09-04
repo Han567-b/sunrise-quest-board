@@ -7,6 +7,8 @@ function runBackendSelfTests() {
     testValidApplication_,
     testMissingRequiredField_,
     testInvalidEmail_,
+    testMultiPathMapping_,
+    testApprovalEmailContent_,
     testTeamReviewPrivacy_,
     testSheetFormulaGuard_,
     testWithdrawnCardGuard_
@@ -44,6 +46,33 @@ function testInvalidEmail_() {
   assertTest_(!validation.valid && validation.fieldErrors.email, "Invalid email should fail validation.");
 }
 
+function testMultiPathMapping_() {
+  var payload = fakeApplicationPayload_();
+  var normalized = normalizeApplication_(payload);
+  var record = buildPrivateRecord_(
+    normalized,
+    "SQ-20990101-MULTI001",
+    "2099-01-01T00:00:00.000Z",
+    { resumeFileId: "", certificationFileIds: [] }
+  );
+  var teamRecord = buildTeamReviewRecord_(record);
+  assertTest_(record.primary_role === payload.application.selectedRoles[0], "First selected path should be primary.");
+  assertTest_(JSON.parse(record.additional_roles).length === 2, "Every additional path should be stored.");
+  assertTest_(teamRecord.primary_role.indexOf("Event Lead") !== -1, "Team Review should summarize every selected path.");
+  assertTest_(record.onboarding_acknowledged === true, "Onboarding acknowledgement should be stored.");
+  assertTest_(record.onboarding_email_status === ONBOARDING_EMAIL_NOT_SENT, "New applications should not be marked emailed.");
+}
+
+function testApprovalEmailContent_() {
+  var message = buildApprovalOnboardingEmail_({
+    first_name: "Fake",
+    primary_role: "Cloud Support · remote digital desk"
+  });
+  assertTest_(message.subject === "Your Sunrise Quest application is approved", "Approval subject should match the required copy.");
+  assertTest_(message.body.indexOf("Hi Fake,") === 0, "Approval email should use the private first name.");
+  assertTest_(message.body.indexOf("Primary role: Cloud Support · remote digital desk") !== -1, "Approval email should include the private primary role.");
+}
+
 function testTeamReviewPrivacy_() {
   var payload = fakeApplicationPayload_();
   payload.application.skills = "Email fake.private@example.test, call 206-555-0199, or open https://drive.google.com/private.";
@@ -54,7 +83,7 @@ function testTeamReviewPrivacy_() {
     { resumeFileId: "private-resume-id", certificationFileIds: ["private-certification-id"] }
   );
   var teamRecord = buildTeamReviewRecord_(record);
-  ["email", "phone", "zip_code", "accessibility_notes", "resume_file_id", "certification_file_ids", "withdrawal_token_hash"]
+  ["email", "phone", "zip_code", "accessibility_notes", "resume_file_id", "certification_file_ids", "withdrawal_token_hash", "onboarding_email_status", "onboarding_email_sent_at"]
     .forEach(function (forbidden) {
       assertTest_(!Object.prototype.hasOwnProperty.call(teamRecord, forbidden), "Team Review exposed " + forbidden + ".");
     });
@@ -89,7 +118,7 @@ function testWithdrawnCardGuard_() {
 function fakeApplicationPayload_() {
   return {
     action: "submit_application",
-    schemaVersion: "3.0",
+    schemaVersion: "3.1",
     clientRequestId: "fake-request-00000001",
     withdrawalToken: "fake-withdrawal-token-00000000000001",
     applicant: {
@@ -102,13 +131,20 @@ function fakeApplicationPayload_() {
       heardAboutUs: "Test fixture"
     },
     application: {
+      selectedRoles: [
+        "Cloud Support · remote digital desk",
+        "Green Worker · operations / logistics",
+        "Event Lead · experienced coordination"
+      ],
       primaryRole: "Cloud Support · remote digital desk",
-      secondaryRole: "",
+      secondaryRoles: ["Green Worker · operations / logistics", "Event Lead · experienced coordination"],
+      secondaryRole: "Green Worker · operations / logistics",
       skills: "Fake documentation skill",
       availability: "September 26 · Shift 2 · 12:00 PM–3:00 PM",
       rewardPreferences: ["Quest credits"]
     },
     acknowledgements: {
+      onboardingMaterials: true,
       trainingComic: true,
       commitment: true,
       accuracy: true
