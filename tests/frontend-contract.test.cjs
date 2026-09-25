@@ -34,6 +34,10 @@ test("file upload contract includes resume and certification descriptors", () =>
   assert.match(script, /resume:\s*selectedResumeFile\s*\?\s*await fileToDescriptor/);
   assert.match(script, /certifications:\s*await Promise\.all/);
   assert.match(html, /id="certificationFiles"[^>]*multiple/);
+  assert.match(html, /id="certificationFiles"[^>]*accept="[^"]*\.doc[^"]*\.docx/);
+  assert.match(script, /const allowed = \["pdf", "doc", "docx", "jpg", "jpeg", "png"\]/);
+  assert.match(script, /const files = selectedCertificationFiles\.slice\(\)/);
+  assert.match(script, /dataset\.fileSource/);
 });
 
 test("browser draft is explicit and excludes accessibility notes and file contents", () => {

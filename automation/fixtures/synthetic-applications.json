@@ -1,0 +1,35 @@
+{
+  "team_review": {
+    "submission_id": "SQ-20260926-A1B2C3D4",
+    "name": "Synthetic Applicant",
+    "primary_role": "Power Runner · solar / technical; Cloud Support · remote digital desk",
+    "skills_summary": "Synthetic test data: battery inventory and documentation",
+    "availability_summary": "Synthetic test shift",
+    "qualification_summary": "Resume on file; 1 supporting document(s) on file",
+    "review_status": "Pending Review",
+    "admin_notes": "Excluded from the Notion fixture by data minimization.",
+    "player_card_status": "Not Created",
+    "last_updated": "2026-09-26T00:00:00.000Z"
+  },
+  "private_application": {
+    "submission_id": "SQ-20260926-A1B2C3D4",
+    "first_name": "Synthetic",
+    "last_name": "Applicant",
+    "email": "synthetic.applicant@example.test",
+    "phone": "000-000-0000",
+    "primary_role": "Power Runner · solar / technical",
+    "secondary_role": "Cloud Support · remote digital desk",
+    "additional_roles": "[\"Cloud Support · remote digital desk\"]",
+    "skills": "Synthetic test data: battery inventory and documentation",
+    "availability": "Synthetic test shift",
+    "resume_file_id": "SYNTHETIC-NOT-A-DRIVE-ID",
+    "certification_file_ids": "[\"SYNTHETIC-NOT-A-DRIVE-ID\"]",
+    "accessibility_notes": "Synthetic private note that must never leave the private store.",
+    "withdrawal_token_hash": "SYNTHETIC-NOT-A-TOKEN",
+    "review_status": "Pending Review",
+    "is_withdrawn": false,
+    "marketing_consent": true,
+    "created_at": "2026-09-26T00:00:00.000Z",
+    "updated_at": "2026-09-26T00:00:00.000Z"
+  }
+}

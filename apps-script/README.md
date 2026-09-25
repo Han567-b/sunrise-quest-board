@@ -12,6 +12,8 @@ Do not authorize, deploy, own production resources, or connect Zapier with `hanl
 - `Tests.gs` — pure Apps Script smoke tests; it uses fake data and performs no Google writes.
 - `appsscript.json` — V8 runtime plus Sheets, Drive, trigger, and send-email scopes.
 - `ZAPIER_PLAN.md` — free two-step admin alert boundary and paid-Zap retirement steps.
+- `../AUTOMATION_PLATFORM_COMPARISON.md` — current Zapier/Make comparison and recommendation.
+- `../AUTOMATION_IMPLEMENTATION_PLAN.md` — integration data flows, mappings, permissions, and rollout plan.
 
 ## Architecture and responsibilities
 
@@ -132,7 +134,7 @@ If a Team Review write fails after the private row succeeds, retry the same requ
 ### Upload limits
 
 - Resume: optional PDF, DOC, or DOCX; maximum 5 MB.
-- Certifications: up to three PDF, JPG, or PNG files; maximum 5 MB each.
+- Supporting documents: up to three PDF, DOC, DOCX, JPG, or PNG files; maximum 5 MB each. The existing `certification_file_ids` field and Restricted Certifications folder are retained for backward compatibility.
 - Combined request uploads: maximum 12 MB.
 - Stored filenames use the submission ID, a neutral label, and a sanitized original filename.
 
@@ -148,6 +150,8 @@ Supported `review_status` values are exactly:
 - `Needs Info`
 
 New applications default to `Pending Review`. New Team Review records default to `Not Created` for Player Card status.
+
+`setupBackend()` freezes the Team Review header and applies a strict dropdown to `review_status` using the four supported values. This improves review consistency without adding columns, changing the privacy-safe row shape, or affecting the live two-step admin-alert Zap.
 
 After `installAdminReviewTrigger()` is installed, an authorized admin edits `review_status` or `admin_notes` in Team Review. The trigger validates the status and synchronizes it to Private Applications. `Approved` creates or updates one Player Card by `submission_id`, copies the full approved path set and onboarding acknowledgement, and records the role set once in `role_history`; retries cannot create a duplicate card or history entry. It then privately looks up first name, email, and primary role and sends the approval/onboarding email through `MailApp` under the trigger owner's KTL Workspace authorization. A withdrawn application cannot be approved, create a card, or receive this email.
 
@@ -183,10 +187,10 @@ On success:
 Complete these steps while signed in as **`han@keytechlabs.org`**:
 
 1. Open the production Apps Script project.
-2. Replace its local source with `Code.gs`, `Tests.gs`, and `appsscript.json` from this folder.
+2. Replace `Code.gs` and `Tests.gs` with the committed files from this folder. Change `appsscript.json` only when its Git diff shows an intentional manifest change.
 3. Confirm all five Script Properties are present. Do not paste their values into source code.
 4. Run `runBackendSelfTests()`; confirm every result has `passed: true`. The updated manifest requests permission to send email on behalf of the active KTL account.
-5. Run `setupBackend()` once. Review and approve the requested Sheets, Drive, trigger, and send-email scopes. Confirm the two private email columns were appended; existing rows and values are not overwritten.
+5. Run `setupBackend()` once. Review and approve the requested Sheets, Drive, trigger, and send-email scopes. It appends missing internal columns without overwriting existing values, freezes the Team Review header, and adds the four-status dropdown.
 6. Confirm the existing installable `onTeamReviewEdit` trigger is owned by `han@keytechlabs.org`. Reinstallation is unnecessary if it already exists and is owned by that account.
 7. Run `processAllTeamReviewRows()` only if existing Team Review rows need synchronization.
 8. Deploy a **new Web app version** that executes as the deployment owner and accepts calls from the public Quest Board.
@@ -203,7 +207,7 @@ Local automated tests use in-memory Sheets/Drive fakes and never touch Google:
 node --test tests/*.test.cjs
 ```
 
-Covered cases include valid submission, legacy single-role compatibility, multi-path preservation, onboarding acknowledgement, missing required fields, invalid email, Private Applications write, privacy-safe Team Review sync, duplicate submission protection, approval, Player Card creation/history, duplicate card protection, approval-email copy, duplicate email protection, withdrawn and missing-email skips, send-failure retry, withdrawal, and upload failure handling.
+Covered cases include valid submission, legacy single-role compatibility, multi-path preservation, onboarding acknowledgement, missing required fields, invalid email, Private Applications write, privacy-safe Team Review sync, PDF/image/DOCX supporting uploads, Team Review status guardrails, duplicate submission protection, approval, Player Card creation/history, duplicate card protection, approval-email copy, duplicate email protection, withdrawn and missing-email skips, send-failure retry, withdrawal, and upload failure handling.
 
 Apps Script pure smoke tests:
 
@@ -229,4 +233,4 @@ Google writes, Drive uploads, installable triggers, and web-app permissions stil
 
 ## Free automation boundary
 
-Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, is live. Zap 2, `Approved → Onboarding Email`, was built and tested in Zapier but is being moved to the deployed Apps Script workflow so it does not depend on Zapier Filter, Lookup, or another paid multi-step feature. See `ZAPIER_PLAN.md` for the final handoff and deactivation checklist.
+Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, is live. The paid multi-step Zap 2 prototype is not the long-term path; Apps Script owns `Approved → Onboarding Email` so approval does not depend on Zapier Filter or Lookup. Verify that the old Zap 2 is disabled to prevent duplicate mail. See `ZAPIER_PLAN.md` for the boundary and `../AUTOMATION_PLATFORM_COMPARISON.md` for the Zapier/Make evaluation.

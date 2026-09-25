@@ -134,6 +134,8 @@ var FILE_RULES = {
   ],
   certificationMimeTypes: [
     "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "image/jpeg",
     "image/png"
   ]
@@ -365,6 +367,7 @@ function setupBackend() {
   var privateSheet = getConfiguredSheet_(config.privateSheetId, PRIVATE_BASE_HEADERS, PRIVATE_INTERNAL_HEADERS);
   var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
   var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, PLAYER_CARD_INTERNAL_HEADERS);
+  var teamReviewSetup = configureTeamReviewSheet_(teamSheet);
   DriveApp.getFolderById(config.resumeFolderId).getName();
   DriveApp.getFolderById(config.certificationFolderId).getName();
 
@@ -373,8 +376,28 @@ function setupBackend() {
     schemaVersion: SCHEMA_VERSION,
     privateSheet: privateSheet.getName(),
     teamReviewSheet: teamSheet.getName(),
-    playerCardsSheet: playerSheet.getName()
+    playerCardsSheet: playerSheet.getName(),
+    teamReviewSetup: teamReviewSetup
   };
+}
+
+/** Adds admin guardrails without adding columns or exposing private data. */
+function configureTeamReviewSheet_(teamSheet) {
+  var headers = getHeaders_(teamSheet);
+  var reviewColumn = headerIndex_(headers, "review_status") + 1;
+  var rowCount = Math.max(teamSheet.getMaxRows() - 1, 1);
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(REVIEW_STATUSES, true)
+    .setAllowInvalid(false)
+    .setHelpText("Choose Pending Review, Approved, Rejected, or Needs Info.")
+    .build();
+
+  teamSheet.setFrozenRows(1);
+  teamSheet.getRange(1, reviewColumn).setNote(
+    "Use only the four supported review statuses. Approved creates or updates the Player Card and sends onboarding once."
+  );
+  teamSheet.getRange(2, reviewColumn, rowCount, 1).setDataValidation(rule);
+  return { frozenHeader: true, reviewStatusValidation: true };
 }
 
 /**
@@ -761,7 +784,7 @@ function validateFiles_(files, fieldErrors) {
     combined += resumeSize;
   }
   if (certifications.length > FILE_RULES.maxCertificationCount) {
-    fieldErrors.certifications = "Upload no more than " + FILE_RULES.maxCertificationCount + " certification files.";
+    fieldErrors.certifications = "Upload no more than " + FILE_RULES.maxCertificationCount + " supporting documents.";
   }
   certifications.forEach(function (file, index) {
     combined += validateFileDescriptor_(
@@ -927,7 +950,7 @@ function buildTeamReviewRecord_(privateRecord) {
     qualificationParts.push("Resume on file");
   }
   if (certificationIds.length) {
-    qualificationParts.push(certificationIds.length + " certification file(s) on file");
+    qualificationParts.push(certificationIds.length + " supporting document(s) on file");
   }
   if (!qualificationParts.length) {
     qualificationParts.push("No uploaded qualifications");

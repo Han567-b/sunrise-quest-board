@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260905-1">
+    <link rel="stylesheet" href="styles.css?v=20260922-1">
   </head>
   <body>
     <header class="topbar">
@@ -1054,7 +1054,7 @@
                 <label class="field" for="phone"><span>Phone number <em>*</em></span><input id="phone" name="phone" type="tel" placeholder="Your best contact number" autocomplete="tel" required></label>
                 <label class="field" for="zip"><span>Zip code <em>*</em></span><input id="zip" name="zip" type="text" inputmode="numeric" placeholder="Your zip code" autocomplete="postal-code" required></label>
                 <label class="field" for="referral"><span>How did you hear about this opportunity? <em>*</em></span><select id="referral" name="referral" required><option value="">Choose one</option><option>Sunrise Fair team</option><option>Friend or community partner</option><option>Social media</option><option>School or training program</option><option>Other</option></select></label>
-                <label class="field full-width" for="accessibility"><span>Accessibility or health needs</span><textarea id="accessibility" name="accessibility" rows="3" placeholder="Share anything that would help us plan a respectful, safe role for you."></textarea></label>
+                <label class="field full-width" for="accessibility"><span>Accessibility or health needs</span><textarea id="accessibility" name="accessibility" rows="3" placeholder="Example: a seated task, mobility support, shade, or another accommodation."></textarea><small>Optional. Share only what the team needs to arrange a safe, respectful role.</small></label>
               </div>
             </section>
 
@@ -1095,7 +1095,7 @@
                   <option>September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</option>
                   <option>September 26 · Shift 2 · 12:00 PM–3:00 PM</option>
                   <option>September 26 · Shift 3 · 2:00 PM–5:00 PM</option>
-                </select></label>
+                </select><small>Choose the shift you can reliably attend. A team lead will confirm your final assignment.</small></label>
                 <label class="field full-width conditional-field" id="leadExperienceField" for="leadExperience" hidden><span>Event Lead experience <em>*</em></span><textarea id="leadExperience" name="leadExperience" rows="4" placeholder="Tell us about crew coordination, event operations, shift leadership, or experience across multiple Sunrise roles."></textarea><small>Event Leads are an experienced coordination path. A team lead will review this information before assignment.</small></label>
               </div>
             </section>
@@ -1104,10 +1104,10 @@
               <div class="step-heading">
                 <p class="eyebrow">Step 3 of 5</p>
                 <h3 id="step-proof-title">Show what you can bring.</h3>
-                <p>Skills, prior work, and supporting proof help the team match you to a clear quest.</p>
+                <p>Share the skills, interests, relevant experience, and optional documents that best show how you can contribute.</p>
               </div>
               <div class="form-grid">
-                <label class="field" for="interests"><span>Skills and interests <em>*</em></span><textarea id="interests" name="interests" rows="4" placeholder="Example: battery checks, tent setup, crew standups, remote documentation..." required></textarea></label>
+                <label class="field" for="interests"><span>Skills, interests, and relevant experience <em>*</em></span><textarea id="interests" name="interests" rows="4" placeholder="Example: battery checks, tent setup, customer service, crew coordination, spreadsheets, photography, or volunteer event work." required></textarea><small>Include paid work, volunteer experience, training, hobbies, or tools that relate to any path you selected.</small></label>
                 <div class="field resume-upload-field">
                   <span>Resume</span>
                   <input class="visually-hidden" id="resumeFile" name="resumeFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
@@ -1124,9 +1124,9 @@
                   <p class="resume-restore-note" id="resumeRestoreNote" hidden>A previous draft included this filename. Please attach the file again before final submission.</p>
                 </div>
                 <div class="field certification-upload-field">
-                  <label for="certificationFiles"><span>Certifications or qualification proof</span></label>
-                  <input id="certificationFiles" name="certificationFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
-                  <small>Optional · up to 3 PDF, JPG, or PNG files, 5 MB each and 12 MB combined with your resume.</small>
+                  <label for="certificationFiles"><span>Additional supporting documents</span></label>
+                  <input id="certificationFiles" name="certificationFiles" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png" aria-describedby="supportingFileHelp">
+                  <small id="supportingFileHelp">Optional · add up to 3 certificates, licenses, work samples, or qualification documents. PDF, DOC, DOCX, JPG, or PNG; 5 MB each and 12 MB total with your resume. You can add files in more than one selection and remove them before submitting.</small>
                   <ul class="certification-file-list" id="certificationFileList" aria-live="polite"></ul>
                 </div>
               </div>
@@ -1164,7 +1164,7 @@
                 <div><dt>Availability</dt><dd data-review="availability">September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM</dd></div>
                 <div><dt>Skills</dt><dd data-review="skills">No skills added yet</dd></div>
                 <div><dt>Resume</dt><dd data-review="resume">No resume attached</dd></div>
-                <div><dt>Certifications</dt><dd data-review="certifications">No certifications attached</dd></div>
+                <div><dt>Supporting documents</dt><dd data-review="certifications">No supporting documents attached</dd></div>
                 <div><dt>Rewards</dt><dd data-review="rewards">Quest credits, Badge progress</dd></div>
               </dl>
               <div class="panel-note onboarding-materials">
@@ -1250,6 +1250,6 @@
     </section>
 
     <div class="scrim" data-close-panel></div>
-    <script src="script.js?v=20260905-1"></script>
+    <script src="script.js?v=20260922-1"></script>
   </body>
 </html>

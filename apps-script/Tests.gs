@@ -9,6 +9,7 @@ function runBackendSelfTests() {
     testInvalidEmail_,
     testMultiPathMapping_,
     testApprovalEmailContent_,
+    testSupportingDocumentTypes_,
     testTeamReviewPrivacy_,
     testSheetFormulaGuard_,
     testWithdrawnCardGuard_
@@ -71,6 +72,18 @@ function testApprovalEmailContent_() {
   assertTest_(message.subject === "Your Sunrise Quest application is approved", "Approval subject should match the required copy.");
   assertTest_(message.body.indexOf("Hi Fake,") === 0, "Approval email should use the private first name.");
   assertTest_(message.body.indexOf("Primary role: Cloud Support · remote digital desk") !== -1, "Approval email should include the private primary role.");
+}
+
+function testSupportingDocumentTypes_() {
+  var payload = fakeApplicationPayload_();
+  payload.files.certifications = [{
+    name: "fake-work-sample.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    size: 4,
+    base64: "dGVzdA=="
+  }];
+  var validation = validateApplication_(payload);
+  assertTest_(validation.valid, "DOCX supporting documents should pass validation.");
 }
 
 function testTeamReviewPrivacy_() {

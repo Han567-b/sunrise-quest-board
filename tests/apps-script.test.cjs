@@ -52,6 +52,22 @@ class MockRange {
     return this;
   }
 
+  setNote(value) {
+    this.sheet.notes.set(`${this.row}:${this.column}`, value);
+    return this;
+  }
+
+  setDataValidation(rule) {
+    this.sheet.validations.push({
+      row: this.row,
+      column: this.column,
+      rowCount: this.rowCount,
+      columnCount: this.columnCount,
+      rule
+    });
+    return this;
+  }
+
   getRow() {
     return this.row;
   }
@@ -69,6 +85,10 @@ class MockSheet {
   constructor(name, headers) {
     this.name = name;
     this.data = [headers.slice()];
+    this.frozenRows = 0;
+    this.maxRows = 1000;
+    this.notes = new Map();
+    this.validations = [];
   }
 
   getName() {
@@ -86,6 +106,14 @@ class MockSheet {
       }
     }
     return 0;
+  }
+
+  getMaxRows() {
+    return this.maxRows;
+  }
+
+  setFrozenRows(value) {
+    this.frozenRows = value;
   }
 
   getRange(row, column, rowCount, columnCount) {
@@ -197,6 +225,27 @@ function createHarness() {
       openById(id) {
         if (!spreadsheets[id]) throw new Error(`Unknown spreadsheet: ${id}`);
         return spreadsheets[id];
+      },
+      newDataValidation() {
+        const rule = { values: [], showDropdown: false, allowInvalid: true, helpText: "" };
+        return {
+          requireValueInList(values, showDropdown) {
+            rule.values = values.slice();
+            rule.showDropdown = showDropdown;
+            return this;
+          },
+          setAllowInvalid(value) {
+            rule.allowInvalid = value;
+            return this;
+          },
+          setHelpText(value) {
+            rule.helpText = value;
+            return this;
+          },
+          build() {
+            return structuredClone(rule);
+          }
+        };
       }
     },
     DriveApp: {
@@ -500,7 +549,42 @@ test("resume and certification uploads store IDs only in Private Applications", 
   const teamSerialized = JSON.stringify(harness.teamSheet.recordAt(2));
   assert.equal(teamSerialized.includes("resume-1"), false);
   assert.equal(teamSerialized.includes("certification-1"), false);
-  assert.equal(harness.teamSheet.recordAt(2).qualification_summary, "Resume on file; 1 certification file(s) on file");
+  assert.equal(harness.teamSheet.recordAt(2).qualification_summary, "Resume on file; 1 supporting document(s) on file");
+});
+
+test("DOCX supporting documents use the existing restricted qualification folder", () => {
+  const harness = createHarness();
+  const bytes = Buffer.from("fake supporting document");
+  const result = harness.request(validPayload({
+    files: {
+      resume: null,
+      certifications: [{
+        name: "work-sample.docx",
+        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        size: bytes.length,
+        base64: bytes.toString("base64")
+      }]
+    }
+  }));
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(JSON.parse(harness.privateSheet.recordAt(2).certification_file_ids), ["certification-1"]);
+  assert.equal(harness.teamSheet.recordAt(2).qualification_summary, "1 supporting document(s) on file");
+  assert.equal(harness.folders.certifications.files.length, 1);
+});
+
+test("setupBackend adds Team Review status guardrails without changing its schema", () => {
+  const harness = createHarness();
+  const result = harness.sandbox.setupBackend();
+
+  assert.equal(result.ok, true);
+  assert.equal(harness.teamSheet.frozenRows, 1);
+  assert.equal(harness.teamSheet.validations.length, 1);
+  assert.deepEqual(harness.teamSheet.validations[0].rule.values, [
+    "Pending Review", "Approved", "Rejected", "Needs Info"
+  ]);
+  assert.equal(harness.teamSheet.validations[0].rule.allowInvalid, false);
+  assert.deepEqual(harness.teamSheet.data[0], TEAM_HEADERS);
 });
 
 test("Needs Info and admin notes synchronize to Private Applications", () => {
@@ -752,7 +836,7 @@ test("Apps Script editor self-tests pass with the production backend source", ()
 
   const results = harness.sandbox.runBackendSelfTests();
 
-  assert.equal(results.length, 8);
+  assert.equal(results.length, 9);
   assert.equal(results.every((result) => result.passed), true);
 });
 

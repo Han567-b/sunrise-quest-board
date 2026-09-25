@@ -1,0 +1,170 @@
+{
+  "version": "1.0.0",
+  "reviewed_on": "2026-09-26",
+  "status": "prepared_not_authorized",
+  "source_of_truth": "Restricted KTL Google Sheets managed by Apps Script",
+  "global_rules": {
+    "production_account": "han@keytechlabs.org",
+    "synthetic_tests_only": true,
+    "never_transfer": [
+      "phone",
+      "accessibility_notes",
+      "resume_file_id",
+      "certification_file_ids",
+      "withdrawal_token_hash",
+      "private_drive_links"
+    ],
+    "result_log_fields": [
+      "workflow_id",
+      "platform",
+      "submission_id",
+      "outcome",
+      "reason",
+      "attempt"
+    ]
+  },
+  "workflows": [
+    {
+      "id": "team-review-to-notion",
+      "purpose": "Create or update an internal recruitment record in an authorized Restricted Notion data source.",
+      "activation_status": "prepared_not_authorized",
+      "source": "Team Review only",
+      "dedupe_key": "submission_id",
+      "direction": "one_way_google_sheets_to_notion",
+      "field_map": {
+        "submission_id": "Submission ID",
+        "name": "Name",
+        "primary_role": "Path Summary",
+        "skills_summary": "Skills Summary",
+        "availability_summary": "Availability Summary",
+        "qualification_summary": "Qualification Summary",
+        "review_status": "Review Status",
+        "player_card_status": "Player Card Status",
+        "last_updated": "Last Updated"
+      },
+      "validation": [
+        "Require a valid submission_id",
+        "Use only the Team Review allowlist",
+        "Search by Submission ID before create",
+        "Reject writes from Notion back to approval fields"
+      ],
+      "zapier": {
+        "trigger": "Google Sheets: New or Updated Spreadsheet Row in Team Review",
+        "actions": [
+          "Notion: Find Data Source Item by Submission ID",
+          "Path: update the found item or create one item",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Use Zap run history; manually replay on Free or use paid Autoreplay; never include row payloads in alerts.",
+        "estimated_successful_tasks_per_record": 3,
+        "subscription": "Professional or higher because this is a multi-step Zap; Free supports only one action."
+      },
+      "make": {
+        "trigger": "Google Sheets: Watch New Rows or Watch Changes in Team Review",
+        "actions": [
+          "Notion: Search Objects/Data Source Items by Submission ID",
+          "Router: update found item or create one item",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Break handler plus incomplete execution; retry rate-limit and connection errors; enable confidential data handling.",
+        "estimated_credits_per_record": 4,
+        "subscription": "Build/test on Free, but polling alone can exceed 1,000 monthly credits and Free allows only two active scenarios."
+      }
+    },
+    {
+      "id": "application-summary-to-pdf",
+      "purpose": "Generate a privacy-minimized application summary from an approved template and store the PDF in a Restricted Drive folder.",
+      "activation_status": "prepared_not_authorized",
+      "source": "Private Applications through a dedicated allowlist",
+      "dedupe_key": "submission_id + report_type",
+      "direction": "one_way_google_sheets_to_restricted_drive",
+      "field_map": {
+        "submission_id": "Submission ID",
+        "name": "Applicant Name",
+        "primary_role": "Primary Path",
+        "additional_roles": "Additional Paths",
+        "skills": "Skills Summary",
+        "availability": "Availability Summary",
+        "review_status": "Review Status",
+        "created_at": "Submitted At",
+        "updated_at": "Updated At"
+      },
+      "validation": [
+        "Require a valid submission_id",
+        "Do not export contact, accessibility, token, or file-reference fields",
+        "Use a versioned template key",
+        "Search the Restricted report folder by deterministic filename before create"
+      ],
+      "zapier": {
+        "trigger": "Google Sheets: New or Updated Spreadsheet Row that meets the approved report condition",
+        "actions": [
+          "Google Docs: Create Document From Template",
+          "Google Drive: Export File as PDF",
+          "Google Drive: Upload the PDF into the pre-shared Restricted folder",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Stop on template/export/upload failure; replay only after deterministic filename lookup prevents duplicates.",
+        "estimated_successful_tasks_per_record": 4,
+        "subscription": "Professional or higher because more than one action is required."
+      },
+      "make": {
+        "trigger": "Google Sheets: Watch New Rows or Watch Changes",
+        "actions": [
+          "Google Docs: Create a Document from a Template",
+          "Google Drive: Download/Export the document as PDF",
+          "Google Drive: Upload the PDF into the pre-shared Restricted folder",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Use a Break handler and incomplete execution; resume only after filename dedupe check.",
+        "estimated_credits_per_record": 5,
+        "subscription": "Free can prototype files up to 5 MB; Core increases file size and permits unlimited active scenarios."
+      },
+      "sharing": "Grant named KTL staff access to the parent Drive folder; do not create public or anyone-with-link permissions per report."
+    },
+    {
+      "id": "consented-applicant-to-mailchimp",
+      "purpose": "Add or update a Mailchimp audience member only after separate explicit marketing consent.",
+      "activation_status": "blocked_pending_marketing_consent_field_and_authorization",
+      "source": "Private Applications through a dedicated consent gate",
+      "dedupe_key": "normalized email address",
+      "direction": "one_way_google_sheets_to_mailchimp",
+      "field_map": {
+        "email": "Email Address",
+        "first_name": "FNAME",
+        "last_name": "LNAME",
+        "selected_roles": "Role tags",
+        "marketing_consent": "Eligibility gate only; not a tag"
+      },
+      "validation": [
+        "Require marketing_consent === true from a dedicated field",
+        "Skip withdrawn applications",
+        "Validate and normalize email",
+        "Find existing member by email before add/update",
+        "Never resubscribe an unsubscribed member automatically",
+        "Use pending/double-opt-in for a new member"
+      ],
+      "zapier": {
+        "trigger": "Google Sheets: New or Updated Private Applications row after consent field exists",
+        "actions": [
+          "Mailchimp: Find Subscriber",
+          "Filter/Path: skip unsubscribed or withdrawn; add/update eligible member and role tags",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Do not retry consent or unsubscribe failures; retry transient provider failures only after subscriber lookup.",
+        "estimated_successful_tasks_per_record": 3,
+        "subscription": "Professional or higher because lookup, branching, update, and result logging are multi-step."
+      },
+      "make": {
+        "trigger": "Google Sheets: Watch New Rows or Watch Changes after consent field exists",
+        "actions": [
+          "Mailchimp: Search Members",
+          "Filter/Router: skip unsubscribed or withdrawn; add/update eligible member and role tags",
+          "Google Sheets: write a minimal execution result to an automation log"
+        ],
+        "error_policy": "Break on provider failure; never convert an unsubscribe into subscribed during retry.",
+        "estimated_credits_per_record": 4,
+        "subscription": "Can prototype on Free; three continuously active scenarios require Core or consolidation."
+      }
+    }
+  ]
+}

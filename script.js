@@ -413,10 +413,11 @@ function updateApplicationReview() {
   const role = formatSelectedRoleSummary();
   const availability = document.querySelector("#availability")?.value || "September 26 · Shift 1 setup / teardown · 9:00 AM–12:00 PM + 5:00 PM–8:00 PM";
   const skills = document.querySelector("#interests")?.value.trim() || "No skills added yet";
-  const resume = selectedResumeFile?.name || savedResumeMetadata?.name || "No resume attached";
+  const resume = selectedResumeFile?.name
+    || (savedResumeMetadata?.name ? `${savedResumeMetadata.name} · reattach before submitting` : "No resume attached");
   const certificationNames = selectedCertificationFiles.length
     ? selectedCertificationFiles.map((file) => file.name)
-    : savedCertificationMetadata.map((file) => file.name);
+    : savedCertificationMetadata.map((file) => `${file.name} · reattach before submitting`);
   const rewards = [...document.querySelectorAll('input[name="applicationReward"]:checked')]
     .map((item) => item.value)
     .join(", ") || "No reward preference selected";
@@ -427,7 +428,7 @@ function updateApplicationReview() {
   review("availability", availability);
   review("skills", skills);
   review("resume", resume);
-  review("certifications", certificationNames.join(" · ") || "No certifications attached");
+  review("certifications", certificationNames.join(" · ") || "No supporting documents attached");
   review("rewards", rewards);
 }
 
@@ -542,7 +543,7 @@ function validateApplicationStep(step, revealErrors = true) {
     checks.push({
       input: certificationFileInput,
       valid: selectedCertificationFiles.length <= 3 && combinedUploadSize <= 12 * 1024 * 1024,
-      message: "Use no more than 3 certification files and keep all uploads at 12 MB or less."
+      message: "Use no more than 3 supporting documents and keep all uploads at 12 MB or less."
     });
   }
   if (step === 4) {
@@ -763,35 +764,43 @@ function updateCertificationFileUi() {
       : `${formatFileSize(file.size)} · reattach before submission`;
     details.append(name, metadata);
     item.appendChild(details);
-    if (selectedCertificationFiles.length) {
-      const removeButton = document.createElement("button");
-      removeButton.type = "button";
-      removeButton.className = "undo-button";
-      removeButton.dataset.removeCertification = String(index);
-      removeButton.textContent = "Remove";
-      item.appendChild(removeButton);
-    }
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "undo-button";
+    removeButton.dataset.removeCertification = String(index);
+    removeButton.dataset.fileSource = selectedCertificationFiles.length ? "selected" : "draft";
+    removeButton.textContent = "Remove";
+    item.appendChild(removeButton);
     certificationFileList.appendChild(item);
   });
   updateApplicationReview();
 }
 
 function acceptCertificationFiles(fileList) {
-  const files = [...(fileList || [])];
-  const allowed = ["pdf", "jpg", "jpeg", "png"];
-  const invalidType = files.find((file) => !allowed.includes(file.name.split(".").pop()?.toLowerCase()));
-  const tooLarge = files.find((file) => file.size > 5 * 1024 * 1024);
+  const incomingFiles = [...(fileList || [])];
+  const allowed = ["pdf", "doc", "docx", "jpg", "jpeg", "png"];
+  const invalidType = incomingFiles.find((file) => !allowed.includes(file.name.split(".").pop()?.toLowerCase()));
+  const tooLarge = incomingFiles.find((file) => file.size > 5 * 1024 * 1024);
   clearValidationError(certificationFileInput);
-  if (files.length > 3) {
-    setValidationError(certificationFileInput, "Choose no more than 3 certification files.");
-    return;
-  }
   if (invalidType) {
-    setValidationError(certificationFileInput, "Choose PDF, JPG, or PNG certification files.");
+    setValidationError(certificationFileInput, "Choose PDF, DOC, DOCX, JPG, or PNG supporting documents.");
     return;
   }
   if (tooLarge) {
-    setValidationError(certificationFileInput, "Each certification file must be 5 MB or less.");
+    setValidationError(certificationFileInput, "Each supporting document must be 5 MB or less.");
+    return;
+  }
+  const files = selectedCertificationFiles.slice();
+  incomingFiles.forEach((file) => {
+    const duplicate = files.some((existing) => (
+      existing.name === file.name
+      && existing.size === file.size
+      && existing.lastModified === file.lastModified
+    ));
+    if (!duplicate) files.push(file);
+  });
+  if (files.length > 3) {
+    setValidationError(certificationFileInput, "Choose no more than 3 supporting documents.");
     return;
   }
   const combinedSize = (selectedResumeFile?.size || 0) + files.reduce((total, file) => total + file.size, 0);
@@ -801,6 +810,7 @@ function acceptCertificationFiles(fileList) {
   }
   selectedCertificationFiles = files;
   savedCertificationMetadata = files.map((file) => ({ name: file.name, size: file.size, type: file.type }));
+  if (certificationFileInput) certificationFileInput.value = "";
   updateCertificationFileUi();
   scheduleDraftSave();
 }
@@ -1450,12 +1460,17 @@ if (certificationFileList) {
   certificationFileList.addEventListener("click", (event) => {
     const button = event.target.closest("[data-remove-certification]");
     if (!button) return;
-    selectedCertificationFiles.splice(Number(button.dataset.removeCertification), 1);
-    savedCertificationMetadata = selectedCertificationFiles.map((file) => ({
-      name: file.name,
-      size: file.size,
-      type: file.type
-    }));
+    const index = Number(button.dataset.removeCertification);
+    if (button.dataset.fileSource === "draft") {
+      savedCertificationMetadata.splice(index, 1);
+    } else {
+      selectedCertificationFiles.splice(index, 1);
+      savedCertificationMetadata = selectedCertificationFiles.map((file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }));
+    }
     if (certificationFileInput) certificationFileInput.value = "";
     updateCertificationFileUi();
     scheduleDraftSave();

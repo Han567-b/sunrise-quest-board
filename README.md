@@ -50,15 +50,16 @@ The site adapts common service-marketplace patterns into a Sunrise-specific syst
 - `script.js`: filtering, readiness level, quest publishing, applicant shortlisting, and Player Card interactions
 - `assets/`: comic and supporting images
 - `apps-script/`: Google Apps Script application, review, upload, withdrawal, and Player Card backend
+- `automation/`: provider-neutral Zapier/Make workflow specifications, privacy transformations, and synthetic fixtures
 - `tests/`: local fake-data backend and front-end contract tests
 
 ## Backend and privacy
 
 Production Google Workspace ownership, authorization, deployment, and future automation connections must use `han@keytechlabs.org`.
 
-The backend keeps full applications in Restricted Private Applications, preserves one or more selected paths with a primary matching role, sends only an allowlisted summary to Restricted Team Review, stores uploads in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards retain additional paths and lightweight role history, remain non-public by default, and require explicit applicant opt-in before public visibility. Approval onboarding email is sent privately by the KTL-owned Apps Script trigger with duplicate-safe private delivery tracking; Zapier Free is limited to the two-step new-Team-Review-row admin alert. Google resource IDs stay in Apps Script Script Properties and must never be committed.
+The backend keeps full applications in Restricted Private Applications, preserves one or more selected paths with a primary matching role, sends only an allowlisted summary to Restricted Team Review, stores an optional resume plus up to three supporting documents in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards retain additional paths and lightweight role history, remain non-public by default, and require explicit applicant opt-in before public visibility. Team Review uses a controlled four-status dropdown without receiving private file references. Approval onboarding email is sent privately by the KTL-owned Apps Script trigger with duplicate-safe private delivery tracking; Zapier Free is limited to the two-step new-Team-Review-row admin alert. Google resource IDs stay in Apps Script Script Properties and must never be committed.
 
-See [`apps-script/README.md`](apps-script/README.md) for schemas, setup, deployment, admin workflow, tests, and the manual access-control checklist.
+See [`apps-script/README.md`](apps-script/README.md) for schemas, setup, deployment, admin workflow, tests, and the manual access-control checklist. See [`AUTOMATION_PLATFORM_COMPARISON.md`](AUTOMATION_PLATFORM_COMPARISON.md), [`AUTOMATION_IMPLEMENTATION_PLAN.md`](AUTOMATION_IMPLEMENTATION_PLAN.md), [`AUTOMATION_TEST_RESULTS.md`](AUTOMATION_TEST_RESULTS.md), and [`DEPLOYMENT_STATUS.md`](DEPLOYMENT_STATUS.md) for the researched Zapier/Make comparison and release boundary.
 
 ## Publish on GitHub Pages
 

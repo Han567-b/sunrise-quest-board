@@ -31,3 +31,5 @@ The installable Apps Script `onTeamReviewEdit` trigger now handles approval onbo
 Repeated Approved processing skips records already marked `Sent`. A provider failure records `Failed`, leaves approval and Player Card data intact, and can be retried by reprocessing the Approved row. A `Sending` claim prevents an uncertain prior delivery from automatically sending a duplicate; reconcile that private row manually before changing its status.
 
 Before relying on the automation, verify the Apps Script project and installable trigger are authorized by `han@keytechlabs.org`, all Sheets and Drive folders remain Restricted, the free admin-alert Zap is connected with the same KTL account, and the paid approval Zap is disabled.
+
+For the current Zapier/Make comparison and prepared cross-app workflow specifications, see `../AUTOMATION_PLATFORM_COMPARISON.md` and `../AUTOMATION_IMPLEMENTATION_PLAN.md`. No additional automation service is authorized for production by these documents.
