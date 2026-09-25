@@ -10,6 +10,7 @@ function runBackendSelfTests() {
     testMultiPathMapping_,
     testApprovalEmailContent_,
     testSupportingDocumentTypes_,
+    testStoredFileNaming_,
     testTeamReviewPrivacy_,
     testSheetFormulaGuard_,
     testWithdrawnCardGuard_
@@ -84,6 +85,22 @@ function testSupportingDocumentTypes_() {
   }];
   var validation = validateApplication_(payload);
   assertTest_(validation.valid, "DOCX supporting documents should pass validation.");
+}
+
+function testStoredFileNaming_() {
+  var submissionId = "SQ-20990101-ABCDEF12";
+  assertTest_(
+    buildStoredFileName_(submissionId, "resume", "application/pdf") === submissionId + "_resume.pdf",
+    "Resume filename should use the submission ID and resume label."
+  );
+  assertTest_(
+    buildStoredFileName_(submissionId, "1", "image/jpeg") === submissionId + "_1.jpg",
+    "Supporting filenames should use their sequential number."
+  );
+  assertTest_(
+    buildStoredFileName_(submissionId, "3", "application/vnd.openxmlformats-officedocument.wordprocessingml.document") === submissionId + "_3.docx",
+    "Supporting filenames should keep a canonical validated extension."
+  );
 }
 
 function testTeamReviewPrivacy_() {

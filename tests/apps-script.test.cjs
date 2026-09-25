@@ -546,6 +546,8 @@ test("resume and certification uploads store IDs only in Private Applications", 
   const privateRecord = harness.privateSheet.recordAt(2);
   assert.equal(privateRecord.resume_file_id, "resume-1");
   assert.deepEqual(JSON.parse(privateRecord.certification_file_ids), ["certification-1"]);
+  assert.equal(harness.folders.resumes.files[0].blob.name, `${result.submissionId}_resume.pdf`);
+  assert.equal(harness.folders.certifications.files[0].blob.name, `${result.submissionId}_1.png`);
   const teamSerialized = JSON.stringify(harness.teamSheet.recordAt(2));
   assert.equal(teamSerialized.includes("resume-1"), false);
   assert.equal(teamSerialized.includes("certification-1"), false);
@@ -571,6 +573,64 @@ test("DOCX supporting documents use the existing restricted qualification folder
   assert.deepEqual(JSON.parse(harness.privateSheet.recordAt(2).certification_file_ids), ["certification-1"]);
   assert.equal(harness.teamSheet.recordAt(2).qualification_summary, "1 supporting document(s) on file");
   assert.equal(harness.folders.certifications.files.length, 1);
+  assert.equal(harness.folders.certifications.files[0].blob.name, `${result.submissionId}_1.docx`);
+});
+
+test("supporting uploads are numbered sequentially and stay mapped to one submission", () => {
+  const harness = createHarness();
+  const resumeBytes = Buffer.from("fake resume");
+  const supportingBytes = Buffer.from("fake support");
+  const result = harness.request(validPayload({
+    files: {
+      resume: {
+        name: "Applicant Final Resume.PDF",
+        mimeType: "application/pdf",
+        size: resumeBytes.length,
+        base64: resumeBytes.toString("base64")
+      },
+      certifications: [
+        {
+          name: "photo.jpeg",
+          mimeType: "image/jpeg",
+          size: supportingBytes.length,
+          base64: supportingBytes.toString("base64")
+        },
+        {
+          name: "notes.png",
+          mimeType: "image/png",
+          size: supportingBytes.length,
+          base64: supportingBytes.toString("base64")
+        },
+        {
+          name: "work sample.docx",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          size: supportingBytes.length,
+          base64: supportingBytes.toString("base64")
+        }
+      ]
+    }
+  }));
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(
+    harness.folders.resumes.files.map((file) => file.blob.name),
+    [`${result.submissionId}_resume.pdf`]
+  );
+  assert.deepEqual(
+    harness.folders.certifications.files.map((file) => file.blob.name),
+    [
+      `${result.submissionId}_1.jpg`,
+      `${result.submissionId}_2.png`,
+      `${result.submissionId}_3.docx`
+    ]
+  );
+  const privateRecord = harness.privateSheet.recordAt(2);
+  assert.equal(privateRecord.submission_id, result.submissionId);
+  assert.equal(privateRecord.resume_file_id, "resume-1");
+  assert.deepEqual(
+    JSON.parse(privateRecord.certification_file_ids),
+    ["certification-1", "certification-2", "certification-3"]
+  );
 });
 
 test("setupBackend adds Team Review status guardrails without changing its schema", () => {
@@ -836,7 +896,7 @@ test("Apps Script editor self-tests pass with the production backend source", ()
 
   const results = harness.sandbox.runBackendSelfTests();
 
-  assert.equal(results.length, 9);
+  assert.equal(results.length, 10);
   assert.equal(results.every((result) => result.passed), true);
 });
 

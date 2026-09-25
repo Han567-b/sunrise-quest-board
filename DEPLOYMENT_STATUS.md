@@ -7,7 +7,7 @@ Status date: September 26, 2026
 | Area | Status |
 | --- | --- |
 | Existing public GitHub Pages release | Active at the established public site; post-release verification remains required after the status commit |
-| Production Apps Script | `Code.gs` and `Tests.gs` synchronized with the KTL project; Web App Version 2 deployed September 26, 2026 at 1:53 AM on the existing endpoint |
+| Production Apps Script | `Code.gs` and `Tests.gs` synchronized with the KTL project; Web App Version 3 deployed September 26, 2026 at 3:57 AM on the existing endpoint |
 | Previous unfinished frontend/backend improvements | Committed and synchronized with the production backend |
 | New Zapier vs. Make technical preparation | Implemented locally with synthetic tests; no external workflow activated |
 | Apps Script production synchronization | Completed manually using `han@keytechlabs.org`; self-tests and `setupBackend()` completed successfully |
@@ -50,7 +50,7 @@ The production synchronization was completed manually in the existing KTL Apps S
 1. the repository versions of `Code.gs` and `Tests.gs` were copied into the existing project;
 2. `runBackendSelfTests()` completed without an error;
 3. `setupBackend()` completed successfully;
-4. the existing Web App deployment was updated to Version 2 on September 26, 2026 at 1:53 AM;
+4. the existing Web App deployment was updated to Version 3 on September 26, 2026 at 3:57 AM, including submission-ID-based upload filenames;
 5. the established public Web App endpoint remained unchanged.
 
 `appsscript.json` did not change in this release and did not require another synchronization. No new endpoint, Script Property, production resource ID, or sharing change was created. Production Script Properties and sharing state are intentionally not stored in this repository.
@@ -97,7 +97,7 @@ No real applicant data, production upload, email, marketing contact, or external
 - Manifest: unchanged.
 - Apps Script self-tests: passed.
 - Backend setup/guardrails: completed.
-- Existing Web App deployment: updated to Version 2 without changing its endpoint.
+- Existing Web App deployment: updated to Version 3 without changing its endpoint.
 - Trigger architecture: unchanged; `onTeamReviewEdit` remains the required installable handler.
 - Required access policy: Private Applications, Team Review, Player Cards, and uploaded documents remain Restricted.
 
@@ -115,5 +115,5 @@ No real applicant data, production upload, email, marketing contact, or external
 - Public site loads with no visual/background regression.
 - Active frontend still targets the established production Apps Script endpoint.
 - One non-destructive page-load/navigation smoke test passes.
-- Production Apps Script Version 2 is the confirmed matching backend release.
+- Production Apps Script Version 3 is the confirmed matching backend release.
 - Private Applications, Team Review, Player Cards, uploads, templates, and reports remain Restricted.

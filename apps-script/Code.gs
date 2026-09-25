@@ -141,6 +141,14 @@ var FILE_RULES = {
   ]
 };
 
+var FILE_EXTENSION_BY_MIME_TYPE = {
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "image/jpeg": "jpg",
+  "image/png": "png"
+};
+
 var MAX_LENGTHS = {
   firstName: 80,
   lastName: 80,
@@ -882,7 +890,7 @@ function uploadApplicationFiles_(files, submissionId, config, createdFiles) {
   if (files.certifications.length) {
     var certificationFolder = DriveApp.getFolderById(config.certificationFolderId);
     files.certifications.forEach(function (file, index) {
-      var created = createDriveFile_(certificationFolder, file, submissionId, "cert-" + (index + 1));
+      var created = createDriveFile_(certificationFolder, file, submissionId, String(index + 1));
       createdFiles.push(created);
       certificationIds.push(created.getId());
     });
@@ -902,10 +910,18 @@ function createDriveFile_(folder, descriptor, submissionId, label) {
     throw new Error("An uploaded file did not match its declared size.");
   }
 
-  var storedName = submissionId + "_" + label + "_" + sanitizeFileName_(descriptor.name);
+  var storedName = buildStoredFileName_(submissionId, label, descriptor.mimeType);
   var blob = Utilities.newBlob(bytes, descriptor.mimeType, storedName);
   // The configured destination folder must already be Restricted; permissions are never changed here.
   return folder.createFile(blob);
+}
+
+function buildStoredFileName_(submissionId, label, mimeType) {
+  var extension = FILE_EXTENSION_BY_MIME_TYPE[cleanString_(mimeType).toLowerCase()];
+  if (!extension) {
+    throw new Error("An uploaded file has an unsupported storage type.");
+  }
+  return cleanString_(submissionId) + "_" + cleanString_(label) + "." + extension;
 }
 
 function buildPrivateRecord_(normalized, submissionId, now, uploaded) {

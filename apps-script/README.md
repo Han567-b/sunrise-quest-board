@@ -136,7 +136,7 @@ If a Team Review write fails after the private row succeeds, retry the same requ
 - Resume: optional PDF, DOC, or DOCX; maximum 5 MB.
 - Supporting documents: up to three PDF, DOC, DOCX, JPG, or PNG files; maximum 5 MB each. The existing `certification_file_ids` field and Restricted Certifications folder are retained for backward compatibility.
 - Combined request uploads: maximum 12 MB.
-- Stored filenames use the submission ID, a neutral label, and a sanitized original filename.
+- Stored filenames use only the existing submission ID plus a stable label: `SUBMISSION_ID_resume.ext` for the resume and `SUBMISSION_ID_1.ext`, `SUBMISSION_ID_2.ext`, and `SUBMISSION_ID_3.ext` for supporting documents. Extensions are canonicalized from the already validated MIME type. File IDs remain attached to that same submission in the private `resume_file_id` and `certification_file_ids` fields.
 
 File IDs are stored only in Private Applications. Upload code never changes file sharing.
 

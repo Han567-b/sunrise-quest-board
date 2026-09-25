@@ -109,7 +109,7 @@ Mailchimp testing must use a test audience and addresses controlled by the teste
 
 | Check | Result |
 | --- | --- |
-| Full Node suite | PASS — 39 tests, 0 failures |
+| Full Node suite | PASS — 40 tests, 0 failures |
 | `script.js` and automation module syntax | PASS |
 | Apps Script `Code.gs` / `Tests.gs` syntax through temporary `.js` copies | PASS |
 | Workflow/fixture JSON parse | PASS |
