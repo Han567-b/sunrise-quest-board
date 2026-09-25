@@ -6,13 +6,13 @@ Status date: September 26, 2026
 
 | Area | Status |
 | --- | --- |
-| Existing public GitHub Pages release | Active at the established public site; verification will be repeated after the next push |
-| Existing production Apps Script | Previously deployed and used by the public site; current production source/version has not been retrieved in this session |
-| Previous unfinished frontend/backend improvements | Present locally, tested, not yet committed/pushed at the start of this work |
+| Existing public GitHub Pages release | Active at the established public site; post-release verification remains required after the status commit |
+| Production Apps Script | `Code.gs` and `Tests.gs` synchronized with the KTL project; Web App Version 2 deployed September 26, 2026 at 1:53 AM on the existing endpoint |
+| Previous unfinished frontend/backend improvements | Committed and synchronized with the production backend |
 | New Zapier vs. Make technical preparation | Implemented locally with synthetic tests; no external workflow activated |
-| Apps Script production synchronization | Blocked by missing authenticated deployment/source-retrieval tooling |
-| Git commit | Created from the reviewed local release set; hash is reported in the release handoff |
-| Git push | Intentionally held until the matching Apps Script files are deployed with the KTL account |
+| Apps Script production synchronization | Completed manually using `han@keytechlabs.org`; self-tests and `setupBackend()` completed successfully |
+| Git release commit | `7d7abd0` (`Prepare automation comparison and application safeguards`) |
+| Git push | Release commit is present on `origin/main`; this deployment-status update will be pushed after final regression checks |
 
 ## Repository baseline
 
@@ -43,18 +43,17 @@ apps-script/Tests.gs
 
 `apps-script/appsscript.json` has no local change in this update.
 
-## Production management inspection
+## Production synchronization record
 
-No `.clasp.json`, authenticated `clasp` installation, Apps Script API project mapping, GitHub CLI, or other production Apps Script source-management configuration was found. A connected Chrome session can reach the Apps Script project, but the active Google account is `hanl34@uw.edu`; an explicit `authuser=han@keytechlabs.org` attempt remained on the UW account. No source was read, changed, saved, or deployed from that session because production work must use `han@keytechlabs.org`.
+The production synchronization was completed manually in the existing KTL Apps Script project while signed in as `han@keytechlabs.org`:
 
-No safe authenticated command or browser session is therefore available to:
+1. the repository versions of `Code.gs` and `Tests.gs` were copied into the existing project;
+2. `runBackendSelfTests()` completed without an error;
+3. `setupBackend()` completed successfully;
+4. the existing Web App deployment was updated to Version 2 on September 26, 2026 at 1:53 AM;
+5. the established public Web App endpoint remained unchanged.
 
-1. download and back up the production source;
-2. compare production source with local source;
-3. verify the exact current deployment version;
-4. create a new version or update the existing deployment.
-
-Production Script Properties, spreadsheet/folder IDs, trigger ownership, and sharing state cannot be inspected from the repository. They must not be guessed or reconstructed from screenshots.
+`appsscript.json` did not change in this release and did not require another synchronization. No new endpoint, Script Property, production resource ID, or sharing change was created. Production Script Properties and sharing state are intentionally not stored in this repository.
 
 ## `setupBackend()` safety inspection
 
@@ -78,7 +77,7 @@ It does **not**:
 - change Drive/Sheet sharing;
 - create public links.
 
-Even though it is non-destructive by design, it should not be run in production until source sync is complete and the production sheet backup/access check is confirmed.
+The function completed successfully in production after source synchronization.
 
 ## New automation integration status
 
@@ -91,25 +90,22 @@ Even though it is non-destructive by design, it should not be run in production 
 
 No real applicant data, production upload, email, marketing contact, or external API call was created during the new work.
 
-## Minimum safe Apps Script release handoff
+## Completed Apps Script release handoff
 
-Because automated deployment is unavailable, the remaining production step cannot be completed without an authenticated Google Workspace interaction. The minimum safe manual handoff, after this repository commit is finalized, will be:
-
-1. Sign in to the existing production Apps Script project as `han@keytechlabs.org`.
-2. Back up or copy the current project source and note the actual active deployment version.
-3. Compare and replace only `Code.gs` and `Tests.gs` with the committed versions; do not change Script Properties, deployment access, or `appsscript.json`.
-4. Run `runBackendSelfTests()` and confirm completion.
-5. Run `setupBackend()` once to add the dropdown/freeze guardrails and any missing safe extension headers.
-6. Create a new version on the existing deployment (do not create a new endpoint) and record the actual version number.
-7. Confirm the installable `onTeamReviewEdit` trigger still belongs to `han@keytechlabs.org` and all resources remain Restricted.
-
-This is intentionally not assigned a presumed “Version 4”; the actual production project must determine the next version.
+- Production account: `han@keytechlabs.org`.
+- Synchronized files: `apps-script/Code.gs` and `apps-script/Tests.gs`.
+- Manifest: unchanged.
+- Apps Script self-tests: passed.
+- Backend setup/guardrails: completed.
+- Existing Web App deployment: updated to Version 2 without changing its endpoint.
+- Trigger architecture: unchanged; `onTeamReviewEdit` remains the required installable handler.
+- Required access policy: Private Applications, Team Review, Player Cards, and uploaded documents remain Restricted.
 
 ## Deployment blockers and non-blockers
 
-- **Blocker for backend deployment:** no Apps Script source/deployment channel authenticated as `han@keytechlabs.org`; the reachable Chrome session is on the prohibited UW account and was left unchanged.
+- **Backend deployment:** complete through the KTL-owned Apps Script project.
 - **Not a blocker for local testing/documentation:** all new automation work uses synthetic fixtures and pure local tests.
-- **Potential blocker for pushing frontend/backend together:** the frontend file handling changes should not be publicly released before the corresponding local Apps Script upload rules are synchronized. The final Git decision must preserve this compatibility boundary.
+- **Frontend/backend compatibility boundary:** cleared because the matching Apps Script upload rules are now deployed on the existing endpoint.
 - **Blocker for external pilots:** approved Zapier/Make/Notion/Mailchimp accounts and test resources are not connected.
 - **Blocker for Mailchimp production:** no dedicated explicit marketing-consent fields or approved consent copy.
 
@@ -119,5 +115,5 @@ This is intentionally not assigned a presumed “Version 4”; the actual produc
 - Public site loads with no visual/background regression.
 - Active frontend still targets the established production Apps Script endpoint.
 - One non-destructive page-load/navigation smoke test passes.
-- Backend source is not claimed deployed until the Apps Script project confirms the committed code and actual deployment version.
+- Production Apps Script Version 2 is the confirmed matching backend release.
 - Private Applications, Team Review, Player Cards, uploads, templates, and reports remain Restricted.
