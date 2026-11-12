@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=20261112-notion">
-    <link rel="stylesheet" href="refresh.css?v=20261112-1">
+    <link rel="stylesheet" href="refresh.css?v=20261112-7">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -26,7 +26,7 @@
         <a href="#roles">The crew</a>
         <a href="#board">Explore quests</a>
         <a href="#role-timeline">Field guides</a>
-        <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">The Sunrise story ↗</a>
+        <a href="#sunrise-story">About Sunrise</a>
       </nav>
       <a class="ghost-button" href="#notion-intake">Join the crew ↗</a>
     </header>
@@ -54,6 +54,24 @@
         </div>
       </section>
       <div class="community-strip" aria-label="Ways to contribute"><span>A place for your skills.</span><span>Solar &amp; energy</span><span>Site &amp; operations</span><span>Digital &amp; remote</span><span>Local makers</span></div>
+
+      <section class="sunrise-story" id="sunrise-story" aria-labelledby="sunrise-story-title">
+        <div class="story-intro">
+          <div><p class="eyebrow">About SunRise Fairs</p><h2 id="sunrise-story-title">A community fair.<br>Powered by the sun.</h2></div>
+          <div class="story-intro-copy">
+            <h3>What is SunRise Fairs?</h3>
+            <p>SunRise Fairs brings solar power, local markets, and hands-on learning into community gatherings. Neighbors, growers, artists, small businesses, and educators come together to share food, music, skills, and practical ways to live more sustainably.</p>
+            <h3>Where the Quest Board fits</h3>
+            <p>The Quest Board helps people find a role behind the scenes—from setting up the site and supporting solar equipment to coordinating information remotely. Explore the roles and field guides to understand the work before signing up.</p>
+            <a href="https://www.linkedin.com/company/sunrisefairs/posts/?feedView=all" target="_blank" rel="noopener noreferrer">Updates from SunRise Fairs <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="story-themes">
+          <article><span class="story-theme-number">01 / ENERGY</span><h3>Solar in everyday use.</h3><p>Solar and battery systems power the fair.</p></article>
+          <article><span class="story-theme-number">02 / LEARNING</span><h3>Room to try something.</h3><p>Try STEAM activities, planting, and greenhouse learning.</p></article>
+          <article><span class="story-theme-number">03 / COMMUNITY</span><h3>A place to gather.</h3><p>Meet local makers and neighbors at the market.</p></article>
+        </div>
+      </section>
 
       <section class="roles-section" id="roles" aria-labelledby="roles-title">
         <div class="section-copy">
@@ -187,7 +205,7 @@
         <aside class="control-rail" aria-label="Quest controls">
           <div>
             <p class="eyebrow">Find your contribution</p>
-            <h2 id="board-title">Find your best-fit quest.</h2>
+            <h2 id="board-title">Find a quest.</h2>
             <p class="intro">Explore sample assignments by skill, experience, and reward. Event details are being updated.</p>
           </div>
 
@@ -243,11 +261,12 @@
           <div class="quest-grid" id="questGrid"></div>
         </section>
 
-        <aside class="profile-panel" aria-label="Player card and progress">
+        <aside class="profile-panel" id="player-preview" aria-label="Player card and progress">
+          <div class="player-summary">
           <div class="player-card">
-            <div class="avatar">GW</div>
+            <img class="crew-portrait" src="assets/crew-avatar.svg" width="88" height="99" alt="Illustrated sample crew member">
             <div>
-              <p class="eyebrow">Player Card Preview</p>
+              <p class="eyebrow">Sample Player Card</p>
               <h2 id="playerTitle">Trained Greenworker</h2>
               <p id="playerMeta">Level 2 contributor · 18 credits · 3 badges</p>
             </div>
@@ -264,12 +283,14 @@
             <p id="readinessNote">Ready for guided event-day support with lead review.</p>
           </div>
 
-          <div class="badges" aria-label="Earned badges">
+          <div class="badges" aria-label="Example badges">
             <span>Solar 101</span>
             <span>Site Safety</span>
             <span>Crew Standup</span>
           </div>
 
+          <p class="sample-player-note">Illustrated example · Not a signed-in member</p>
+          </div>
           <div class="detail-box" id="questDetail">
             <p class="eyebrow">Selected quest</p>
             <h3>Choose a quest</h3>
@@ -953,6 +974,17 @@
           </div>
           <span class="notion-test-label">Event date: TBD</span>
         </div>
+        <div class="signup-layout">
+          <aside class="signup-guide" aria-labelledby="signup-guide-title">
+            <img src="assets/storyboard/team-lead/guest_services_beat_2_team_briefing.jpg" alt="Illustrated Sunrise crew gathering for a briefing" loading="lazy" width="640" height="480">
+            <div class="signup-guide-copy">
+              <p class="eyebrow">Before you start</p>
+              <h3 id="signup-guide-title">Get to know the work.</h3>
+              <p>Explore the crew roles and field guides before choosing how to help.</p>
+              <a href="#role-timeline">Read the field guides <span aria-hidden="true">↗</span></a>
+              <div class="signup-test-note"><strong>This is a test form.</strong><p>Use fictional details. The team is still updating the questions and event schedule.</p></div>
+            </div>
+          </aside>
         <div class="notion-form-card">
           <div class="notion-form-toolbar">
             <span>Sunrise · Test Form for Quest Board</span>
@@ -969,24 +1001,44 @@
           ></iframe>
           <p class="notion-form-help">Form not loading? <a href="https://sunrisefairs.notion.site/416e1025b3e780ebbdd9c0f0132fc1f4" target="_blank" rel="noopener noreferrer">Open it directly in Notion.</a> Scroll inside the form to reach Submit.</p>
         </div>
-        <p class="notion-intake-note">Submitting sends your answers to the team's Notion form. This preview does not create a Player Card or confirm a quest assignment.</p>
+        </div>
+        <p class="notion-intake-note">Answers go to the team's Notion form. Test submissions do not create a Player Card or reserve a quest.</p>
       </section>
 
-      <footer class="site-footer" aria-label="Sunrise Quest Board footer">
-        <div class="footer-mark" aria-hidden="true">
-          <span></span>
-          <b>☀</b>
-          <span></span>
+      <section class="closing-invitation" aria-labelledby="closing-title">
+        <div class="closing-inner">
+          <div><p class="eyebrow">Explore Sunrise</p><h2 id="closing-title">There’s a role for you.</h2><p>Start with the crew guides to find the work that fits your skills.</p></div>
+          <a class="primary-link" href="#roles">Explore the roles <span aria-hidden="true">↗</span></a>
         </div>
-        <h2>Sunrise Operational</h2>
-        <p>Help run the next Sunrise Fair.</p>
-        <div class="footer-links">
-          <a href="#roles">Roles</a>
-          <a href="#role-timeline">Timeline</a>
-          <a href="#board">Find a Quest</a>
-          <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Full Comic</a>
+      </section>
+      <footer class="site-footer" id="site-footer" aria-label="Sunrise Quest Board footer">
+        <div class="footer-main">
+          <div class="footer-identity">
+            <a class="footer-brand" href="#top" aria-label="Sunrise Quest Board home"><span class="footer-emblem" aria-hidden="true">☀</span><span>Sunrise<strong>Quest Board</strong></span></a>
+            <p>The crew behind Sunrise Fair.<br>Solar power, site support, and remote coordination.</p>
+          </div>
+          <nav class="footer-column" aria-label="Explore Quest Board">
+            <h3>Explore</h3>
+            <a href="#sunrise-story">About Sunrise</a>
+            <a href="#roles">Crew roles</a>
+            <a href="#board">Quest board</a>
+            <a href="#role-timeline">Field guides</a>
+            <a href="#rewards">Rewards</a>
+          </nav>
+          <div class="footer-column footer-event">
+            <h3>Next Sunrise Fair</h3>
+            <p>Date &amp; location to be announced.</p>
+            <a href="#notion-intake">Preview the signup form <span aria-hidden="true">↗</span></a>
+            <span class="footer-preview-badge">Test signup · Not open registration</span>
+          </div>
+          <div class="footer-column footer-world">
+            <h3>More from Sunrise</h3>
+            <p>Explore the fair, the crew, and the event story.</p>
+            <a href="https://www.linkedin.com/company/sunrisefairs/posts/?feedView=all" target="_blank" rel="noopener noreferrer">SunRise Fairs on LinkedIn ↗</a>
+            <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Sunrise comic site ↗</a>
+          </div>
         </div>
-        <small>Presented for the Sunrise Fair Greenworker Quest Board</small>
+        <div class="footer-bottom"><span>Sunrise Fair · Quest Board</span><span>A companion to Sunrise Operational</span><a href="#top">Back to top ↑</a></div>
       </footer>
 
     </main>
