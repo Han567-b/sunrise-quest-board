@@ -3826,3 +3826,35 @@ body.application-open {
     display: none !important;
   }
 }
+/* Notion intake preview: scoped to preserve the existing application UI. */
+.notion-intake {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 88px 28px;
+  scroll-margin-top: 110px;
+}
+.notion-intake-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.notion-intake-heading h2 { margin: 8px 0 16px; font-size: clamp(32px, 4vw, 52px); line-height: 1.1; }
+.notion-intake-heading p:not(.eyebrow) { max-width: 650px; line-height: 1.7; }
+.notion-test-label { flex-shrink: 0; padding: 10px 16px; border: 1px solid #d8ae59; border-radius: 999px; background: #fff0ca; font-size: 13px; font-weight: 700; }
+.notion-form-card { overflow: hidden; border: 1px solid #d8cdbb; border-radius: 20px; background: #fff; box-shadow: 0 16px 40px #3924090a; }
+.notion-form-toolbar { display: flex; justify-content: space-between; gap: 16px; padding: 20px 24px; background: #fff4df; border-bottom: 1px solid #e8dcc8; font-size: 14px; }
+.notion-form-toolbar span { font-weight: 700; }
+.notion-form-toolbar a, .notion-form-help a { color: #743b0c; text-decoration: underline; text-underline-offset: 3px; }
+.notion-form-frame { display: block; width: 100%; height: 820px; border: 0; background: #fff; }
+.notion-form-help { margin: 0; padding: 18px 24px; border-top: 1px solid #eee7dc; font-size: 13px; line-height: 1.7; }
+.notion-intake-note { max-width: 760px; margin: 20px 0 0; font-size: 14px; line-height: 1.7; color: #615649; }
+@media (max-width: 640px) {
+  .notion-intake { padding: 56px 16px; }
+  .notion-intake-heading, .notion-form-toolbar { flex-direction: column; }
+  .notion-test-label { align-self: flex-start; }
+  .notion-form-toolbar { padding: 16px; }
+  .notion-form-frame { height: 740px; }
+  .notion-form-help { padding: 16px; }
+}

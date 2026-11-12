@@ -73,3 +73,20 @@ GitHub Pages is set to deploy from:
 Public URL:
 
 https://han567-b.github.io/sunrise-quest-board/
+
+
+## November 12 interface update
+
+The homepage now uses a cream and muted green layout with a split introduction,
+shorter navigation, role shortcuts, and a quest browser placed before the field guides.
+All five role journeys retain their full content in keyboard-accessible expandable sections.
+The `refresh.css` stylesheet contains the new presentation rules; existing application code remains in place.
+
+The Join link opens the embedded Notion test form. Questions are still being updated by
+the team. This route does not yet create Player Cards or sync with the existing Apps Script intake.
+Notion controls its own button and placeholder language; English is not forced for every visitor.
+
+Verified locally at 1280px and 388px: no horizontal overflow, role shortcuts update the
+quest filter, Level 4 reaches 100%, and the Power Runner guide expands to all 15 beats.
+Notion response receipt has not been tested. Original application date values remain
+unchanged because the existing backend validates them; new event shifts need a coordinated update.

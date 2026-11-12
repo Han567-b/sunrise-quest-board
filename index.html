@@ -9,59 +9,57 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260922-1">
+    <link rel="stylesheet" href="styles.css?v=20261112-notion">
+    <link rel="stylesheet" href="refresh.css?v=20261112-1">
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Sunrise Quest Board home">
         <span class="brand-mark">SQ</span>
         <span>
           <strong>Sunrise Quest Board</strong>
-          <small>September 26 Sunrise Fair</small>
+          <small>Crew roles &amp; field guides</small>
         </span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#roles">Roles</a>
-        <a href="#rewards">Rewards</a>
-        <a href="#hire">Open Quest</a>
-        <a href="#role-timeline">Timeline</a>
-        <a href="#board">Find Work</a>
-        <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">Full Comic</a>
+        <a href="#roles">The crew</a>
+        <a href="#board">Explore quests</a>
+        <a href="#role-timeline">Field guides</a>
+        <a href="https://sunrisecomics-jd2k6wxp.manus.space/" target="_blank" rel="noopener">The Sunrise story ↗</a>
       </nav>
-      <button class="ghost-button" type="button" data-open-panel="applyPanel">Join</button>
+      <a class="ghost-button" href="#notion-intake">Join the crew ↗</a>
     </header>
 
     <main id="top">
+      <span id="main-content" tabindex="-1"></span>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-overlay"></div>
         <div class="hero-inner">
           <div class="hero-copy">
-            <p class="kicker">Sunrise Fair · September 26</p>
-            <h1 id="hero-title">Choose your quest. Help build the fair.</h1>
-            <p class="hero-lede">Pick a role, share your skills, and get matched with a clear event-day mission.</p>
+            <p class="kicker"><span></span> The people behind Sunrise Fair</p>
+            <h1 id="hero-title">Help bring<br>Sunrise Fair<br><em>to life.</em></h1>
+            <p class="hero-lede">Help with solar power, event setup, or remote coordination. Explore the roles and see what the work involves.</p>
             <div class="hero-actions">
-              <a href="#board" class="primary-link">Find a Quest</a>
-              <a href="#roles" class="secondary-link">See Roles</a>
+              <a href="#board" class="primary-link">Explore quests <span aria-hidden="true">↗</span></a>
+              <a href="#roles" class="secondary-link">Meet the crew <span aria-hidden="true">↓</span></a>
             </div>
+            <p class="hero-footnote">On-site &amp; remote paths <span>·</span> Next event date: TBD</p>
           </div>
-          <aside class="hero-panel" aria-label="Quest status">
-            <p class="eyebrow">Open Roles</p>
-            <strong>3 crew paths</strong>
-            <span>Power, setup, and remote support teams work under Event Lead coordination. Vendors join through a separate market path.</span>
-            <div class="hero-metrics">
-              <div><b>Power</b><span>solar support</span></div>
-              <div><b>Green</b><span>site crew</span></div>
-              <div><b>Cloud</b><span>digital desk</span></div>
-            </div>
-          </aside>
+          <div class="hero-visual">
+            <div class="hero-art-label"><span>THE SUNRISE FIELD NOTES</span><span>01 / COMMUNITY</span></div>
+            <img class="hero-art" src="assets/green-jobs-expo.png" width="586" height="350" alt="Comic illustration of a speaker and community gathered at a green jobs fair" fetchpriority="high">
+            <div class="hero-art-caption"><span>Sunrise Fair<br><strong>Meet the people behind the event.</strong></span><span class="hero-sun" aria-hidden="true">✳</span></div>
+            <a class="hero-visual-note" href="#role-timeline"><span class="note-icon" aria-hidden="true">↗</span><span>See the work before you arrive.<small>Explore the illustrated field guides</small></span></a>
+          </div>
         </div>
       </section>
+      <div class="community-strip" aria-label="Ways to contribute"><span>A place for your skills.</span><span>Solar &amp; energy</span><span>Site &amp; operations</span><span>Digital &amp; remote</span><span>Local makers</span></div>
 
       <section class="roles-section" id="roles" aria-labelledby="roles-title">
         <div class="section-copy">
           <p class="eyebrow">Choose a path</p>
-          <h2 id="roles-title">One coordinated crew. Four ways to contribute.</h2>
-          <p>Event Leads guide three operational teams, while vendors join through a separate market path. Every quest still gives people a role, a shift, a checklist, and a way to show what they completed.</p>
+          <h2 id="roles-title">Choose your role.<br>Meet your crew.</h2>
+          <p>Three operational paths, guided by Event Leads. A separate market path for local vendors. Find where your skills belong.</p>
         </div>
         <div class="role-hierarchy">
           <article class="role-card lead lead-layer">
@@ -89,7 +87,8 @@
                 <div><dt>Quest work</dt><dd>Unload solar hardware, check battery status, watch power flow, flag safety issues.</dd></div>
                 <div><dt>Earn</dt><dd>Quest credits, Solar 101 badge, Site Safety badge, stipend review for higher-responsibility shifts.</dd></div>
               </dl>
-            </article>
+            <a class="role-explore" href="#board" data-skill-link="energy">Explore power quests <span aria-hidden="true">↗</span></a>
+          </article>
             <article class="role-card ops">
               <span>Operations</span>
               <h3>Green Workers</h3>
@@ -99,7 +98,8 @@
                 <div><dt>Quest work</dt><dd>Build the event layout, support tables and signs, move supplies, help breakdown.</dd></div>
                 <div><dt>Earn</dt><dd>Quest credits, Crew Standup badge, Operations badge, stronger fit for future lead roles.</dd></div>
               </dl>
-            </article>
+            <a class="role-explore" href="#board" data-skill-link="logistics">Explore operations quests <span aria-hidden="true">↗</span></a>
+          </article>
             <article class="role-card cloud">
               <span>Digital / Remote</span>
               <h3>Cloud Support</h3>
@@ -109,7 +109,8 @@
                 <div><dt>Quest work</dt><dd>Update status logs, collect proof, organize photos, route questions to the right lead.</dd></div>
                 <div><dt>Earn</dt><dd>Quest credits, Documentation badge, Cloud Support badge, post-event portfolio proof.</dd></div>
               </dl>
-            </article>
+            <a class="role-explore" href="#board" data-skill-link="community">Explore remote quests <span aria-hidden="true">↗</span></a>
+          </article>
           </div>
 
           <aside class="vendor-path" aria-labelledby="vendor-path-title">
@@ -135,7 +136,7 @@
       <section class="model-section" id="model" aria-labelledby="model-title">
         <div class="section-copy">
           <p class="eyebrow">How it works</p>
-          <h2 id="model-title">Apply like a marketplace. Show up like a crew.</h2>
+          <h2 id="model-title">How to get involved.</h2>
         </div>
         <div class="pattern-grid">
           <article>
@@ -182,18 +183,114 @@
         </div>
       </section>
 
+      <section class="workspace" id="board" aria-labelledby="board-title">
+        <aside class="control-rail" aria-label="Quest controls">
+          <div>
+            <p class="eyebrow">Find your contribution</p>
+            <h2 id="board-title">Find your best-fit quest.</h2>
+            <p class="intro">Explore sample assignments by skill, experience, and reward. Event details are being updated.</p>
+          </div>
+
+          <form class="matcher" id="matcher">
+            <label for="skill">Skill focus</label>
+            <select id="skill" name="skill">
+              <option value="all">Any skill</option>
+              <option value="energy">Solar / technical</option>
+              <option value="logistics">Operations / logistics</option>
+              <option value="media">Story / documentation</option>
+              <option value="community">Cloud / digital support</option>
+            </select>
+
+            <label for="experience">Experience level</label>
+            <input id="experience" name="experience" type="range" min="1" max="4" value="2">
+            <div class="range-labels" aria-live="polite">
+              <span>New</span>
+              <strong id="experienceValue">Level 2</strong>
+              <span>Lead</span>
+            </div>
+            <div class="level-steps" role="group" aria-label="Experience level shortcuts">
+              <button type="button" data-level="1">L1</button>
+              <button type="button" data-level="2" class="active">L2</button>
+              <button type="button" data-level="3">L3</button>
+              <button type="button" data-level="4">L4</button>
+            </div>
+
+            <fieldset>
+              <legend>Reward type</legend>
+              <label><input type="checkbox" name="reward" value="credits" checked> Quest credits</label>
+              <label><input type="checkbox" name="reward" value="stipend"> Stipend eligible</label>
+              <label><input type="checkbox" name="reward" value="badge" checked> Badge progress</label>
+            </fieldset>
+          </form>
+
+          <div class="rail-note">
+            <strong>Player Card</strong>
+            <span>Your choices help the board recommend the right role.</span>
+          </div>
+        </aside>
+
+        <section class="board-panel" aria-label="Recommended quests">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Quest board · Preview</p>
+              <h2>Recommended Roles</h2>
+            </div>
+            <div class="segmented" role="group" aria-label="Quest view">
+              <button type="button" class="active" data-view="recommended">Recommended</button>
+              <button type="button" data-view="all">All</button>
+            </div>
+          </div>
+          <div class="quest-grid" id="questGrid"></div>
+        </section>
+
+        <aside class="profile-panel" aria-label="Player card and progress">
+          <div class="player-card">
+            <div class="avatar">GW</div>
+            <div>
+              <p class="eyebrow">Player Card Preview</p>
+              <h2 id="playerTitle">Trained Greenworker</h2>
+              <p id="playerMeta">Level 2 contributor · 18 credits · 3 badges</p>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-title">
+              <span id="readinessLabel">Quest readiness</span>
+              <strong id="levelPercent">68%</strong>
+            </div>
+            <div class="progress-bar" aria-label="Quest readiness">
+              <span id="levelBar" style="width: 68%"></span>
+            </div>
+            <p id="readinessNote">Ready for guided event-day support with lead review.</p>
+          </div>
+
+          <div class="badges" aria-label="Earned badges">
+            <span>Solar 101</span>
+            <span>Site Safety</span>
+            <span>Crew Standup</span>
+          </div>
+
+          <div class="detail-box" id="questDetail">
+            <p class="eyebrow">Selected quest</p>
+            <h3>Choose a quest</h3>
+            <p>Select a card to see responsibilities, proof needed, and why the match makes sense.</p>
+          </div>
+        </aside>
+      </section>
+
+
       <section class="hire-desk" id="hire" aria-labelledby="hire-title">
         <div class="section-copy">
           <p class="eyebrow">Featured quest</p>
-          <h2 id="hire-title">Power Runner · Solar Hardware Support</h2>
+          <h2 id="hire-title">A closer look at the work.</h2>
           <p>A sample open quest for contributors who want a technical event-day role.</p>
         </div>
         <div class="hire-layout">
           <article class="post-panel">
-            <p class="eyebrow">Open Quest</p>
+            <p class="eyebrow">Sample assignment</p>
             <h3>Power Runner · Solar Hardware Support</h3>
             <dl>
-              <div><dt>When</dt><dd>September 26 Sunrise Fair</dd></div>
+              <div><dt>When</dt><dd>Next event date: TBD</dd></div>
               <div><dt>Team</dt><dd>Power Runners</dd></div>
               <div><dt>Shift</dt><dd>Setup · live power check · breakdown</dd></div>
               <div><dt>Reward</dt><dd>Credits + badge + stipend review</dd></div>
@@ -220,16 +317,17 @@
       <section class="role-timeline-section" id="role-timeline" aria-labelledby="role-timeline-title">
         <div class="section-copy">
           <p class="eyebrow">Event-day timeline</p>
-          <h2 id="role-timeline-title">Role journeys and field storylines.</h2>
-          <p>Start with the Event Lead coordination view, then follow each operational crew journey. The separate Vendor / Market path closes the set. Every storyline keeps its beginning, middle, end, and final proof or report.</p>
+          <h2 id="role-timeline-title">Know your role.<br>See how the day works.</h2>
+          <p>Choose a guide to see the work from first check-in to final report. Each journey includes the steps, handoffs, and story behind your role.</p>
         </div>
 
-        <article class="role-timeline-block timeline-power">
-          <div class="timeline-role-header">
+        <details class="role-timeline-block timeline-power">
+          <summary class="timeline-role-header">
             <span>Power Runners</span>
             <h3>Solar hardware and battery flow</h3>
             <p>For contributors helping the technical lead keep vendor tables, charging stations, and the microgrid stable.</p>
-          </div>
+          <span class="journey-action">Explore this field guide <b aria-hidden="true">+</b></span></summary>
+          <div class="journey-content">
           <div class="phase-grid" aria-label="Power Runner timeline phases">
             <article class="phase-card beginning">
               <span>Beginning</span>
@@ -378,14 +476,16 @@
               </article>
             </div>
           </div>
-        </article>
+          </div>
+        </details>
 
-        <article class="role-timeline-block timeline-cloud">
-          <div class="timeline-role-header">
+        <details class="role-timeline-block timeline-cloud">
+          <summary class="timeline-role-header">
             <span>Cloud Support</span>
             <h3>Live communications and event reporting</h3>
             <p>For contributors sitting at the digital desk, watching the map, routing messages, and turning the day's communications into a usable report.</p>
-          </div>
+          <span class="journey-action">Explore this field guide <b aria-hidden="true">+</b></span></summary>
+          <div class="journey-content">
           <div class="phase-grid" aria-label="Cloud Support timeline phases">
             <article class="phase-card beginning">
               <span>Beginning</span>
@@ -499,14 +599,16 @@
               </article>
             </div>
           </section>
-        </article>
+          </div>
+        </details>
 
-        <article class="role-timeline-block timeline-green">
-          <div class="timeline-role-header">
+        <details class="role-timeline-block timeline-green">
+          <summary class="timeline-role-header">
             <span>Green Workers · Setup &amp; Breakdown</span>
             <h3>Infrastructure setup, changes, and reset</h3>
             <p>For Green Workers who learn the gear, build the physical site, support active infrastructure changes, and close the field cleanly.</p>
-          </div>
+          <span class="journey-action">Explore this field guide <b aria-hidden="true">+</b></span></summary>
+          <div class="journey-content">
           <div class="phase-grid" aria-label="Setup and Breakdown Team timeline phases">
             <article class="phase-card beginning">
               <span>Beginning</span>
@@ -556,14 +658,16 @@
             <article class="task-chip end"><span>14</span><strong>Inventory cleanup</strong><small>final breakdowns</small></article>
             <article class="task-chip end"><span>15</span><strong>Submit report</strong><small>send to lead</small></article>
           </div>
-        </article>
+          </div>
+        </details>
 
-        <article class="role-timeline-block timeline-vendor">
-          <div class="timeline-role-header">
+        <details class="role-timeline-block timeline-vendor">
+          <summary class="timeline-role-header">
             <span>CE Vendor · Separate Market Path</span>
             <h3>Vendor arrival, market work, and table closeout</h3>
             <p>For vendors or micro-businesses moving through the fair as participants: arrive prepared, operate the table, respond to schedule needs, and close with a clear vendor report.</p>
-          </div>
+          <span class="journey-action">Explore this field guide <b aria-hidden="true">+</b></span></summary>
+          <div class="journey-content">
           <div class="phase-grid" aria-label="CE Vendor timeline phases">
             <article class="phase-card beginning">
               <span>Beginning</span>
@@ -719,14 +823,16 @@
               </article>
             </div>
           </section>
-        </article>
+          </div>
+        </details>
 
-        <article class="role-timeline-block timeline-lead">
-          <div class="timeline-role-header">
+        <details class="role-timeline-block timeline-lead">
+          <summary class="timeline-role-header">
             <span>Event Lead · Coordination Layer</span>
             <h3>Crew training, stage changes, and final accountability</h3>
             <p>For the person guiding the system: train the three operational crews, watch shift changes, coordinate vendor needs, and turn the day into a complete operations record.</p>
-          </div>
+          <span class="journey-action">Explore this field guide <b aria-hidden="true">+</b></span></summary>
+          <div class="journey-content">
           <div class="phase-grid" aria-label="Event Lead timeline phases">
             <article class="phase-card beginning">
               <span>Beginning</span>
@@ -834,102 +940,36 @@
               </article>
             </div>
           </section>
-        </article>
+          </div>
+        </details>
       </section>
 
-      <section class="workspace" id="board" aria-labelledby="board-title">
-        <aside class="control-rail" aria-label="Quest controls">
+      <section class="notion-intake" id="notion-intake" aria-labelledby="notion-intake-title">
+        <div class="notion-intake-heading">
           <div>
-            <p class="eyebrow">Contributor Search</p>
-            <h2 id="board-title">Find your best-fit quest.</h2>
-            <p class="intro">Filter by skill, level, and reward.</p>
+            <p class="eyebrow">Notion form · Test preview</p>
+            <h2 id="notion-intake-title">Try the signup form.</h2>
+            <p>Try the Sunrise test form below. Questions are still being updated; please use fictional details for this preview.</p>
           </div>
-
-          <form class="matcher" id="matcher">
-            <label for="skill">Skill focus</label>
-            <select id="skill" name="skill">
-              <option value="all">Any skill</option>
-              <option value="energy">Solar / technical</option>
-              <option value="logistics">Operations / logistics</option>
-              <option value="media">Story / documentation</option>
-              <option value="community">Cloud / digital support</option>
-            </select>
-
-            <label for="experience">Experience level</label>
-            <input id="experience" name="experience" type="range" min="1" max="4" value="2">
-            <div class="range-labels" aria-live="polite">
-              <span>New</span>
-              <strong id="experienceValue">Level 2</strong>
-              <span>Lead</span>
-            </div>
-            <div class="level-steps" role="group" aria-label="Experience level shortcuts">
-              <button type="button" data-level="1">L1</button>
-              <button type="button" data-level="2" class="active">L2</button>
-              <button type="button" data-level="3">L3</button>
-              <button type="button" data-level="4">L4</button>
-            </div>
-
-            <fieldset>
-              <legend>Reward type</legend>
-              <label><input type="checkbox" name="reward" value="credits" checked> Quest credits</label>
-              <label><input type="checkbox" name="reward" value="stipend"> Stipend eligible</label>
-              <label><input type="checkbox" name="reward" value="badge" checked> Badge progress</label>
-            </fieldset>
-          </form>
-
-          <div class="rail-note">
-            <strong>Player Card</strong>
-            <span>Your choices help the board recommend the right role.</span>
+          <span class="notion-test-label">Event date: TBD</span>
+        </div>
+        <div class="notion-form-card">
+          <div class="notion-form-toolbar">
+            <span>Sunrise · Test Form for Quest Board</span>
+            <a href="https://sunrisefairs.notion.site/416e1025b3e780ebbdd9c0f0132fc1f4" target="_blank" rel="noopener noreferrer">Open form in a new tab ↗</a>
           </div>
-        </aside>
-
-        <section class="board-panel" aria-label="Recommended quests">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Open quests</p>
-              <h2>Recommended Roles</h2>
-            </div>
-            <div class="segmented" role="group" aria-label="Quest view">
-              <button type="button" class="active" data-view="recommended">Recommended</button>
-              <button type="button" data-view="all">All</button>
-            </div>
-          </div>
-          <div class="quest-grid" id="questGrid"></div>
-        </section>
-
-        <aside class="profile-panel" aria-label="Player card and progress">
-          <div class="player-card">
-            <div class="avatar">GW</div>
-            <div>
-              <p class="eyebrow">Player Card Preview</p>
-              <h2 id="playerTitle">Trained Greenworker</h2>
-              <p id="playerMeta">Level 2 contributor · 18 credits · 3 badges</p>
-            </div>
-          </div>
-
-          <div class="progress-wrap">
-            <div class="progress-title">
-              <span id="readinessLabel">Quest readiness</span>
-              <strong id="levelPercent">68%</strong>
-            </div>
-            <div class="progress-bar" aria-label="Quest readiness">
-              <span id="levelBar" style="width: 68%"></span>
-            </div>
-            <p id="readinessNote">Ready for guided event-day support with lead review.</p>
-          </div>
-
-          <div class="badges" aria-label="Earned badges">
-            <span>Solar 101</span>
-            <span>Site Safety</span>
-            <span>Crew Standup</span>
-          </div>
-
-          <div class="detail-box" id="questDetail">
-            <p class="eyebrow">Selected quest</p>
-            <h3>Choose a quest</h3>
-            <p>Select a card to see responsibilities, proof needed, and why the match makes sense.</p>
-          </div>
-        </aside>
+          <iframe
+            class="notion-form-frame"
+            src="https://sunrisefairs.notion.site/ebd//416e1025b3e780ebbdd9c0f0132fc1f4"
+            title="Sunrise Quest Board — Notion test intake form"
+            width="100%"
+            height="820"
+            loading="lazy"
+            allowfullscreen
+          ></iframe>
+          <p class="notion-form-help">Form not loading? <a href="https://sunrisefairs.notion.site/416e1025b3e780ebbdd9c0f0132fc1f4" target="_blank" rel="noopener noreferrer">Open it directly in Notion.</a> Scroll inside the form to reach Submit.</p>
+        </div>
+        <p class="notion-intake-note">Submitting sends your answers to the team's Notion form. This preview does not create a Player Card or confirm a quest assignment.</p>
       </section>
 
       <footer class="site-footer" aria-label="Sunrise Quest Board footer">
@@ -939,7 +979,7 @@
           <span></span>
         </div>
         <h2>Sunrise Operational</h2>
-        <p>Join the September 26 Sunrise Fair crew.</p>
+        <p>Help run the next Sunrise Fair.</p>
         <div class="footer-links">
           <a href="#roles">Roles</a>
           <a href="#role-timeline">Timeline</a>
@@ -1250,6 +1290,6 @@
     </section>
 
     <div class="scrim" data-close-panel></div>
-    <script src="script.js?v=20260922-1"></script>
+    <script src="script.js?v=20261112-1"></script>
   </body>
 </html>

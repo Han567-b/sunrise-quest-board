@@ -5,11 +5,11 @@ const quests = [
     role: "Power Runners",
     level: 2,
     rewards: ["credits", "stipend", "badge"],
-    duration: "September 26 · full event day",
+    duration: "Date TBD · full event day",
     score: 96,
     summary: "Prepare solar hardware, check battery status, route cables safely, and keep power notes during setup, live operations, and breakdown.",
     proof: ["Battery and inverter check log", "Cable safety photos", "End-of-night power notes"],
-    reason: "Matches the solar/technical role from the MVP brief and turns energy work into a clear quest with proof."
+    reason: "For contributors comfortable working with solar equipment and following a technical checklist."
   },
   {
     title: "Green Worker · Infrastructure Setup",
@@ -17,11 +17,11 @@ const quests = [
     role: "Green Workers",
     level: 2,
     rewards: ["credits", "badge"],
-    duration: "September 26 · setup + live support",
+    duration: "Date TBD · setup + live support",
     score: 92,
     summary: "Set tents, move materials, support site logistics, keep lanes clear, and help the event lead convert the plan into a working site.",
     proof: ["Setup checklist", "Before and after photos", "Crew handoff notes"],
-    reason: "Uses the operations role from the brief and copies the marketplace idea of scoped, assignable physical tasks."
+    reason: "For hands-on contributors who can help with setup, equipment, and site logistics."
   },
   {
     title: "Cloud Support · Remote Operations Desk",
@@ -29,11 +29,11 @@ const quests = [
     role: "Cloud Support",
     level: 1,
     rewards: ["credits", "badge"],
-    duration: "September 26 · remote support",
+    duration: "Date TBD · remote support",
     score: 89,
-    summary: "Track September 26 status updates, route questions, update digital notes, and keep remote documentation useful for on-site teams.",
+    summary: "Track event-day status updates, route questions, update digital notes, and keep remote documentation useful for on-site teams.",
     proof: ["Support log", "Issue routing notes", "Updated onboarding records"],
-    reason: "Makes remote admin visible as real work instead of invisible background help."
+    reason: "For remote contributors who can keep records current and route questions to the right team."
   },
   {
     title: "Power Runner · Battery Watch",
@@ -41,11 +41,11 @@ const quests = [
     role: "Power Runners",
     level: 3,
     rewards: ["credits", "stipend", "badge"],
-    duration: "September 26 · live operations",
+    duration: "Date TBD · live operations",
     score: 87,
     summary: "Monitor battery levels, report power risks early, and coordinate with the technical lead before power becomes a problem.",
     proof: ["Hourly battery notes", "Risk alerts", "Final stability summary"],
-    reason: "Adds a higher-readiness quest for contributors who can handle responsibility during the live event."
+    reason: "For experienced contributors who can monitor equipment and report issues to the technical lead."
   },
   {
     title: "Green Worker · Breakdown & Site Reset",
@@ -53,11 +53,11 @@ const quests = [
     role: "Green Workers",
     level: 1,
     rewards: ["credits", "badge"],
-    duration: "September 26 · late night",
+    duration: "Date TBD · late night",
     score: 84,
     summary: "Pack equipment, coil cables, clear materials, and help confirm that the site is clean after the fair.",
     proof: ["Breakdown checklist", "Final sweep photos", "Missing item notes"],
-    reason: "Keeps the least glamorous work visible, assignable, and creditable."
+    reason: "For contributors available to pack equipment and leave the site ready for handover."
   },
   {
     title: "Cloud Support · Proof & Feedback Queue",
@@ -65,11 +65,11 @@ const quests = [
     role: "Cloud Support",
     level: 2,
     rewards: ["credits", "badge"],
-    duration: "After September 26",
+    duration: "After the event · date TBD",
     score: 82,
     summary: "Collect quest proof, organize photos and logs, prepare feedback notes, and compare expected duties with what happened on site.",
     proof: ["Proof folder", "Feedback summary", "Expectation vs. reality notes"],
-    reason: "Connects the live test to measurable learning after September 26."
+    reason: "For contributors who can organize submitted reports and prepare a clear event summary."
   }
 ];
 
@@ -1509,3 +1509,13 @@ updateResumeFileUi();
 updateCertificationFileUi();
 if (applicationCompletedLocally) showApplicationSuccess(lastSubmissionReceipt);
 else showApplicationForm(currentApplicationStep);
+
+// Role shortcuts reuse the board's existing filters.
+document.querySelectorAll('[data-skill-link]').forEach((link) => {
+  link.addEventListener('click', () => {
+    const skillSelect = document.getElementById('skill');
+    if (!skillSelect) return;
+    skillSelect.value = link.dataset.skillLink;
+    skillSelect.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+});
