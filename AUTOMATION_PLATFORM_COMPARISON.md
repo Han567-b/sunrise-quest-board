@@ -63,7 +63,7 @@ Zapier provides Google Docs template creation and a Google Drive `Export File` a
 - Use `submission_id + report_type` as the idempotency key and deterministic filename, for example `SQ-…-application-summary.pdf`.
 - Search for an existing output before creation or replace only a known prior version.
 - Give named KTL staff access to the parent folder once. Do not create `Anyone with the link` permissions.
-- Make Free limits processed files to 5 MB. The current application allows a combined upload total of 12 MB, so source uploads must not be passed through a Make Free PDF scenario. [Make file limits](https://www.make.com/en/pricing)
+- Make Free limits processed files to 5 MB. The September Apps Script form allowed a combined upload total of 12 MB, so source uploads must not be passed through a Make Free PDF scenario. [Make file limits](https://www.make.com/en/pricing)
 
 ### Practical comparison
 
@@ -102,7 +102,7 @@ Both platforms support member search, add/update, tags, and unsubscribe-related 
 
 ### Current blocker and safe design
 
-The Quest Board currently records application consent and onboarding acknowledgement, but it does **not** have a separate marketing-consent field. Those existing confirmations are not permission to subscribe someone to marketing. Therefore, the prepared workflow remains disabled and locally returns `explicit_marketing_consent_required` unless a dedicated Boolean is exactly `true`.
+The September Apps Script form recorded application consent and onboarding acknowledgement, but it does **not** have a separate marketing-consent field. Those existing confirmations are not permission to subscribe someone to marketing. Therefore, the prepared workflow remains disabled and locally returns `explicit_marketing_consent_required` unless a dedicated Boolean is exactly `true`.
 
 If KTL approves a future implementation:
 
@@ -129,7 +129,7 @@ Zapier Free supports manual replay of errored runs; paid plans add Autoreplay. M
 
 ## Privacy, access, and maintenance
 
-- Production connections must use `han@keytechlabs.org` or a future approved KTL service account; never `hanl34@uw.edu`.
+- Production connections must use `han@keytechlabs.org` or a future approved KTL service account.
 - Keep Private Applications, Team Review, Player Cards, uploads, templates, reports, Notion data source, and automation logs Restricted.
 - Use least-privilege OAuth connections and document who owns each connection.
 - Do not move approval, withdrawal, Player Card, or approval-email logic out of Apps Script.
@@ -150,7 +150,7 @@ Zapier Free supports manual replay of errored runs; paid plans add Autoreplay. M
 
 ## Final selection guidance
 
-- **September recommendation:** Keep Apps Script and Zapier Free Zap 1 for the Team Review workflow. The [public signup preview](README.md#signup-and-backend) uses a separate Notion form.
+- **September recommendation:** Keep Apps Script and Zapier Free Zap 1 for the Team Review workflow. The [public signup preview](README.md#signup) uses a separate Notion form.
 - **For Jessica's learning pilot:** Make is the stronger comparison candidate for a synthetic multi-step Notion workflow because its routers and data flow are visible.
 - **For production cross-app expansion:** choose only after KTL reviews data processing, account ownership, expected monthly volume, consent language, and who will monitor failures.
 - **Do not activate all three on Make Free:** only two scenarios can be active, and 15-minute polling can consume about 2,880 trigger credits per scenario in a 30-day month before processing any new rows. A webhook-driven design or paid plan is required for efficient always-on use.

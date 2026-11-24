@@ -1,21 +1,16 @@
-# Sunrise Quest Board Apps Script Intake
+# Archived Apps Script Intake
 
-The public Quest Board currently sends visitors to a separate Notion test form. This guide covers the Apps Script intake retained in the repository. The Notion test form does not feed this backend.
+The Quest Board currently uses only the Notion test form for signup. This guide documents the earlier Apps Script intake for reference.
 
 This folder contains the Google Apps Script backend for multi-path applications, privacy-safe team review, restricted uploads, admin decisions, applicant withdrawal, onboarding acknowledgement/email, and internal Player Cards.
 
-Production owner and authorization account: **Han Lin — `han@keytechlabs.org`**.
-
-Do not authorize, deploy, own production resources, or connect Zapier with `hanl34@uw.edu`.
+The earlier Apps Script deployment used `han@keytechlabs.org`.
 
 ## Files
 
 - `Code.gs` — public submission/withdrawal endpoint and internal admin workflow.
 - `Tests.gs` — pure Apps Script smoke tests; it uses fake data and performs no Google writes.
 - `appsscript.json` — V8 runtime plus Sheets, Drive, trigger, and send-email scopes.
-- `ZAPIER_PLAN.md` — free two-step admin alert boundary and paid-Zap retirement steps.
-- `../AUTOMATION_PLATFORM_COMPARISON.md` — September Zapier/Make comparison and recommendation.
-- `../AUTOMATION_IMPLEMENTATION_PLAN.md` — integration data flows, mappings, permissions, and rollout plan.
 
 ## Architecture and responsibilities
 
@@ -133,14 +128,6 @@ The earlier application form calls the web-app endpoint with the deployment owne
 
 If a Team Review write fails after the private row succeeds, retry the same request. Its `client_request_id` repairs the review row without creating a duplicate private record or duplicate upload.
 
-### Upload limits
-
-These limits apply to the Apps Script intake.
-
-- An optional resume can be a PDF, DOC, or DOCX file up to 5 MB.
-- Applicants can attach up to three supporting documents. Each can be a PDF, DOC, DOCX, JPG, or PNG file up to 5 MB.
-- All attachments combined can be up to 12 MB per submission.
-
 ### Stored filenames and file IDs
 
 The backend uses the submission ID to name each file. It chooses the extension from the validated MIME type.
@@ -165,7 +152,7 @@ Supported `review_status` values are exactly:
 
 New applications default to `Pending Review`. New Team Review records default to `Not Created` for Player Card status.
 
-`setupBackend()` freezes the Team Review header and limits the `review_status` dropdown to these four values. It preserves the Team Review columns used by the September admin-alert Zap.
+`setupBackend()` freezes the Team Review header and limits the `review_status` dropdown to these four values.
 
 After `installAdminReviewTrigger()` is installed, an authorized admin edits `review_status` or `admin_notes` in Team Review. The trigger validates the status and synchronizes it to Private Applications. `Approved` creates or updates one Player Card by `submission_id`, copies the full approved path set and onboarding acknowledgement, and records the role set once in `role_history`; retries cannot create a duplicate card or history entry. It then privately looks up first name, email, and primary role and sends the approval/onboarding email through `MailApp` under the trigger owner's KTL Workspace authorization. A withdrawn application cannot be approved, create a card, or receive this email.
 
@@ -177,7 +164,7 @@ Email delivery state stays only in Private Applications:
 - `Failed` — Google returned a send error; approval and Player Card remain saved, and reprocessing the Approved row retries.
 - `Missing Email` — the private email is blank or invalid; Player Card remains saved and no message is attempted.
 
-Repeated processing of an Approved row with `Sent` does not send again. Do not add these delivery fields or the email address to Team Review. Disable the older paid `Approved → Filter → Lookup → Gmail` Zap after this Apps Script version is verified, or duplicate emails could occur.
+Repeated processing of an Approved row with `Sent` does not send again. Do not add these delivery fields or the email address to Team Review.
 
 An `Approved` decision cannot be reversed automatically while its Player Card remains active. Resolve or deactivate the internal card first under an authorized KTL admin process, then correct the source records deliberately. This guard prevents a rejected applicant from retaining an accidentally active card.
 
@@ -196,9 +183,9 @@ On success:
 - no Player Card can be created afterward;
 - if a card already exists, it remains internal history, becomes `Withdrawn`, and public consent is forced to `false`.
 
-## Deployment with the KTL account
+## Historical Apps Script deployment procedure
 
-Use these steps when maintaining or redeploying the earlier Apps Script intake. The public Notion form is managed separately. Sign in as **`han@keytechlabs.org`** before starting.
+The September deployment used the following procedure with the **`han@keytechlabs.org`** account.
 
 1. Open the production Apps Script project.
 2. Replace `Code.gs` and `Tests.gs` with the committed files from this folder. Change `appsscript.json` only when its Git diff shows an intentional manifest change.
@@ -244,7 +231,3 @@ Google writes, Drive uploads, installable triggers, and web-app permissions stil
 - Player Cards remain internal unless an applicant explicitly opts in.
 - Approval is required before card creation.
 - Withdrawn applications remain historical and cannot create cards.
-
-## Free automation boundary
-
-The September deployment record lists Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, as live at that time. The paid multi-step Zap 2 prototype is not the long-term path; Apps Script owns `Approved → Onboarding Email` so approval does not depend on Zapier Filter or Lookup. Verify that the old Zap 2 is disabled to prevent duplicate mail. See `ZAPIER_PLAN.md` for the boundary and `../AUTOMATION_PLATFORM_COMPARISON.md` for the Zapier/Make evaluation.

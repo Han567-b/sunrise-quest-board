@@ -2,7 +2,7 @@
 
 Reviewed: September 26, 2026
 
-This plan covers proposed automations for the Apps Script Team Review sheet. The [public Notion signup preview](README.md#signup-and-backend) is a separate form.
+This plan covers proposed automations for the Apps Script Team Review sheet. The [public Notion signup preview](README.md#signup) is a separate form.
 
 ## 1. Architecture boundary
 

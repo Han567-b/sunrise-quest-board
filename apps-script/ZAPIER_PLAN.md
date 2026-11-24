@@ -1,11 +1,11 @@
 # Free Long-Term Automation Architecture
 
-Zapier Free is used only for the simple internal new-application alert. Apps Script owns application storage, approval logic, withdrawal verification, Player Card creation, and applicant onboarding email. Production connections and Apps Script authorization must use `han@keytechlabs.org`.
+In the September setup, Zapier Free was used only for the simple internal new-application alert. Apps Script owns application storage, approval logic, withdrawal verification, Player Card creation, and applicant onboarding email. Production connections and Apps Script authorization must use `han@keytechlabs.org`.
 
-September release status for the Apps Script intake. See the [current signup flow](../README.md#signup-and-backend) for the public Notion preview.
+September release status for the Apps Script intake. See the [current signup flow](../README.md#signup) for the public Notion preview.
 
-- Zap 1, `New Application → Admin Alert`, is live as the free two-step workflow.
-- Zap 2, `Approved → Onboarding Email`, was built and tested in Zapier but is being retired in favor of the deployed Apps Script implementation, avoiding a paid multi-step dependency.
+- Zap 1, `New Application → Admin Alert`, was live at the time of the September release.
+- Zap 2, `Approved → Onboarding Email`, was built and tested in Zapier but was slated for retirement in favor of the deployed Apps Script implementation, avoiding a paid multi-step dependency.
 
 ## Keep: one free two-step Zap
 
@@ -32,4 +32,4 @@ Repeated Approved processing skips records already marked `Sent`. A provider fai
 
 Before relying on the automation, verify the Apps Script project and installable trigger are authorized by `han@keytechlabs.org`, all Sheets and Drive folders remain Restricted, the free admin-alert Zap is connected with the same KTL account, and the paid approval Zap is disabled.
 
-For the current Zapier/Make comparison and prepared cross-app workflow specifications, see `../AUTOMATION_PLATFORM_COMPARISON.md` and `../AUTOMATION_IMPLEMENTATION_PLAN.md`. No additional automation service is authorized for production by these documents.
+For the September Zapier/Make comparison and prepared cross-app workflow specifications, see `../AUTOMATION_PLATFORM_COMPARISON.md` and `../AUTOMATION_IMPLEMENTATION_PLAN.md`. No additional automation service is authorized for production by these documents.

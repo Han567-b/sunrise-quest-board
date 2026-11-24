@@ -2,7 +2,7 @@
 
 Status date: September 26, 2026
 
-This records the September Apps Script release. The public signup link now opens a Notion test form. See the [current site overview](README.md#signup-and-backend) for the signup flow.
+This records the September Apps Script release. The public signup link now opens a Notion test form. See the [current site overview](README.md#signup) for the signup flow.
 
 ## Executive status
 
@@ -23,9 +23,9 @@ This records the September Apps Script release. The public signup link now opens
 - Existing Zap 1 remains `New Team Review row → Admin Alert`; no code or schema change replaces it.
 - `AGENTS.md` and `PROJECT_MEMORY.md` are local untracked guidance files and must remain untracked, unchanged, and excluded from commits.
 
-## Unfinished production update inherited from the previous session
+## September release changes
 
-The current local work adds:
+The September release included:
 
 - clearer application guidance;
 - one resume plus up to three supporting documents;

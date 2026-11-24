@@ -11,13 +11,15 @@ The Quest Board helps people explore crew roles and sample assignments for Sunri
 - **Field guides.** Expand any of the five role guides to see event-day tasks and handoffs. The Power Runner guide includes 15 illustrated beats.
 - **About Sunrise.** Learn about the fair’s solar power, hands-on learning, and community market.
 
-## Signup and backend
+## Signup
 
-The public **Join the crew** link takes you to the Notion test form on the Quest Board. You can also open the form directly in Notion from that section. Use fictional details while the team updates the questions. The next event date and location are still to be announced.
+The Quest Board currently uses only Notion for signup. The public **Join the crew** link takes you to the test form. You can also open the form directly in Notion from that section. Use fictional details while the team updates the questions. The next event date and location are still to be announced.
 
-The test form is separate from the earlier Google Apps Script intake. It does not sync to Team Review, create Player Cards, or reserve quests. End-to-end Notion response receipt has not been verified.
+End-to-end Notion response receipt has not been verified.
 
-The earlier application form and its Apps Script endpoint remain in the codebase. The [Apps Script guide](apps-script/README.md) covers that form’s upload rules, review workflow, and deployment. The [September deployment record](DEPLOYMENT_STATUS.md) documents the earlier release and automation status.
+## Project history
+
+See the [September deployment record](DEPLOYMENT_STATUS.md) and the [archived Apps Script guide](apps-script/README.md) for the previous intake.
 
 ## Development
 
