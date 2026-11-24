@@ -135,12 +135,24 @@ If a Team Review write fails after the private row succeeds, retry the same requ
 
 ### Upload limits
 
-- Resume: optional PDF, DOC, or DOCX; maximum 5 MB.
-- Supporting documents: up to three PDF, DOC, DOCX, JPG, or PNG files; maximum 5 MB each. The existing `certification_file_ids` field and Restricted Certifications folder are retained for backward compatibility.
-- Combined request uploads: maximum 12 MB.
-- Stored filenames use only the existing submission ID plus a stable label: `SUBMISSION_ID_resume.ext` for the resume and `SUBMISSION_ID_1.ext`, `SUBMISSION_ID_2.ext`, and `SUBMISSION_ID_3.ext` for supporting documents. Extensions are canonicalized from the already validated MIME type. File IDs remain attached to that same submission in the private `resume_file_id` and `certification_file_ids` fields.
+These limits apply to the Apps Script intake.
 
-File IDs are stored only in Private Applications. Upload code never changes file sharing.
+- An optional resume can be a PDF, DOC, or DOCX file up to 5 MB.
+- Applicants can attach up to three supporting documents. Each can be a PDF, DOC, DOCX, JPG, or PNG file up to 5 MB.
+- All attachments combined can be up to 12 MB per submission.
+
+### Stored filenames and file IDs
+
+The backend uses the submission ID to name each file. It chooses the extension from the validated MIME type.
+
+| File | Stored name | Field in Private Applications |
+| --- | --- | --- |
+| Resume | `SUBMISSION_ID_resume.ext` | `resume_file_id` |
+| First supporting document | `SUBMISSION_ID_1.ext` | `certification_file_ids` |
+| Second supporting document | `SUBMISSION_ID_2.ext` | `certification_file_ids` |
+| Third supporting document | `SUBMISSION_ID_3.ext` | `certification_file_ids` |
+
+Supporting documents still use the Restricted Certifications folder and the existing field for compatibility with older submissions. File IDs are stored only in Private Applications. Uploads keep the configured Drive sharing settings.
 
 ## Admin workflow
 
