@@ -2,6 +2,8 @@
 
 Status date: September 26, 2026
 
+This records the September Apps Script release. The public signup link now opens a Notion test form. See the [current site overview](README.md#signup-and-backend) for the signup flow.
+
 ## Executive status
 
 | Area | Status |
@@ -109,11 +111,11 @@ No real applicant data, production upload, email, marketing contact, or external
 - **Blocker for external pilots:** approved Zapier/Make/Notion/Mailchimp accounts and test resources are not connected.
 - **Blocker for Mailchimp production:** no dedicated explicit marketing-consent fields or approved consent copy.
 
-## Post-release verification checklist
+## September release verification checklist
 
 - GitHub Pages deploy completes from the new commit.
 - Public site loads with no visual/background regression.
-- Active frontend still targets the established production Apps Script endpoint.
+- For the September signup flow, confirm that the application form targets the established Apps Script endpoint.
 - One non-destructive page-load/navigation smoke test passes.
 - Production Apps Script Version 3 is the confirmed matching backend release.
 - Private Applications, Team Review, Player Cards, uploads, templates, and reports remain Restricted.

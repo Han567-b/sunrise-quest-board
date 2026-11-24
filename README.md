@@ -1,92 +1,30 @@
 # Sunrise Quest Board
 
-External jump-out site for the Sunrise Operational comic:
+The Quest Board helps people explore crew roles and sample assignments for Sunrise Fair. The illustrated field guides show what each role does from check-in to closeout.
 
-https://sunrisecomics-jd2k6wxp.manus.space/
+[Open the Quest Board](https://han567-b.github.io/sunrise-quest-board/) · [Sunrise comic site](https://sunrisecomics-jd2k6wxp.manus.space/)
 
-This prototype turns the September 26 Sunrise Fair volunteer system into a marketplace-style Quest Board. The main comic site stays unchanged; this repository hosts the recruiting, matching, and assignment layer that could open from the main site's top navigation.
+## What’s on the site
 
-## MVP Purpose
+- **Crew roles.** Event Leads coordinate Power Runners (solar and batteries), Green Workers (setup and site operations), and Cloud Support (remote coordination and documentation). CE Vendors have a separate market path.
+- **Quest browser.** Browse sample assignments by skill, experience, and reward preference. The board shows a fit score, quest details, and a sample Player Card. The featured quest includes a matching preview with example candidates.
+- **Field guides.** Expand any of the five role guides to see event-day tasks and handoffs. The Power Runner guide includes 15 illustrated beats.
+- **About Sunrise.** Learn about the fair’s solar power, hands-on learning, and community market.
 
-Project: Sunrise Fair Greenworker Quest System
+## Signup and backend
 
-Target event: September 26 Sunrise Fair
+The public **Join the crew** link opens an embedded Notion test form. Use fictional details while the team updates the questions. The next event date and location are still to be announced.
 
-Product deadline: September 10, 2026
+The test form is separate from the earlier Google Apps Script intake. It does not sync to Team Review, create Player Cards, or reserve quests. End-to-end Notion response receipt has not been verified.
 
-Readiness target: all recruited Greenworkers complete the quest guide/manual by September 20.
+The repository still contains the Apps Script intake for application review, restricted uploads, withdrawals, onboarding emails, and internal Player Cards. See the [Apps Script guide](apps-script/README.md) for setup and privacy rules, and the [September deployment record](DEPLOYMENT_STATUS.md) for the earlier release and automation status.
 
-## Character Paths
+## Development
 
-- Power Runners: solar and technical support for energy distribution, battery checks, cable safety, and power stability.
-- Green Workers: operations support for tents, physical infrastructure, logistics, site flow, and breakdown.
-- Cloud Support: remote digital support for documentation, status updates, issue routing, and post-event proof collection.
-- CE Vendors: market-table participants who need setup, power, attendance flow, support requests, and closing reports.
-- Event Leads: coordination roles for crew training, shift changes, field decisions, and final event reporting.
+- `index.html` holds the page content and Notion embed.
+- `styles.css` and `refresh.css` handle layout and styling.
+- `script.js` handles the quest browser, matching preview, and earlier application form.
+- `assets/` holds the illustrations and storyboard images.
+- `apps-script/`, `automation/`, and `tests/` hold the backend, workflow prototypes, and tests.
 
-## Visual Role Guide
-
-The Power Runner path now includes a 15-beat storyboard gallery. Each beat pairs a role action with a visual panel so contributors can understand the day as a comic-style journey before they accept the quest.
-
-## Marketplace Logic
-
-The site adapts common service-marketplace patterns into a Sunrise-specific system:
-
-- Fast quest posting instead of loose volunteer requests.
-- Applicant comparison by fit, readiness, proof, and availability.
-- Player Cards that package skills, badges, interests, and contribution history.
-- Milestone-based completion with proof, feedback, credits, and badge progress.
-
-## Reward Fields
-
-- Quest Credits: internal contribution points for verified completed work.
-- Stipend Eligible: roles that may qualify for compensation or program support after lead approval.
-- Badge Progress: skill-growth tracking for role readiness, such as Solar 101, Site Safety, Crew Standup, or Documentation Support.
-
-## Files
-
-- `index.html`: page structure and content
-- `styles.css`: visual design and responsive layout
-- `script.js`: filtering, readiness level, quest publishing, applicant shortlisting, and Player Card interactions
-- `assets/`: comic and supporting images
-- `apps-script/`: Google Apps Script application, review, upload, withdrawal, and Player Card backend
-- `automation/`: provider-neutral Zapier/Make workflow specifications, privacy transformations, and synthetic fixtures
-- `tests/`: local fake-data backend and front-end contract tests
-
-## Backend and privacy
-
-Production Google Workspace ownership, authorization, deployment, and future automation connections must use `han@keytechlabs.org`.
-
-The backend keeps full applications in Restricted Private Applications, preserves one or more selected paths with a primary matching role, sends only an allowlisted summary to Restricted Team Review, stores an optional resume plus up to three supporting documents in Restricted Drive folders, and creates an internal Player Card only after approval. Player Cards retain additional paths and lightweight role history, remain non-public by default, and require explicit applicant opt-in before public visibility. Team Review uses a controlled four-status dropdown without receiving private file references. Approval onboarding email is sent privately by the KTL-owned Apps Script trigger with duplicate-safe private delivery tracking; Zapier Free is limited to the two-step new-Team-Review-row admin alert. Google resource IDs stay in Apps Script Script Properties and must never be committed.
-
-See [`apps-script/README.md`](apps-script/README.md) for schemas, setup, deployment, admin workflow, tests, and the manual access-control checklist. See [`AUTOMATION_PLATFORM_COMPARISON.md`](AUTOMATION_PLATFORM_COMPARISON.md), [`AUTOMATION_IMPLEMENTATION_PLAN.md`](AUTOMATION_IMPLEMENTATION_PLAN.md), [`AUTOMATION_TEST_RESULTS.md`](AUTOMATION_TEST_RESULTS.md), and [`DEPLOYMENT_STATUS.md`](DEPLOYMENT_STATUS.md) for the researched Zapier/Make comparison and release boundary.
-
-## Publish on GitHub Pages
-
-After local edits are committed in GitHub Desktop, click `Push origin`.
-
-GitHub Pages is set to deploy from:
-
-- Branch: `main`
-- Folder: `/ (root)`
-
-Public URL:
-
-https://han567-b.github.io/sunrise-quest-board/
-
-
-## November 12 interface update
-
-The homepage now uses a cream and muted green layout with a split introduction,
-shorter navigation, role shortcuts, and a quest browser placed before the field guides.
-All five role journeys retain their full content in keyboard-accessible expandable sections.
-The `refresh.css` stylesheet contains the new presentation rules; existing application code remains in place.
-
-The Join link opens the embedded Notion test form. Questions are still being updated by
-the team. This route does not yet create Player Cards or sync with the existing Apps Script intake.
-Notion controls its own button and placeholder language; English is not forced for every visitor.
-
-Verified locally at 1280px and 388px: no horizontal overflow, role shortcuts update the
-quest filter, Level 4 reaches 100%, and the Power Runner guide expands to all 15 beats.
-Notion response receipt has not been tested. Original application date values remain
-unchanged because the existing backend validates them; new event shifts need a coordinated update.
+Open `index.html` to preview the site locally. Run `node --test` for the local checks. GitHub Pages publishes from the root of the `main` branch.

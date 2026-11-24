@@ -2,6 +2,8 @@
 
 Reviewed: September 26, 2026
 
+This plan covers proposed automations for the Apps Script Team Review sheet. The [public Notion signup preview](README.md#signup-and-backend) is a separate form.
+
 ## 1. Architecture boundary
 
 The existing Apps Script backend remains authoritative. Zapier and Make are optional projection/reporting layers; neither receives authority to approve applications, withdraw them, create Player Cards, or send the existing approval/onboarding email.

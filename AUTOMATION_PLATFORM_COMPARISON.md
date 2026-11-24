@@ -4,7 +4,7 @@ Reviewed: September 26, 2026. Vendor pricing, quotas, and app actions change; co
 
 ## Executive recommendation
 
-Keep the current architecture as the production baseline:
+At the September review, the recommended baseline for the Apps Script workflow was:
 
 1. Google Apps Script remains the system of record and owns sensitive submission storage, approval processing, withdrawal, Player Card creation, and approval/onboarding email.
 2. Keep the live two-step Zapier Free workflow `New Team Review row → Admin Alert`. It uses the privacy-safe Team Review sheet and fits Zapier Free.
@@ -150,7 +150,7 @@ Zapier Free supports manual replay of errored runs; paid plans add Autoreplay. M
 
 ## Final selection guidance
 
-- **Today:** Apps Script + Zapier Free Zap 1 is the recommended production architecture.
+- **September recommendation:** Keep Apps Script and Zapier Free Zap 1 for the Team Review workflow. The [public signup preview](README.md#signup-and-backend) uses a separate Notion form.
 - **For Jessica's learning pilot:** Make is the stronger comparison candidate for a synthetic multi-step Notion workflow because its routers and data flow are visible.
 - **For production cross-app expansion:** choose only after KTL reviews data processing, account ownership, expected monthly volume, consent language, and who will monitor failures.
 - **Do not activate all three on Make Free:** only two scenarios can be active, and 15-minute polling can consume about 2,880 trigger credits per scenario in a 30-day month before processing any new rows. A webhook-driven design or paid plan is required for efficient always-on use.

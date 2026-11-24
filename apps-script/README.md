@@ -1,5 +1,7 @@
 # Sunrise Quest Board Backend MVP
 
+The public Quest Board currently sends visitors to a separate Notion test form. This guide covers the Apps Script intake retained in the repository. The Notion test form does not feed this backend.
+
 This folder contains the Google Apps Script backend for multi-path applications, privacy-safe team review, restricted uploads, admin decisions, applicant withdrawal, onboarding acknowledgement/email, and internal Player Cards.
 
 Production owner and authorization account: **Han Lin — `han@keytechlabs.org`**.
@@ -233,4 +235,4 @@ Google writes, Drive uploads, installable triggers, and web-app permissions stil
 
 ## Free automation boundary
 
-Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, is live. The paid multi-step Zap 2 prototype is not the long-term path; Apps Script owns `Approved → Onboarding Email` so approval does not depend on Zapier Filter or Lookup. Verify that the old Zap 2 is disabled to prevent duplicate mail. See `ZAPIER_PLAN.md` for the boundary and `../AUTOMATION_PLATFORM_COMPARISON.md` for the Zapier/Make evaluation.
+The September deployment record lists Zap 1, the two-step Zapier Free workflow `New Team Review row → Gmail admin alert`, as live at that time. The paid multi-step Zap 2 prototype is not the long-term path; Apps Script owns `Approved → Onboarding Email` so approval does not depend on Zapier Filter or Lookup. Verify that the old Zap 2 is disabled to prevent duplicate mail. See `ZAPIER_PLAN.md` for the boundary and `../AUTOMATION_PLATFORM_COMPARISON.md` for the Zapier/Make evaluation.

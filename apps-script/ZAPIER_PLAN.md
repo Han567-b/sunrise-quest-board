@@ -2,7 +2,7 @@
 
 Zapier Free is used only for the simple internal new-application alert. Apps Script owns application storage, approval logic, withdrawal verification, Player Card creation, and applicant onboarding email. Production connections and Apps Script authorization must use `han@keytechlabs.org`.
 
-Current meeting status:
+September release status for the Apps Script intake. See the [current signup flow](../README.md#signup-and-backend) for the public Notion preview.
 
 - Zap 1, `New Application → Admin Alert`, is live as the free two-step workflow.
 - Zap 2, `Approved → Onboarding Email`, was built and tested in Zapier but is being retired in favor of the deployed Apps Script implementation, avoiding a paid multi-step dependency.
