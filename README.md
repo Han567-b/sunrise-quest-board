@@ -13,11 +13,11 @@ The Quest Board helps people explore crew roles and sample assignments for Sunri
 
 ## Signup and backend
 
-The public **Join the crew** link opens an embedded Notion test form. Use fictional details while the team updates the questions. The next event date and location are still to be announced.
+The public **Join the crew** link takes you to the Notion test form on the Quest Board. You can also open the form directly in Notion from that section. Use fictional details while the team updates the questions. The next event date and location are still to be announced.
 
 The test form is separate from the earlier Google Apps Script intake. It does not sync to Team Review, create Player Cards, or reserve quests. End-to-end Notion response receipt has not been verified.
 
-The repository still contains the Apps Script intake for application review, restricted uploads, withdrawals, onboarding emails, and internal Player Cards. See the [Apps Script guide](apps-script/README.md) for setup and privacy rules, and the [September deployment record](DEPLOYMENT_STATUS.md) for the earlier release and automation status.
+The earlier application form and its Apps Script endpoint remain in the codebase. The [Apps Script guide](apps-script/README.md) covers that form’s upload rules, review workflow, and deployment. The [September deployment record](DEPLOYMENT_STATUS.md) documents the earlier release and automation status.
 
 ## Development
 

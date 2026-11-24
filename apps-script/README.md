@@ -1,4 +1,4 @@
-# Sunrise Quest Board Backend MVP
+# Sunrise Quest Board Apps Script Intake
 
 The public Quest Board currently sends visitors to a separate Notion test form. This guide covers the Apps Script intake retained in the repository. The Notion test form does not feed this backend.
 
@@ -14,13 +14,13 @@ Do not authorize, deploy, own production resources, or connect Zapier with `hanl
 - `Tests.gs` — pure Apps Script smoke tests; it uses fake data and performs no Google writes.
 - `appsscript.json` — V8 runtime plus Sheets, Drive, trigger, and send-email scopes.
 - `ZAPIER_PLAN.md` — free two-step admin alert boundary and paid-Zap retirement steps.
-- `../AUTOMATION_PLATFORM_COMPARISON.md` — current Zapier/Make comparison and recommendation.
+- `../AUTOMATION_PLATFORM_COMPARISON.md` — September Zapier/Make comparison and recommendation.
 - `../AUTOMATION_IMPLEMENTATION_PLAN.md` — integration data flows, mappings, permissions, and rollout plan.
 
 ## Architecture and responsibilities
 
 ```text
-Public Quest Board
+Earlier application form retained in the Quest Board source
   → Apps Script web app
     → Private Applications (full restricted record)
     → Team Review (privacy-safe restricted review record)
@@ -117,7 +117,7 @@ Manually verify each production resource:
 
 Grant only named KTL team members the access their work requires. Public Player Card visibility requires an applicant's explicit opt-in; a Player Card is internal by default.
 
-The code deliberately does not call Drive sharing APIs. Web-app access allows the public form to call the endpoint; it does not make Sheets, folders, or files public.
+The earlier application form calls the web-app endpoint with the deployment owner's configured access. Sheets, folders, and files keep their existing sharing settings.
 
 ## Application workflow
 
@@ -165,7 +165,7 @@ Supported `review_status` values are exactly:
 
 New applications default to `Pending Review`. New Team Review records default to `Not Created` for Player Card status.
 
-`setupBackend()` freezes the Team Review header and applies a strict dropdown to `review_status` using the four supported values. This improves review consistency without adding columns, changing the privacy-safe row shape, or affecting the live two-step admin-alert Zap.
+`setupBackend()` freezes the Team Review header and limits the `review_status` dropdown to these four values. It preserves the Team Review columns used by the September admin-alert Zap.
 
 After `installAdminReviewTrigger()` is installed, an authorized admin edits `review_status` or `admin_notes` in Team Review. The trigger validates the status and synchronizes it to Private Applications. `Approved` creates or updates one Player Card by `submission_id`, copies the full approved path set and onboarding acknowledgement, and records the role set once in `role_history`; retries cannot create a duplicate card or history entry. It then privately looks up first name, email, and primary role and sends the approval/onboarding email through `MailApp` under the trigger owner's KTL Workspace authorization. A withdrawn application cannot be approved, create a card, or receive this email.
 
@@ -198,7 +198,7 @@ On success:
 
 ## Deployment with the KTL account
 
-Complete these steps while signed in as **`han@keytechlabs.org`**:
+Use these steps when maintaining or redeploying the earlier Apps Script intake. The public Notion form is managed separately. Sign in as **`han@keytechlabs.org`** before starting.
 
 1. Open the production Apps Script project.
 2. Replace `Code.gs` and `Tests.gs` with the committed files from this folder. Change `appsscript.json` only when its Git diff shows an intentional manifest change.
@@ -207,7 +207,7 @@ Complete these steps while signed in as **`han@keytechlabs.org`**:
 5. Run `setupBackend()` once. Review and approve the requested Sheets, Drive, trigger, and send-email scopes. It appends missing internal columns without overwriting existing values, freezes the Team Review header, and adds the four-status dropdown.
 6. Confirm the existing installable `onTeamReviewEdit` trigger is owned by `han@keytechlabs.org`. Reinstallation is unnecessary if it already exists and is owned by that account.
 7. Run `processAllTeamReviewRows()` only if existing Team Review rows need synchronization.
-8. Deploy a **new Web app version** that executes as the deployment owner and accepts calls from the public Quest Board.
+8. Deploy a **new Web app version** that executes as the deployment owner and accepts calls from the earlier application form.
 9. Copy the resulting `/exec` URL into the `sunrise-submission-endpoint` meta tag in `index.html`.
 10. Use fake applicant data to perform one end-to-end submission, Team Review check, approval, Player Card check, and withdrawal test. Remove or clearly label fake rows/files afterward according to KTL policy.
 
