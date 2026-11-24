@@ -1,6 +1,6 @@
 /**
- * Pure Apps Script smoke tests. These use fake data and do not read or write
- * Google Sheets or Drive. Run runBackendSelfTests from the editor.
+ * Run runBackendSelfTests in the Apps Script editor.
+ * Tests use sample data without accessing Sheets or Drive.
  */
 function runBackendSelfTests() {
   var tests = [

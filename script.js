@@ -600,7 +600,7 @@ function collectApplicationDraft() {
     phone: value("#phone"),
     zip: value("#zip"),
     referral: value("#referral"),
-    // Accessibility notes are deliberately excluded from browser storage.
+    // Keep accessibility notes out of browser storage.
     roles: selectedApplicationRoles.slice(),
     role: selectedApplicationRoles[0] || "",
     secondaryRole: selectedApplicationRoles[1] || "",
@@ -993,7 +993,7 @@ function saveSubmissionReceipt(result, payload) {
   try {
     localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
   } catch (error) {
-    // The visible confirmation still contains the Submission ID.
+    // The confirmation still shows the submission ID if storage fails.
   }
 }
 
@@ -1347,7 +1347,7 @@ if (withdrawApplication) {
       try {
         localStorage.setItem(APPLICATION_RECEIPT_KEY, JSON.stringify(lastSubmissionReceipt));
       } catch (storageError) {
-        // The server-confirmed withdrawal still appears in the current page.
+        // Show the confirmed withdrawal even if storage fails.
       }
       showApplicationSuccess(lastSubmissionReceipt);
       if (successActionStatus) {
@@ -1501,7 +1501,7 @@ updateRoleChoiceState();
 try {
   localStorage.removeItem(LEGACY_APPLICATION_DRAFT_KEY);
 } catch (error) {
-  // Private browsing or storage policies may block cleanup; the form still works.
+  // Storage cleanup can fail in private browsing.
 }
 restoreApplicationDraft();
 restoreSubmissionReceipt();
@@ -1510,7 +1510,7 @@ updateCertificationFileUi();
 if (applicationCompletedLocally) showApplicationSuccess(lastSubmissionReceipt);
 else showApplicationForm(currentApplicationStep);
 
-// Role shortcuts reuse the board's existing filters.
+// Role shortcuts apply quest filters.
 document.querySelectorAll('[data-skill-link]').forEach((link) => {
   link.addEventListener('click', () => {
     const skillSelect = document.getElementById('skill');

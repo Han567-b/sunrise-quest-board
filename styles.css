@@ -1224,7 +1224,7 @@ figcaption span {
   }
 }
 
-/* Current Quest Board interface */
+/* Quest Board layout */
 .hero {
   position: relative;
   min-height: min(760px, calc(100vh - 69px));
@@ -1595,7 +1595,7 @@ button:disabled {
   }
 }
 
-/* Final footer override: keep it visually close to the main comic site's ending. */
+/* Comic-style footer */
 .site-footer {
   display: flex;
   min-height: 640px;
@@ -1678,7 +1678,7 @@ button:disabled {
   text-transform: uppercase;
 }
 
-/* Meeting update: add clearer section pacing and the Power Runner day timeline. */
+/* Section spacing and Power Runner timeline */
 .roles-section,
 .model-section,
 .reward-section,
@@ -2105,7 +2105,7 @@ button:disabled {
   }
 }
 
-/* Phase 1: role hierarchy */
+/* Role hierarchy */
 .role-hierarchy {
   display: grid;
   gap: 0;
@@ -2177,7 +2177,7 @@ button:disabled {
   line-height: 1.55;
 }
 
-/* Move the existing role journeys into Adam's latest hierarchy order. */
+/* Role journey order */
 .role-timeline-section {
   display: flex;
   flex-direction: column;
@@ -2199,7 +2199,7 @@ button:disabled {
   border-color: rgba(65, 98, 61, 0.28);
 }
 
-/* Phase 1: multi-step application workspace */
+/* Application steps */
 body.application-open {
   overflow: hidden;
 }
@@ -2540,7 +2540,7 @@ body.application-open {
   }
 }
 
-/* Refined application experience: focused rail + form workspace */
+/* Application sidebar and form */
 .application-modal [hidden] {
   display: none !important;
 }
@@ -3374,7 +3374,7 @@ body.application-open {
   }
 }
 
-/* Phase 2A: validation, drafts, file preparation, and completion state */
+/* Validation, drafts, uploads, and confirmation */
 .application-form em,
 .acknowledgement-list em,
 .reward-choice-grid em {
@@ -3826,7 +3826,7 @@ body.application-open {
     display: none !important;
   }
 }
-/* Notion intake preview: scoped to preserve the existing application UI. */
+/* Notion intake preview */
 .notion-intake {
   max-width: 1240px;
   margin: 0 auto;

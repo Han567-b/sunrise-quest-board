@@ -1,9 +1,8 @@
 /**
- * Sunrise Quest Board backend MVP.
+ * Sunrise Quest Board backend.
  *
- * Production ownership and authorization must use han@keytechlabs.org.
- * Resource IDs are read only from Script Properties. This code never changes
- * Drive or spreadsheet sharing; all production resources must remain Restricted.
+ * Use han@keytechlabs.org to own and authorize the production deployment.
+ * Set resource IDs in Script Properties and keep Sheets and Drive access Restricted.
  */
 
 var SCHEMA_VERSION = "3.1";
@@ -31,7 +30,7 @@ var PRIVATE_BASE_HEADERS = [
   "updated_at"
 ];
 
-// Private-only extension columns are appended without replacing the existing 19 columns.
+// Add private fields after the 19 original columns.
 var PRIVATE_INTERNAL_HEADERS = [
   "zip_code",
   "client_request_id",
@@ -76,7 +75,7 @@ var PLAYER_CARD_HEADERS = [
   "updated_at"
 ];
 
-// Player Card extensions preserve multi-path participation without replacing the MVP columns.
+// Keep multi-path fields after the original Player Card columns.
 var PLAYER_CARD_INTERNAL_HEADERS = [
   "additional_roles",
   "role_history",
@@ -164,7 +163,7 @@ var MAX_LENGTHS = {
   adminNotes: 3000
 };
 
-/** Public web-app entry point. Admin changes are intentionally not exposed here. */
+/** Public endpoint for applications and withdrawals. Admin edits use the sheet trigger. */
 function doPost(e) {
   var context = { stage: "parse", submissionId: "" };
 
@@ -250,7 +249,7 @@ function handleApplicationSubmission_(payload, context) {
       context.stage = "team_review_write";
       upsertTeamReview_(teamSheet, privateRecord);
     } catch (writeError) {
-      // Uploaded files are removed only if the private historical row was not saved.
+      // Clean up uploads if the private application row was not saved.
       if (context.stage === "file_upload" || context.stage === "private_write") {
         trashFiles_(createdFiles);
       }
@@ -334,10 +333,10 @@ function handleWithdrawal_(payload, context) {
       match.record.updated_at = now;
     }
 
-    // Always repair dependent records, including on an idempotent retry.
+    // Sync Team Review even if the withdrawal was already saved.
     upsertTeamReview_(teamSheet, match.record);
 
-    // A pre-existing card remains an internal historical record and is made non-public.
+    // Keep the existing card for internal records and clear public consent.
     var playerSheet = getConfiguredSheet_(config.playerCardsSheetId, PLAYER_CARD_HEADERS, PLAYER_CARD_INTERNAL_HEADERS);
     var playerMatch = findObjectByValue_(playerSheet, "submission_id", submissionId);
     if (playerMatch) {
@@ -367,8 +366,8 @@ function handleWithdrawal_(payload, context) {
 
 /**
  * Run once after deploying, while signed in as han@keytechlabs.org.
- * It appends only missing internal Private Applications columns and verifies
- * all required resource headers. It does not change sharing permissions.
+ * Add missing internal columns and check the required sheet headers.
+ * Sharing permissions stay as configured.
  */
 function setupBackend() {
   var config = getConfig_();
@@ -389,7 +388,7 @@ function setupBackend() {
   };
 }
 
-/** Adds admin guardrails without adding columns or exposing private data. */
+/** Set up Team Review edit controls. */
 function configureTeamReviewSheet_(teamSheet) {
   var headers = getHeaders_(teamSheet);
   var reviewColumn = headerIndex_(headers, "review_status") + 1;
@@ -409,8 +408,7 @@ function configureTeamReviewSheet_(teamSheet) {
 }
 
 /**
- * Installs the admin-only edit trigger. Run interactively as han@keytechlabs.org.
- * The trigger watches Team Review edits without exposing admin actions publicly.
+ * Run as han@keytechlabs.org to install the Team Review edit trigger.
  */
 function installAdminReviewTrigger() {
   var config = getConfig_();
@@ -429,7 +427,7 @@ function installAdminReviewTrigger() {
   return { ok: true, created: !exists };
 }
 
-/** Installable trigger handler. Do not rename without reinstalling the trigger. */
+/** Reinstall the edit trigger if this handler is renamed. */
 function onTeamReviewEdit(e) {
   if (!e || !e.range) {
     throw new Error("onTeamReviewEdit must run from an installable spreadsheet edit trigger.");
@@ -452,7 +450,7 @@ function onTeamReviewEdit(e) {
   processAdminReviewRow_(sheet, e.range.getRow(), config);
 }
 
-/** Manual repair/backfill helper for rows edited before the trigger was installed. */
+/** Run manually to sync reviews edited before the trigger was installed. */
 function processAllTeamReviewRows() {
   var config = getConfig_();
   var teamSheet = getConfiguredSheet_(config.teamReviewSheetId, TEAM_REVIEW_HEADERS, []);
@@ -631,9 +629,8 @@ function createOrUpdatePlayerCard_(playerSheet, privateRecord, now) {
 }
 
 /**
- * Sends approval onboarding from the account that owns the installable trigger.
- * Production trigger ownership and authorization must remain han@keytechlabs.org.
- * The private claim prevents repeat Approved processing from sending twice.
+ * Approval emails come from the trigger owner (han@keytechlabs.org in production).
+ * Record the send attempt on the private sheet so retries do not send twice.
  */
 function sendApprovalOnboardingEmail_(privateSheet, rowNumber, privateRecord) {
   if (isTrue_(privateRecord.is_withdrawn)) {
@@ -679,7 +676,7 @@ function sendApprovalOnboardingEmail_(privateSheet, rowNumber, privateRecord) {
       updated_at: nowIso_()
     });
     privateRecord.onboarding_email_status = ONBOARDING_EMAIL_FAILED;
-    // Do not include an address, name, message body, or provider response in logs/errors.
+    // Keep names, addresses, email text, and provider responses out of logs and errors.
     throw new Error("Approval and Player Card were saved, but the onboarding email could not be sent. Reprocess the Approved row to retry.");
   }
 
@@ -912,7 +909,7 @@ function createDriveFile_(folder, descriptor, submissionId, label) {
 
   var storedName = buildStoredFileName_(submissionId, label, descriptor.mimeType);
   var blob = Utilities.newBlob(bytes, descriptor.mimeType, storedName);
-  // The configured destination folder must already be Restricted; permissions are never changed here.
+  // Set the upload folder to Restricted before using it.
   return folder.createFile(blob);
 }
 
@@ -1217,7 +1214,7 @@ function trashFiles_(files) {
     try {
       file.setTrashed(true);
     } catch (ignored) {
-      // Best-effort cleanup only. Do not log file names or IDs.
+      // Ignore cleanup errors to keep file names and IDs out of logs.
     }
   });
 }
@@ -1243,7 +1240,7 @@ function normalizeStringArray_(value) {
   return unique;
 }
 
-/** Accepts schema 3.1 multi-path input and the schema 3.0 primary/secondary shape. */
+/** Read role paths from schema 3.1 or primary/secondary roles from 3.0. */
 function selectedRolesFromApplication_(application) {
   application = application || {};
   var selected = normalizeStringArray_(application.selectedRoles);
@@ -1330,7 +1327,7 @@ function fullName_(firstName, lastName) {
   return [cleanString_(firstName), cleanString_(lastName)].filter(Boolean).join(" ");
 }
 
-/** Removes contact details and private links from fields allowed into Team Review. */
+/** Strip contact details and private links before writing to Team Review. */
 function redactTeamText_(value) {
   return cleanString_(value)
     .replace(/(?:https?:\/\/|www\.|(?:docs|drive)\.google\.com\/)\S+/gi, "[link removed]")
@@ -1338,7 +1335,7 @@ function redactTeamText_(value) {
     .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[contact removed]");
 }
 
-/** Prevents user-provided text from being interpreted as a Sheets formula. */
+/** Escape text that Sheets might read as a formula. */
 function sanitizeSheetValue_(value) {
   if (typeof value !== "string") {
     return value;
